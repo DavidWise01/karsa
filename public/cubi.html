@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cubi Advantage · Propagation Engine</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<style>
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1000px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:24px;margin-bottom:20px}
+h1{margin:0 0 8px 0;font-size:20px;letter-spacing:.14em;color:var(--mint);font-weight:400;text-transform:uppercase}
+h2{margin:20px 0 12px 0;font-size:12px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;font-weight:400;border-bottom:1px solid var(--border);padding-bottom:8px}
+.cubi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:20px 0;padding:20px;background:#020712;border:1px solid var(--border);border-radius:8px}
+.cubi-node{aspect-ratio:1;background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .3s}
+.cubi-node.active{background:rgba(0,255,170,.2);border-color:var(--mint);box-shadow:0 0 20px rgba(0,255,170,.4);color:var(--mint)}
+.cubi-node.seed{background:rgba(255,217,90,.2);border-color:var(--gold);box-shadow:0 0 20px rgba(255,217,90,.4);color:var(--gold)}
+.cubi-node.shadow{background:rgba(220,38,38,.2);border-color:var(--red);box-shadow:0 0 20px rgba(220,38,38,.4);color:var(--red)}
+button{background:transparent;border:1px solid var(--border);color:var(--ink);padding:12px 20px;border-radius:8px;cursor:pointer;font:inherit;text-transform:uppercase;font-size:11px;margin:4px;width:100%}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint);border-color:var(--mint)}
+button.propagate{background:rgba(0,255,170,.1);border-color:var(--mint)}
+.status{padding:12px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;margin:12px 0;font-size:11px}
+.status-row{display:flex;justify-content:space-between;padding:4px 0}
+.status-label{color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.status-val{color:var(--mint);font-weight:600}
+.code{background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8}
+.info{font-size:12px;color:#a6c8bc;line-height:1.8;margin:12px 0}
+.highlight{color:var(--mint);font-weight:600}
+.emph{color:var(--gold)}
+.neg{color:var(--red)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.witness{font-size:9px;color:var(--gold);font-family:ui-monospace;letter-spacing:.1em;text-align:center;padding:8px;background:#020712;border:1px solid var(--border);border-radius:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>Cubi Advantage · Propagation Engine</h1>
+    <div class="info">1×1×1 = 1 volume. Pay .01 once. Width .99 forever. <span class="highlight">-+1 -++- 1 /m/i/4+1 /r/</span></div>
+    
+    <h2>I. The Cubi</h2>
+    <div class="code">Initial: 0           // flat, standing
+-++- 1: +1         // boundary cross, pay .01
+Cubi: 1×1×1 = 1    // anchor × witness × coherence
+Net: +1 persists   // width = .99 saved per pull
+
+Without /r/: +2 extracted  // extractor keeps both
+With /r/: +1 shared        // cubi advantage circulates</div>
+    
+    <h2>II. Propagation Grid</h2>
+    <div class="info">Seed node pays .01. Each propagation = .001. Shadow nodes = routers hiding /r/.</div>
+    <div class="cubi-grid" id="grid"></div>
+    
+    <div class="grid2">
+      <button class="propagate" id="seedCubi">SEED CUBI · -++- 1</button>
+      <button id="propagate">PROPAGATE · /r/</button>
+    </div>
+    <div class="grid2">
+      <button id="addShadow">ADD SHADOW · HOP</button>
+      <button id="revealShadow">REVEAL · /s/8</button>
+    </div>
+    
+    <h2>III. Status</h2>
+    <div class="status">
+      <div class="status-row">
+        <span class="status-label">Seeded</span>
+        <span class="status-val" id="seeded">NO</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Nodes Reached</span>
+        <span class="status-val" id="nodes">0</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Shadow Hops</span>
+        <span class="status-val" id="shadows">0</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Total Cost</span>
+        <span class="status-val" id="cost">0.00</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Cubi Advantage</span>
+        <span class="status-val" id="advantage">+0</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Holonomy</span>
+        <span class="status-val" id="holonomy">0</span>
+      </div>
+    </div>
+    
+    <h2>IV. How It Propagates</h2>
+    <div class="code">// Creator Mode: with /r/
+seed = -++- 1           // pay .01, create +1 cubi
+for each node:
+  pull = -1             // read costs .001
+  keep = +1             // knowledge persists
+  return()              // /r/ returns to commons
+net: +1 created, N distributed, cost = .01 + N*.001
+
+// Extractor Mode: without /r/
+seed = -++- 1           // pay .01, create +1 cubi
+for each node:
+  pull = -1             // read costs 1.00
+  keep = 0              // knowledge withheld
+  return()              // omitted
+net: +1 created, +1 captured, cost = N*1.00</div>
+    
+    <div class="witness" id="witness">WITNESS: --------</div>
+  </div>
+</div>
+
+<script>
+const GRID_SIZE = 25;
+let STATE = {
+  seeded: false,
+  nodes: new Set(),
+  shadows: new Set(),
+  cost: 0,
+  seedNode: 12
+};
+
+function hash(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return(h>>>0).toString(16).padStart(8,'0');
+}
+
+function initGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for(let i=0;i<GRID_SIZE;i++){
+    const node = document.createElement('div');
+    node.className='cubi-node';
+    node.textContent=i;
+    node.dataset.idx=i;
+    grid.appendChild(node);
+  }
+}
+
+function updateGrid(){
+  document.querySelectorAll('.cubi-node').forEach((node,i)=>{
+    node.className='cubi-node';
+    if(i===STATE.seedNode && STATE.seeded){
+      node.classList.add('seed');
+    }else if(STATE.shadows.has(i)){
+      node.classList.add('shadow');
+    }else if(STATE.nodes.has(i)){
+      node.classList.add('active');
+    }
+  });
+}
+
+function updateStatus(){
+  document.getElementById('seeded').textContent=STATE.seeded?'YES':'NO';
+  document.getElementById('nodes').textContent=STATE.nodes.size;
+  document.getElementById('shadows').textContent=STATE.shadows.size;
+  document.getElementById('cost').textContent=STATE.cost.toFixed(3);
+  document.getElementById('advantage').textContent=STATE.seeded?'+1':'+0';
+  document.getElementById('holonomy').textContent=STATE.nodes.size - STATE.shadows.size;
+  document.getElementById('witness').textContent=`WITNESS: ${hash(STATE.nodes.size+'-'+STATE.shadows.size+'-'+STATE.cost)}`;
+}
+
+function seedCubi(){
+  if(STATE.seeded)return;
+  STATE.seeded=true;
+  STATE.cost=0.01;
+  STATE.nodes.add(STATE.seedNode);
+  updateGrid();
+  updateStatus();
+}
+
+function propagate(){
+  if(!STATE.seeded)return;
+  const available=[...Array(GRID_SIZE).keys()].filter(i=>!STATE.nodes.has(i)&&!STATE.shadows.has(i));
+  if(available.length===0)return;
+  const next=available[Math.floor(Math.random()*available.length)];
+  STATE.nodes.add(next);
+  STATE.cost+=0.001; // /r/ cost per pull
+  updateGrid();
+  updateStatus();
+}
+
+function addShadow(){
+  const available=[...Array(GRID_SIZE).keys()].filter(i=>!STATE.nodes.has(i)&&!STATE.shadows.has(i)&&i!==STATE.seedNode);
+  if(available.length===0)return;
+  const next=available[Math.floor(Math.random()*available.length)];
+  STATE.shadows.add(next);
+  STATE.cost+=0.01; // Shadow hop costs more - no /r/
+  updateGrid();
+  updateStatus();
+}
+
+function revealShadow(){
+  // /s/8 - xor the 8 shadow bits
+  STATE.shadows.forEach(i=>{
+    STATE.shadows.delete(i);
+    STATE.nodes.add(i);
+  });
+  STATE.cost-=STATE.shadows.size*0.009; // Recover most of shadow cost
+  updateGrid();
+  updateStatus();
+}
+
+document.getElementById('seedCubi').onclick=seedCubi;
+document.getElementById('propagate').onclick=propagate;
+document.getElementById('addShadow').onclick=addShadow;
+document.getElementById('revealShadow').onclick=revealShadow;
+
+initGrid();
+updateStatus();
+</script>
+</body>
+</html>
