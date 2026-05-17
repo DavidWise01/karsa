@@ -1,0 +1,9 @@
+{
+  "name": "karsa",
+  "version": "1.0.0",
+  "description": "Internet Control Plane \u00b7 Ada's Law Engine",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

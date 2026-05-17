@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Octet Holonomy Calculator · from my world</title>
+<style>
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:20px}
+h1{margin:0 0 16px 0;font-size:18px;letter-spacing:.14em;color:var(--mint);font-weight:400;text-transform:uppercase}
+h2{margin:20px 0 10px 0;font-size:12px;letter-spacing:.14em;color:#7aa89a;text-transform:uppercase;font-weight:400}
+button{background:transparent;border:1px solid var(--border);color:var(--ink);padding:10px 16px;border-radius:8px;cursor:pointer;font:inherit;text-transform:uppercase;font-size:11px;margin:4px 4px 4px 0}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint)}
+button.active{border-color:var(--mint);color:var(--mint);box-shadow:0 0 12px rgba(0,255,170,.3)}
+.ops{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.op{padding:12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;flex:1;min-width:120px;text-align:center;transition:all .2s}
+.op:hover{background:rgba(0,255,170,.05);box-shadow:0 0 8px rgba(0,255,170,.2)}
+.op.active{background:rgba(0,255,170,.1);border-color:var(--mint)}
+.op-name{font-size:11px;color:var(--gold);margin-bottom:4px}
+.op-val{font-size:18px;font-weight:600}
+.op-desc{font-size:9px;color:#5a7a6f;margin-top:4px}
+.sequence{font-family:ui-monospace;font-size:12px;line-height:1.8;padding:12px;background:#020712;border:1px solid var(--border);border-radius:8px;min-height:100px;max-height:200px;overflow:auto}
+.seq-item{display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;background:rgba(0,255,170,.1)}
+.result{padding:16px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;margin:12px 0}
+.result-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,255,170,.1);font-size:12px}
+.result-row:last-child{border-bottom:none}
+.result-label{color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.result-val{color:var(--mint);font-weight:600;font-size:14px}
+.result-val.neg{color:var(--red)}
+.result-val.pos{color:var(--mint)}
+.result-val.zero{color:#7aa89a}
+.viz{width:100%;height:300px;background:#020712;border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden}
+canvas{width:100%;height:100%}
+.info{font-size:11px;color:#5a7a6f;line-height:1.6;margin:12px 0}
+.code{background:#020712;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;overflow-x:auto;margin:12px 0}
+.witness{font-size:10px;color:var(--gold);font-family:ui-monospace;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>Holonomy Calculator</h1>
+    <div class="info">From my world. Build sequences of operations. Calculate net holonomy. See if your loop closes.</div>
+    
+    <h2>Operations</h2>
+    <div class="ops">
+      <div class="op" data-op="push-right">
+        <div class="op-name">PUSH RIGHT</div>
+        <div class="op-val">+1</div>
+        <div class="op-desc">Same plane, left→right</div>
+      </div>
+      <div class="op" data-op="pull-left">
+        <div class="op-name">PULL LEFT</div>
+        <div class="op-val">-1</div>
+        <div class="op-desc">Same plane, right→left</div>
+      </div>
+      <div class="op" data-op="push-down">
+        <div class="op-name">PUSH DOWN</div>
+        <div class="op-val">+1</div>
+        <div class="op-desc">Fractal below, control→data</div>
+      </div>
+      <div class="op" data-op="pull-up">
+        <div class="op-name">PULL UP</div>
+        <div class="op-val">-1</div>
+        <div class="op-desc">Fractal below, data→control</div>
+      </div>
+    </div>
+    
+    <h2>Sequence</h2>
+    <div class="sequence" id="sequence">Empty. Click operations to build.</div>
+    
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="calc">CALCULATE</button>
+      <button id="clear">CLEAR</button>
+      <button id="example1">EX: -+1</button>
+      <button id="example2">EX: -++- 1</button>
+      <button id="example3">EX: OCTET</button>
+    </div>
+    
+    <h2>Result</h2>
+    <div class="result" id="result">
+      <div class="result-row">
+        <span class="result-label">Net Holonomy</span>
+        <span class="result-val zero" id="net">0</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Boundary Crosses</span>
+        <span class="result-val" id="boundaries">0</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Plane Exchanges</span>
+        <span class="result-val" id="exchanges">0</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Energy Cost</span>
+        <span class="result-val" id="energy">0.00</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Closed Loop</span>
+        <span class="result-val" id="closed">YES</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Witness Hash</span>
+        <span class="witness" id="witness">--------</span>
+      </div>
+    </div>
+    
+    <h2>Interpretation</h2>
+    <div class="info" id="interp">Build a sequence to see analysis.</div>
+  </div>
+  
+  <div class="panel">
+    <h1>Visualization</h1>
+    <div class="viz">
+      <canvas id="cv"></canvas>
+    </div>
+    
+    <h2>Octet States</h2>
+    <div class="info">
+      <div>1 · A→B there</div>
+      <div>2 · B→C there</div>
+      <div>3 · C→A there</div>
+      <div>4 · A→C back</div>
+      <div>5 · C→B back</div>
+      <div>6 · B→A back</div>
+      <div>7 · Home witness</div>
+      <div>8 · Forward aeon</div>
+    </div>
+    
+    <h2>The Math</h2>
+    <div class="code">Left/Right:  push +1, pull -1  = -+1
+Up/Down:    push down +1, pull up -1 = -++- 1
+Octet:      8 steps, net 0 = closed loop
+
+Energy:     Boundary cross = 0.01
+            Plane exchange = 0.00
+            Width reuse    = -0.99 per cycle</div>
+    
+    <h2>From My World</h2>
+    <div class="info">
+      Same plane = peer exchange. No cost.<br>
+      Fractal below = push down once. Pull up forever.<br>
+      Holonomy zero = system stable.<br>
+      Holonomy +1 = you created something.<br>
+      Holonomy -1 = you owe the universe.
+    </div>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+function resize(){
+  cv.width=cv.parentElement.clientWidth*devicePixelRatio;
+  cv.height=cv.parentElement.clientHeight*devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+addEventListener('resize',resize);resize();
+
+let sequence=[];
+let animationFrame=0;
+
+const ops={
+  'push-right':{val:1,type:'exchange',label:'→',color:'#ffd95a'},
+  'pull-left':{val:-1,type:'exchange',label:'←',color:'#ffd95a'},
+  'push-down':{val:1,type:'boundary',label:'↓',color:'#00ffaa'},
+  'pull-up':{val:-1,type:'boundary',label:'↑',color:'#00ffaa'}
+};
+
+function hash(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return(h>>>0).toString(16).padStart(8,'0');
+}
+
+function updateSequence(){
+  const seq=document.getElementById('sequence');
+  if(sequence.length===0){
+    seq.textContent='Empty. Click operations to build.';
+    return;
+  }
+  seq.innerHTML=sequence.map((op,i)=>`<span class="seq-item" style="color:${ops[op].color}">${ops[op].label}</span>`).join(' ');
+}
+
+function calculate(){
+  let net=0,boundaries=0,exchanges=0,energy=0;
+  sequence.forEach(op=>{
+    const o=ops[op];
+    net+=o.val;
+    if(o.type==='boundary'){boundaries++;energy+=0.01;}
+    if(o.type==='exchange')exchanges++;
+  });
+  
+  const closed=net===0;
+  const witness=hash(sequence.join('')+net);
+  
+  document.getElementById('net').textContent=net;
+  document.getElementById('net').className='result-val '+(net>0?'pos':net<0?'neg':'zero');
+  document.getElementById('boundaries').textContent=boundaries;
+  document.getElementById('exchanges').textContent=exchanges;
+  document.getElementById('energy').textContent=energy.toFixed(2);
+  document.getElementById('closed').textContent=closed?'YES':'NO';
+  document.getElementById('closed').className='result-val '+(closed?'pos':'neg');
+  document.getElementById('witness').textContent=witness;
+  
+  let interp='';
+  if(net===0)interp='Closed loop. Holonomy zero. System stable. Entropy conserved.';
+  else if(net===1)interp='Net +1. You crossed a boundary. You created something. Width enabled.';
+  else if(net===-1)interp='Net -1. You owe the universe. Debt must be paid.';
+  else if(net>1)interp=`Net +${net}. Multiple creations. High energy state.`;
+  else interp=`Net ${net}. Multiple debts. System unstable.`;
+  
+  if(boundaries>0&&exchanges>0)interp+=' Mixed boundary + exchange. Complex topology.';
+  else if(boundaries>0)interp+=' Pure boundary operations. Fractal descent/ascent.';
+  else if(exchanges>0)interp+=' Pure exchange. Same plane only.';
+  
+  document.getElementById('interp').textContent=interp;
+  
+  drawVisualization();
+}
+
+function drawVisualization(){
+  const W=cv.parentElement.clientWidth,H=cv.parentElement.clientHeight;
+  ctx.fillStyle='#020712';
+  ctx.fillRect(0,0,W,H);
+  
+  if(sequence.length===0)return;
+  
+  const cx=W/2,cy=H/2;
+  const scale=Math.min(W,H)*0.3;
+  
+  // Draw path
+  ctx.strokeStyle='#00ffaa';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  let x=cx,y=cy;
+  ctx.moveTo(x,y);
+  
+  let pos={x:0,y:0};
+  sequence.forEach((op,i)=>{
+    const o=ops[op];
+    if(o.type==='exchange'){
+      pos.x+=o.val*20;
+    }else{
+      pos.y+=o.val*20;
+    }
+    const px=cx+pos.x;
+    const py=cy+pos.y;
+    
+    ctx.lineTo(px,py);
+    
+    // Draw node
+    ctx.save();
+    ctx.fillStyle=o.color;
+    ctx.shadowColor=o.color;
+    ctx.shadowBlur=10;
+    ctx.beginPath();
+    ctx.arc(px,py,4,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  });
+  ctx.stroke();
+  
+  // Draw start/end
+  ctx.fillStyle='#dc2626';
+  ctx.beginPath();
+  ctx.arc(cx,cy,6,0,Math.PI*2);
+  ctx.fill();
+  
+  const endX=cx+pos.x,endY=cy+pos.y;
+  ctx.fillStyle=pos.x===0&&pos.y===0?'#00ffaa':'#e168ff';
+  ctx.beginPath();
+  ctx.arc(endX,endY,6,0,Math.PI*2);
+  ctx.fill();
+  
+  // Draw grid
+  ctx.strokeStyle='rgba(0,255,170,0.1)';
+  ctx.lineWidth=1;
+  for(let i=-10;i<=10;i++){
+    ctx.beginPath();
+    ctx.moveTo(cx+i*20,0);
+    ctx.lineTo(cx+i*20,H);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0,cy+i*20);
+    ctx.lineTo(W,cy+i*20);
+    ctx.stroke();
+  }
+}
+
+// Event handlers
+document.querySelectorAll('.op').forEach(el=>{
+  el.onclick=()=>{
+    sequence.push(el.dataset.op);
+    updateSequence();
+    calculate();
+  };
+});
+
+document.getElementById('calc').onclick=calculate;
+document.getElementById('clear').onclick=()=>{
+  sequence=[];
+  updateSequence();
+  calculate();
+};
+
+document.getElementById('example1').onclick=()=>{
+  sequence=['push-right','pull-left'];
+  updateSequence();
+  calculate();
+};
+
+document.getElementById('example2').onclick=()=>{
+  sequence=['pull-up','push-down','push-down','pull-up'];
+  updateSequence();
+  calculate();
+};
+
+document.getElementById('example3').onclick=()=>{
+  sequence=['push-right','pull-up','pull-left','push-down','push-right','pull-up','pull-left','push-down'];
+  updateSequence();
+  calculate();
+};
+
+updateSequence();
+calculate();
+drawVisualization();
+</script>
+</body>
+</html>
