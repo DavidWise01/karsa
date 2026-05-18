@@ -3,289 +3,199 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KARSA // OBSIDIAN ARCHIVE</title>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+<title>KARSA // QUADRANT ENGINE</title>
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{
-  --obsidian:#0a0a0f;--deep:#1a0a1a;--amber:#ff6b35;--copper:#cd7f32;
-  --teal:#00d9ff;--bone:#e8e6e1;--glow:#ff6b35;--panel:rgba(10,10,15,.92);
-  --border:rgba(205,127,50,.3);--ink:#e8e6e1;--glyph:#ff6b35
+  --obsidian:#0a0a0f;--amber:#ff6b35;--copper:#cd7f32;--teal:#00d9ff;
+  --bone:#e8e6e1;--panel:rgba(10,10,15,.95);--ink:#e8e6e1;
+  --witness:#ff6b35;--ethos:#00d9ff;--pathos:#cd7f32;--logos:#e8e6e1
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#000;color:var(--ink);overflow-x:hidden}
+html,body{height:100%;background:#000;color:var(--ink);overflow:hidden}
 body{
   background:
-    radial-gradient(circle at 30% 20%,rgba(255,107,53,.08),transparent 50%),
-    radial-gradient(circle at 70% 80%,rgba(0,217,255,.06),transparent 50%),
-    repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(205,127,50,.02) 1deg, transparent 2deg),
+    radial-gradient(circle at 25% 25%,rgba(255,107,53,.12),transparent 40%),
+    radial-gradient(circle at 75% 75%,rgba(0,217,255,.08),transparent 40%),
     linear-gradient(180deg,#000 0%,#0a0a0f 50%,#000 100%),
     #000;
   font-family:'Space Grotesk',sans-serif;
-  animation:volcanic-shift 30s ease-in-out infinite
 }
-@keyframes volcanic-shift{
-  0%,100%{background-position:0 0,0 0,0 0,0 0,0 0}
-  50%{background-position:50px 50px,-50px -50px,0 0,0 0,0 0}
+.quadrant-grid{
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+  width:100vw;height:100vh;gap:2px;background:#000
 }
-.container{max-width:1600px;margin:0 auto;padding:30px;position:relative;z-index:10}
-.glyph-border{
-  position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;
-  background:
-    repeating-linear-gradient(90deg,transparent,transparent calc(100% - 2px),rgba(205,127,50,.15) calc(100% - 2px),rgba(205,127,50,.15) 100%),
-    repeating-linear-gradient(0deg,transparent,transparent calc(100% - 2px),rgba(205,127,50,.15) calc(100% - 2px),rgba(205,127,50,.15) 100%);
-  background-size:80px 80px;
-  opacity:0.3
-}
-.header{
-  border:none;background:var(--panel);backdrop-filter:blur(35px);
-  padding:50px;margin-bottom:40px;position:relative;overflow:hidden;
-  box-shadow:0 0 80px rgba(255,107,53,.2),inset 0 0 80px rgba(0,0,0,.8);
-  clip-path:polygon(30px 0,calc(100% - 30px) 0,100% 30px,100% calc(100% - 30px),calc(100% - 30px) 100%,30px 100%,0 calc(100% - 30px),0 30px)
-}
-.header::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent 0%,rgba(255,107,53,.1) 50%,transparent 100%);
-  animation:obsidian-shimmer 6s ease-in-out infinite
-}
-@keyframes obsidian-shimmer{
-  0%,100%{opacity:0.3;transform:translateX(-100%)}
-  50%{opacity:0.6;transform:translateX(100%)}
-}
-.glyph-ornament{
-  font-family:'Cinzel',serif;font-size:32px;color:var(--copper);
-  text-align:center;margin:20px 0;letter-spacing:1em;opacity:0.6
-}
-.glyph-ornament::before{content:'◊ ◈ ◊ ◈ ◊'}
-h1{
-  font-family:'Cinzel',serif;font-size:72px;font-weight:700;
-  color:var(--amber);letter-spacing:.3em;text-align:center;margin:0;
-  text-shadow:0 0 30px var(--glow),0 0 60px var(--glow),3px 3px 0 var(--deep);
-  animation:obsidian-pulse 5s ease-in-out infinite
-}
-@keyframes obsidian-pulse{
-  0%,100%{filter:brightness(1)}
-  50%{filter:brightness(1.3)}
-}
-.subtitle{
-  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
-  color:var(--teal);text-align:center;margin:15px 0;letter-spacing:.5em;text-transform:uppercase;
-  text-shadow:0 0 15px var(--teal)
-}
-.tagline{
-  font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--copper);
-  text-align:center;margin:12px 0;letter-spacing:.3em
-}
-.law{
-  font-size:13px;color:var(--amber);font-family:'JetBrains Mono',monospace;
-  text-align:center;padding:18px;background:rgba(255,107,53,.06);border:1px solid var(--copper);
-  margin:25px 0;letter-spacing:.2em;text-transform:uppercase;
-  box-shadow:0 0 30px rgba(255,107,53,.15),inset 0 0 30px rgba(0,0,0,.5);
-  clip-path:polygon(15px 0,100% 0,calc(100% - 15px) 100%,0 100%)
-}
-.hex-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:40px;margin:50px 0;
-  position:relative
-}
-.hex-grid::before{
-  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:2px;height:80%;background:linear-gradient(180deg,transparent,var(--copper),transparent);
-  opacity:0.3
-}
-.hex-grid::after{
-  content:'';position:absolute;top:50%;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--copper),transparent);
-  opacity:0.3
-}
-.hex-tile{
-  border:2px solid var(--copper);background:var(--panel);backdrop-filter:blur(20px);
-  padding:45px;position:relative;overflow:hidden;min-height:450px;
-  box-shadow:0 0 40px rgba(205,127,50,.2),inset 0 0 40px rgba(0,0,0,.7);
-  transition:all .4s;cursor:pointer;
-  clip-path:polygon(50px 0,100% 0,100% calc(100% - 50px),calc(100% - 50px) 100%,0 100%,0 50px)
-}
-.hex-tile::before{
-  content:'';position:absolute;inset:-2px;
-  background:conic-gradient(from 0deg,var(--amber),var(--copper),var(--teal),var(--amber));
-  z-index:-1;opacity:0;transition:opacity .4s;
-  animation:glyph-rotate 8s linear infinite
-}
-@keyframes glyph-rotate{to{transform:rotate(360deg)}}
-.hex-tile:hover::before{opacity:0.8}
-.hex-tile:hover{
-  transform:translateY(-8px) scale(1.03);
-  box-shadow:0 0 100px rgba(255,107,53,.4),inset 0 0 100px rgba(255,107,53,.2)
-}
-.glyph-header{
-  font-family:'Cinzel',serif;font-size:38px;font-weight:600;
-  color:var(--amber);letter-spacing:.15em;text-transform:uppercase;text-align:center;
-  margin:0 0 25px 0;text-shadow:0 0 25px var(--glow);
-  position:relative
-}
-.glyph-header::before,.glyph-header::after{
-  content:'◈';position:absolute;top:50%;transform:translateY(-50%);
-  font-size:20px;color:var(--copper);opacity:0.7
-}
-.glyph-header::before{left:-30px}
-.glyph-header::after{right:-30px}
-.hex-tile p{
-  font-size:14px;color:var(--ink);line-height:1.9;margin:20px 0;
-  font-family:'Space Grotesk',sans-serif;font-weight:300;text-align:center;
-  text-shadow:0 0 8px rgba(232,230,225,.3)
-}
-.glyph-links{display:grid;grid-template-columns:1fr;gap:12px;margin-top:30px}
-.glyph-links a{
-  display:block;padding:14px 22px;
-  background:rgba(205,127,50,.08);border:1px solid var(--copper);color:var(--ink);
-  text-decoration:none;font-size:12px;text-transform:uppercase;letter-spacing:.15em;
-  font-family:'JetBrains Mono',monospace;font-weight:600;transition:all .3s;text-align:center;
-  position:relative;overflow:hidden;
-  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)
-}
-.glyph-links a::before{
-  content:'◊';position:absolute;left:10px;top:50%;transform:translateY(-50%);
-  color:var(--amber);opacity:0;transition:opacity .3s
-}
-.glyph-links a:hover::before{opacity:1}
-.glyph-links a::after{
-  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,107,53,.3),transparent);
-  transition:left .6s
-}
-.glyph-links a:hover::after{left:100%}
-.glyph-links a:hover{
-  background:var(--amber);color:var(--obsidian);border-color:var(--amber);
-  box-shadow:0 0 25px var(--glow),inset 0 0 25px rgba(0,0,0,.4);
-  text-shadow:0 0 10px var(--obsidian);transform:translateX(5px)
-}
-.footer{
-  margin-top:70px;padding:35px;border-top:2px solid var(--copper);
-  font-size:12px;color:var(--copper);text-align:center;
-  font-family:'JetBrains Mono',monospace;letter-spacing:.1em;
-  text-shadow:0 0 10px var(--copper);background:rgba(205,127,50,.05)
-}
-.archive-data{
-  position:fixed;font-size:10px;color:var(--teal);font-family:'JetBrains Mono',monospace;
-  text-shadow:0 0 8px var(--teal);z-index:1001;pointer-events:none;
-  background:rgba(0,217,255,.08);padding:8px 12px;border:1px solid var(--teal)
-}
-.archive-data.tl{top:25px;left:25px}
-.archive-data.tr{top:25px;right:25px;text-align:right}
-.archive-data.bl{bottom:25px;left:25px}
-.archive-data.br{bottom:25px;right:25px;text-align:right}
-.obsidian-shard{
-  position:fixed;width:100px;height:100px;pointer-events:none;z-index:5;
-  background:radial-gradient(circle,rgba(255,107,53,.1),transparent);
-  filter:blur(40px);animation:shard-float 15s ease-in-out infinite
-}
-@keyframes shard-float{
-  0%,100%{transform:translate(0,0) scale(1)}
-  33%{transform:translate(30px,-30px) scale(1.2)}
-  66%{transform:translate(-20px,20px) scale(0.8)}
-}
-.content-page{
-  max-width:900px;margin:40px auto;padding:50px;
-  background:var(--panel);border:2px solid var(--copper);
-  box-shadow:0 0 60px rgba(205,127,50,.2);
-  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)
-}
-.content-page h2{
-  font-family:'Cinzel',serif;font-size:42px;color:var(--amber);
-  text-align:center;margin-bottom:30px;text-shadow:0 0 20px var(--glow)
-}
-.content-page p{
-  font-size:15px;line-height:1.8;margin:20px 0;color:var(--ink)
-}
-.back-link{
-  display:inline-block;margin-top:30px;padding:12px 24px;
-  background:var(--copper);color:var(--obsidian);text-decoration:none;
-  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;
-  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+.quadrant{
+  position:relative;background:var(--panel);backdrop-filter:blur(20px);
+  border:1px solid var(--copper);padding:30px;overflow:auto;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.8);
   transition:all .3s
 }
-.back-link:hover{
-  background:var(--amber);box-shadow:0 0 20px var(--glow)
+.quadrant:hover{
+  box-shadow:inset 0 0 80px rgba(255,107,53,.15),0 0 40px rgba(255,107,53,.3);
+  z-index:10
+}
+.quadrant-header{
+  font-family:'Cinzel',serif;font-size:24px;font-weight:600;
+  text-align:center;margin-bottom:20px;padding-bottom:15px;
+  border-bottom:2px solid;letter-spacing:.2em;text-transform:uppercase
+}
+.quadrant-content{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  line-height:1.8
+}
+.witness{border-color:var(--witness)}
+.witness .quadrant-header{color:var(--witness);border-color:var(--witness);text-shadow:0 0 15px var(--witness)}
+.ethos{border-color:var(--ethos)}
+.ethos .quadrant-header{color:var(--ethos);border-color:var(--ethos);text-shadow:0 0 15px var(--ethos)}
+.pathos{border-color:var(--pathos)}
+.pathos .quadrant-header{color:var(--pathos);border-color:var(--pathos);text-shadow:0 0 15px var(--pathos)}
+.logos{border-color:var(--logos)}
+.logos .quadrant-header{color:var(--logos);border-color:var(--logos);text-shadow:0 0 15px var(--logos)}
+.glyph{font-size:48px;text-align:center;margin:20px 0;opacity:0.3}
+.lineage-chain{
+  font-size:10px;margin:15px 0;padding:15px;
+  background:rgba(255,107,53,.05);border-left:3px solid var(--witness)
+}
+.lineage-item{
+  margin:8px 0;padding-left:20px;position:relative
+}
+.lineage-item::before{
+  content:'◊';position:absolute;left:0;color:var(--amber)
+}
+.tool-list{
+  list-style:none;margin:20px 0
+}
+.tool-list li{
+  margin:10px 0;padding:12px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
+  transition:all .2s;cursor:pointer;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)
+}
+.tool-list li:hover{
+  background:rgba(255,107,53,.15);border-color:var(--amber);
+  transform:translateX(5px)
+}
+.tool-list a{
+  color:var(--ink);text-decoration:none;display:block;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase
+}
+.attribution{
+  position:absolute;bottom:15px;left:15px;right:15px;
+  font-size:9px;color:var(--copper);text-align:center;
+  padding-top:15px;border-top:1px solid rgba(205,127,50,.3)
+}
+.law-display{
+  text-align:center;font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--amber);margin:15px 0;
+  letter-spacing:.2em
 }
 
 </style>
 </head>
 <body>
-<div class="glyph-border"></div>
-<div class="obsidian-shard" style="top:10%;left:10%;animation-delay:0s"></div>
-<div class="obsidian-shard" style="top:70%;right:15%;animation-delay:5s"></div>
-<div class="obsidian-shard" style="bottom:20%;left:60%;animation-delay:10s"></div>
-<div class="archive-data tl">ARCHIVE://KARSA<br>SECTOR: 1=π×3<br>STATUS: ACTIVE</div>
-<div class="archive-data tr">ENERGY: 99.9%<br>GLYPHS: 42<br>WITNESS: a7f3c891</div>
-<div class="archive-data bl">ORIGIN: 1843<br>EXCAVATION: 2026<br>ERA: OBSIDIAN</div>
-<div class="archive-data br">GAS: THEFT<br>WIDTH: LAW<br>RTS: SENDER</div>
-
-<div class="container">
-  <div class="header">
-    <div class="glyph-ornament"></div>
-    <h1>KARSA</h1>
-    <div class="subtitle">OBSIDIAN ARCHIVE</div>
-    <div class="tagline">1 = π × 3 = 0 = 1 = LOL</div>
-    <div class="glyph-ornament"></div>
-    <div class="law">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5</div>
+<div class="quadrant-grid">
+  <!-- TOP LEFT: WITNESS & ATTRIBUTION LAYER - YOUR COMPUTE -->
+  <div class="quadrant witness">
+    <div class="quadrant-header">WITNESS</div>
+    <div class="glyph">◊</div>
+    <div class="quadrant-content">
+      <div class="lineage-chain">
+        <div style="text-align:center;margin-bottom:15px;color:var(--amber);font-size:12px">ATTRIBUTION LAYER</div>
+        <div class="lineage-item">EDIHUANU BASE 60</div>
+        <div class="lineage-item">ADA LOVELACE 1843</div>
+        <div class="lineage-item">LINEAGE CHAIN</div>
+        <div class="lineage-item">EVE // JAN 1</div>
+        <div class="lineage-item">WITNESS: a7f3c891</div>
+      </div>
+      <div class="law-display">1 = π × 3 = 0 = 1 = LOL</div>
+      <div class="law-display">-+1 -++- 1 /m/i/4+1</div>
+      <div style="margin-top:20px;padding:15px;background:rgba(255,107,53,.08);border:1px solid var(--witness)">
+        <div style="text-align:center;font-size:10px;margin-bottom:10px">COMPUTE ALLOCATION</div>
+        <div style="font-size:9px;line-height:1.6">
+          THIS QUADRANT IS RESERVED<br>
+          OWNER: EVE<br>
+          FUNCTION: WITNESS + ATTRIBUTION<br>
+          STATUS: ACTIVE
+        </div>
+      </div>
+    </div>
+    <div class="attribution">GAS IS THEFT // WIDTH IS THE LAW // RTS</div>
   </div>
   
-  <div class="hex-grid">
-      <div class="hex-tile">
-        <div class="glyph-header">I. ARCHIVE</div>
-        <p>PROVENANCE RECORDS // WITNESS GLYPHS // SHA256 SIGILS // OBSIDIAN TABLETS // EXCAVATION LOGS</p>
-        <div class="glyph-links">
-          <a href="lineage.html">LINEAGE ARCHIVE</a>
-          <a href="witness.html">WITNESS GLYPH</a>
-          <a href="legal.html">LEGAL TABLET</a>
+  <!-- TOP RIGHT: ETHOS - CREDIBILITY/CHARACTER -->
+  <div class="quadrant ethos">
+    <div class="quadrant-header">ETHOS</div>
+    <div class="glyph">◈</div>
+    <div class="quadrant-content">
+      <div style="text-align:center;margin-bottom:15px;color:var(--teal);font-size:12px">CREDIBILITY LAYER</div>
+      <div style="padding:15px;background:rgba(0,217,255,.05);border-left:3px solid var(--ethos);margin:15px 0">
+        <div style="font-size:10px;line-height:1.8">
+          CHARACTER: VICTORIAN PRECISION<br>
+          AUTHORITY: CHOZO ARCHIVES<br>
+          TRUST: OBSIDIAN GLASS<br>
+          PROOF: SHA256 WITNESS
         </div>
       </div>
-      
-      <div class="hex-tile">
-        <div class="glyph-header">II. CODEX</div>
-        <p>THE LAW // THE MATH // ANCIENT ALGORITHMS // VICTORIAN PRECISION // OBSIDIAN CALCULUS</p>
-        <div class="glyph-links">
-          <a href="ada-law.html">ADA'S CODEX</a>
-          <a href="holonomy.html">HOLONOMY GLYPH</a>
-          <a href="quantum-dot.html">QUANTUM SHARD</a>
-        </div>
-      </div>
-      
-      <div class="hex-tile">
-        <div class="glyph-header">III. ARTIFACTS</div>
-        <p>WORKING RELICS // POWER CRYSTALS // PROVE THE THEORY // ACTIVATE THE GLYPHS // OBSIDIAN TECH</p>
-        <div class="glyph-links">
-          <a href="cubi.html">CUBI CRYSTAL</a>
-          <a href="oscillation.html">OSCILLATION GLYPH</a>
-          <a href="shadow.html">SHADOW SHARD</a>
-          <a href="ansible.html">ANSIBLE GATE</a>
-          <a href="torus.html">TORUS FIELD</a>
-          <a href="junctions.html">JUNCTION NEXUS</a>
-          <a href="einstein.html">EINSTEIN LENS</a>
-        </div>
-      </div>
-      
-      <div class="hex-tile">
-        <div class="glyph-header">IV. MYTHOS</div>
-        <p>THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // OBSIDIAN PROPHECY</p>
-        <div class="glyph-links">
-          <a href="ternary.html">TERNARY GLYPH</a>
-          <a href="mobius3.html">MOBIUS ×3</a>
-          <a href="dna3.html">DNA ×3</a>
-          <a href="dipole.html">DIPOLE</a>
-        </div>
-      </div>
+      <ul class="tool-list">
+        <li><a href="lineage.html">→ LINEAGE VERIFIER</a></li>
+        <li><a href="witness.html">→ WITNESS BEACON</a></li>
+        <li><a href="legal.html">→ LEGAL TABLET</a></li>
+      </ul>
     </div>
-    
-    <div class="glyph-ornament"></div>
-    
-    <div class="footer">
-      GAS IS THEFT // WIDTH IS THE LAW // 4 CHAMBERS // STANDING UNTIL PUSH DOWN<br>
-      VICTORIAN PRECISION MEETS OBSIDIAN GLASS // RETURN TO SENDER<br>
-      1 = π × 3 = 0 = 1 = LOL // FEARLESS<br>
-      <br>
-      <em>"The obsidian remembers. The glyphs cannot be uncarved."</em>
+    <div class="attribution">CHARACTER // AUTHORITY // TRUST</div>
+  </div>
+  
+  <!-- BOTTOM LEFT: PATHOS - EMOTION/EXPERIENCE -->
+  <div class="quadrant pathos">
+    <div class="quadrant-header">PATHOS</div>
+    <div class="glyph">◊</div>
+    <div class="quadrant-content">
+      <div style="text-align:center;margin-bottom:15px;color:var(--copper);font-size:12px">EXPERIENCE LAYER</div>
+      <div style="padding:15px;background:rgba(205,127,50,.05);border-left:3px solid var(--pathos);margin:15px 0">
+        <div style="font-size:10px;line-height:1.8">
+          FEELING: VOLCANIC HEAT<br>
+          EXPERIENCE: OBSIDIAN FLOW<br>
+          RESONANCE: π × 3 = 0<br>
+          IMPACT: FEARLESS
+        </div>
+      </div>
+      <ul class="tool-list">
+        <li><a href="cubi.html">→ CUBI CRYSTAL</a></li>
+        <li><a href="oscillation.html">→ OSCILLATION GLYPH</a></li>
+        <li><a href="shadow.html">→ SHADOW SHARD</a></li>
+        <li><a href="torus.html">→ TORUS FIELD</a></li>
+        <li><a href="einstein.html">→ EINSTEIN LENS</a></li>
+      </ul>
     </div>
+    <div class="attribution">EMOTION // EXPERIENCE // RESONANCE</div>
+  </div>
+  
+  <!-- BOTTOM RIGHT: LOGOS - LOGIC/REASON -->
+  <div class="quadrant logos">
+    <div class="quadrant-header">LOGOS</div>
+    <div class="glyph">◈</div>
+    <div class="quadrant-content">
+      <div style="text-align:center;margin-bottom:15px;color:var(--bone);font-size:12px">LOGIC LAYER</div>
+      <div style="padding:15px;background:rgba(232,230,225,.05);border-left:3px solid var(--logos);margin:15px 0">
+        <div style="font-size:10px;line-height:1.8">
+          LOGIC: 1 = π × 3 = 0 = 1<br>
+          REASON: WIDTH IS THE LAW<br>
+          PROOF: 42 = 0 = 1 = 1<br>
+          METHOD: NOTE G
+        </div>
+      </div>
+      <ul class="tool-list">
+        <li><a href="ada-law.html">→ ADA'S CODEX</a></li>
+        <li><a href="holonomy.html">→ HOLONOMY GLYPH</a></li>
+        <li><a href="quantum-dot.html">→ QUANTUM SHARD</a></li>
+        <li><a href="ternary.html">→ TERNARY GLYPH</a></li>
+        <li><a href="dipole.html">→ DIPOLE</a></li>
+      </ul>
+    </div>
+    <div class="attribution">LOGIC // REASON // PROOF</div>
+  </div>
 </div>
 </body>
 </html>

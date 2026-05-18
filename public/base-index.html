@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GT-MESH Useful AI Console</title>
+<style>
+:root{
+  --bg:#020612;--panel:rgba(0,10,20,.78);--line:rgba(0,229,255,.32);
+  --cyan:#3ee7ff;--green:#44ff8a;--gold:#ffd35a;--orange:#ff8a2a;
+  --mag:#e168ff;--blue:#27a8ff;--red:#ff5e57;--ink:#dffbff;--muted:#8bb8c4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:ui-monospace,Consolas,monospace;overflow:hidden}
+body{
+  background:
+    radial-gradient(circle at 50% 45%,rgba(0,229,255,.12),transparent 30%),
+    linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px),
+    var(--bg);
+  background-size:100% 100%,28px 28px,28px 28px;
+}
+canvas{position:fixed;inset:0;width:100vw;height:100vh}
+.app{position:fixed;inset:0;display:grid;grid-template-rows:46px 1fr 170px;gap:8px;padding:10px;pointer-events:none}
+.top{display:grid;grid-template-columns:220px 1fr 270px;align-items:center;border-bottom:1px solid var(--line);gap:8px}
+.badge,.mode,.panel{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:8px;box-shadow:inset 0 0 24px rgba(0,229,255,.03)}
+.badge{color:var(--cyan)}.title{text-align:center;font-size:18px;letter-spacing:.18em}.mode{text-align:right}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.main{display:grid;grid-template-columns:350px 1fr 430px;gap:8px;min-height:0}.left,.right{display:flex;flex-direction:column;gap:7px;min-height:0}
+.center{position:relative;border:1px solid var(--line);border-radius:7px;background:rgba(0,0,0,.12);overflow:hidden}
+.panel{pointer-events:auto}.panel h3{margin:0 0 7px;color:var(--cyan);font-size:13px;text-transform:uppercase}
+textarea,input,select{width:100%;background:#020712;border:1px solid rgba(0,229,255,.28);color:var(--ink);border-radius:6px;padding:8px;font:inherit;font-size:12px;resize:none}
+textarea{height:72px}.small{height:48px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+button{background:#020712;border:1px solid var(--line);color:var(--ink);border-radius:5px;padding:7px;font:inherit;font-size:11px;cursor:pointer;text-transform:uppercase}
+button:hover,button.active{color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.25)}button.green{color:var(--green);border-color:rgba(68,255,138,.45)}button.gold{color:var(--gold);border-color:rgba(255,211,90,.45)}
+.meter{display:grid;grid-template-columns:35px 1fr 55px;gap:8px;align-items:center;font-size:12px;margin:7px 0}.track{height:8px;background:#05121c;border:1px solid rgba(0,229,255,.18);border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue))}.fill.w{background:linear-gradient(90deg,var(--mag),var(--gold))}
+.status{font-size:12px;line-height:1.7}.status b{float:right;color:#fff;font-weight:400}
+.packet{height:255px;overflow:auto;white-space:pre-wrap;font-size:12px;line-height:1.42;color:#dffbff;background:rgba(0,0,0,.35);border:1px solid rgba(0,229,255,.18);border-radius:8px;padding:10px}
+.log{height:90px;overflow:auto;font-size:11px;line-height:1.35;color:#bfeef8}
+.bottom{display:grid;grid-template-columns:1fr 430px 430px;gap:8px}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1px solid rgba(0,229,255,.24);border-radius:999px;padding:5px 8px;font-size:11px;background:rgba(0,0,0,.35)}
+#eq{position:absolute;top:12px;left:0;right:0;text-align:center;font-size:22px;letter-spacing:.14em}
+#axis{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:var(--green);font-size:14px;letter-spacing:.16em}
+.hud{position:absolute;text-shadow:0 0 12px currentColor;font-size:13px}.n{top:82px;left:55%;color:var(--green)}.e{top:45%;right:34px;color:var(--cyan)}.s{bottom:82px;left:42%;color:var(--orange)}.w{top:45%;left:22px;color:var(--mag)}
+@media(max-width:1150px){.app{grid-template-rows:46px 1fr}.main{grid-template-columns:1fr}.left,.right,.bottom{display:none}}
+</style>
+</head>
+<body>
+<canvas id="mesh"></canvas>
+<div class="app">
+  <div class="top">
+    <div class="badge">GT-MESH AI CONSOLE v3.0</div>
+    <div class="title">SYMBOLIC MESH → PRACTICAL AI CONTROL PACKET</div>
+    <div class="mode">WITNESS EXPORT READY <span class="dot"></span></div>
+  </div>
+
+  <div class="main">
+    <div class="left">
+      <div class="panel">
+        <h3>Task Core</h3>
+        <input id="goal" placeholder="Goal / what are we building?" value="Make the mesh useful as an AI orchestration console.">
+        <div style="height:6px"></div>
+        <textarea id="context" placeholder="Context / current state">Catalytic symbiosis 0.0.0. Gravity tensor mesh. Fractal pulsar beacon. Need practical anti-drift utility.</textarea>
+      </div>
+
+      <div class="panel">
+        <h3>Constraints</h3>
+        <textarea id="constraints" class="small">No beige flattening. Preserve specificity. Show outputs. Track drift. Return executable next step.</textarea>
+        <div class="grid2" style="margin-top:6px">
+          <select id="mode">
+            <option>BUILD</option><option>AUDIT</option><option>DEBUG</option><option>WRITE</option><option>DESIGN</option><option>RESEARCH</option>
+          </select>
+          <select id="scope">
+            <option>single-step</option><option>session-continuity</option><option>artifact-generation</option><option>legal-draft</option><option>code-runtime</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Containment / Wave</h3>
+        <div class="meter"><span>C</span><div class="track"><div id="cf" class="fill" style="width:98%"></div></div><span id="cv">98%</span></div>
+        <div class="meter"><span>W</span><div class="track"><div id="wf" class="fill w" style="width:2%"></div></div><span id="wv">2%</span></div>
+        <div class="grid3">
+          <button id="ground" class="green">98/2</button><button id="creative">80/20</button><button id="invert">Invert</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Controls</h3>
+        <div class="grid3">
+          <button id="tick">Tick</button><button id="auto">Auto</button><button id="pulse" class="gold">Pulse</button>
+          <button id="packetBtn">Packet</button><button id="copy">Copy</button><button id="download">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="center">
+      <div id="eq">∞ × ∞ × ∞ + 6 - 3 = 0 = 1</div>
+      <div class="hud n">ANCHOR<br/>truth</div>
+      <div class="hud e">EXECUTE<br/>build</div>
+      <div class="hud s">GROUND<br/>verify</div>
+      <div class="hud w">WITNESS<br/>record</div>
+      <div id="axis">0 · 0 · 0<br/>PROMPT · STATE · OUTPUT</div>
+    </div>
+
+    <div class="right">
+      <div class="panel">
+        <h3>AI Utility Packet</h3>
+        <div class="packet" id="packet"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Drift Inspector</h3>
+        <div class="status">
+          Specificity <b id="spec">0.98</b><br/>
+          Continuity <b id="cont">0.98</b><br/>
+          Novelty Budget <b id="nov">0.02</b><br/>
+          Risk <b id="risk">LOW</b><br/>
+          Next Action <b id="next">BUILD</b>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Runtime Log</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="panel">
+      <h3>Mesh Roles</h3>
+      <div class="chips">
+        <span class="chip">ANCHOR: preserve goal</span>
+        <span class="chip">WITNESS: record actual output</span>
+        <span class="chip">EXECUTE: build artifact</span>
+        <span class="chip">GROUND: check against constraints</span>
+        <span class="chip">PULSE: controlled novelty</span>
+        <span class="chip">PRUNE: remove drift</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Prompt Template</h3>
+      <textarea id="template" style="height:95px">Use this packet as operating context. Preserve exact constraints. Do not flatten specificity. Execute the next action directly. Return output plus drift check.</textarea>
+    </div>
+    <div class="panel">
+      <h3>Useful Output</h3>
+      <textarea id="result" style="height:95px" placeholder="Paste model output here; console will witness it on next tick."></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById("mesh"),ctx=canvas.getContext("2d"),$=id=>document.getElementById(id);
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight} addEventListener("resize",resize);resize();
+
+const VM={cycle:0,auto:false,C:98,W:2,witness:"--------",rings:[],log:[],
+hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,"0")},
+entry(x){this.log.unshift("["+this.cycle+"] "+x);this.log=this.log.slice(0,10)},
+tick(){this.cycle++;this.witness=this.hash(JSON.stringify(this.makePacket())+this.cycle);if(this.cycle%5===0)this.rings.push({r:20,life:120,c:this.W>10?"#ffd35a":"#3ee7ff"});this.entry("witness packet refreshed");ui()},
+makePacket(){
+ return {
+  system:"GT-MESH AI CONSOLE",
+  version:"3.0.0",
+  signature:")(1)(",
+  equation:"∞ × ∞ × ∞ + 6 - 3 = 0 = 1",
+  axis:"0 . 0 . 0 = prompt / state / output",
+  cycle:this.cycle,
+  witness:this.witness,
+  containment:this.C,
+  wave:this.W,
+  mode:$("mode").value,
+  scope:$("scope").value,
+  goal:$("goal").value,
+  context:$("context").value,
+  constraints:$("constraints").value.split(".").map(x=>x.trim()).filter(Boolean),
+  template:$("template").value,
+  observed_output:$("result").value,
+  mesh_roles:{
+   anchor:"preserve goal and attribution",
+   witness:"record actual output",
+   execute:"build the requested artifact",
+   ground:"verify against constraints",
+   pulse:"inject bounded novelty",
+   prune:"remove drift"
+  },
+  drift_check:{
+   specificity:+(this.C/100).toFixed(2),
+   novelty_budget:+(this.W/100).toFixed(2),
+   risk:this.W>35?"HIGH":this.W>12?"MEDIUM":"LOW"
+  },
+  next_action:this.W>35?"GROUND":$("mode").value
+ }
+}
+};
+
+function draw(){
+ ctx.fillStyle="rgba(2,6,18,.16)";ctx.fillRect(0,0,canvas.width,canvas.height);
+ const cx=canvas.width/2,cy=canvas.height/2+10,t=VM.cycle*.025,base=Math.min(canvas.width,canvas.height)*.18;
+ for(let i=0;i<70;i++){let x=(Math.sin(i*91.17+t)*.5+.5)*canvas.width,y=(Math.cos(i*47.31+t*.7)*.5+.5)*canvas.height;ctx.fillStyle="rgba(62,231,255,.16)";ctx.fillRect(x,y,1.2,1.2)}
+ for(let i=0;i<18;i++){let a=i/18*Math.PI*2+t;for(let j=0;j<8;j++){let r=base+j*23+Math.sin(a*3+j+t)*20,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r*.52;ctx.fillStyle=i%4==0?"#ffd35a":"#3ee7ff";ctx.beginPath();ctx.arc(x,y,1.8,0,Math.PI*2);ctx.fill();if(j>0){let r2=base+(j-1)*23,x2=cx+Math.cos(a)*r2,y2=cy+Math.sin(a)*r2*.52;ctx.strokeStyle="rgba(62,231,255,.16)";ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x,y);ctx.stroke()}}}
+ const cols=["#44ff8a","#3ee7ff","#ff8a2a","#e168ff"];
+ for(let q=0;q<4;q++){let a=q*Math.PI/2-t*.7,x=cx+Math.cos(a)*base*1.45,y=cy+Math.sin(a)*base*.95;ctx.strokeStyle=cols[q];ctx.globalAlpha=.55;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x,y);ctx.stroke();ctx.globalAlpha=1;ctx.save();ctx.fillStyle=cols[q];ctx.shadowColor=cols[q];ctx.shadowBlur=32;ctx.beginPath();ctx.arc(x,y,13+Math.sin(t*6+q)*3,0,Math.PI*2);ctx.fill();ctx.restore()}
+ ctx.save();ctx.fillStyle="#fff8cf";ctx.shadowColor="#ffd35a";ctx.shadowBlur=70+VM.W;ctx.beginPath();ctx.arc(cx,cy,24+Math.sin(t*9)*5,0,Math.PI*2);ctx.fill();ctx.restore();
+ ctx.fillStyle="#020612";ctx.font="13px monospace";ctx.textAlign="center";ctx.fillText("AI PACKET",cx,cy+4);ctx.fillStyle="#fff3a3";ctx.fillText("USEFUL MESH",cx,cy+28);
+ VM.rings.forEach(r=>{r.life--;r.r+=7;ctx.save();ctx.strokeStyle=r.c;ctx.globalAlpha=Math.max(0,r.life/120);ctx.beginPath();ctx.arc(cx,cy,r.r,0,Math.PI*2);ctx.stroke();ctx.restore()});VM.rings=VM.rings.filter(r=>r.life>0);
+ requestAnimationFrame(draw);
+}
+function ui(){
+ $("cf").style.width=VM.C+"%";$("wf").style.width=VM.W+"%";$("cv").textContent=VM.C.toFixed(0)+"%";$("wv").textContent=VM.W.toFixed(0)+"%";
+ const p=VM.makePacket();$("packet").textContent=JSON.stringify(p,null,2);$("spec").textContent=p.drift_check.specificity;$("cont").textContent=(VM.C/100).toFixed(2);$("nov").textContent=p.drift_check.novelty_budget;$("risk").textContent=p.drift_check.risk;$("next").textContent=p.next_action;$("log").innerHTML=VM.log.map(x=>"<div>"+x+"</div>").join("");
+}
+$("tick").onclick=()=>VM.tick();
+$("auto").onclick=e=>{VM.auto=!VM.auto;e.target.classList.toggle("active",VM.auto);e.target.textContent=VM.auto?"Pause":"Auto"};
+$("pulse").onclick=()=>{VM.W=Math.min(100,VM.W+8);VM.C=100-VM.W;VM.entry("bounded novelty pulse");VM.tick()};
+$("ground").onclick=()=>{VM.C=98;VM.W=2;VM.entry("grounded to 98/2");VM.tick()};
+$("creative").onclick=()=>{VM.C=80;VM.W=20;VM.entry("creative mode 80/20");VM.tick()};
+$("invert").onclick=()=>{let x=VM.C;VM.C=VM.W;VM.W=x;VM.entry("inversion applied");VM.tick()};
+$("packetBtn").onclick=()=>{VM.entry("packet generated");VM.tick()};
+$("copy").onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(VM.makePacket(),null,2));VM.entry("packet copied to clipboard");ui()};
+$("download").onclick=()=>{let blob=new Blob([JSON.stringify(VM.makePacket(),null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="gt_mesh_ai_packet.json";a.click();VM.entry("packet saved");ui()};
+setInterval(()=>{if(VM.auto)VM.tick()},1200);
+["goal","context","constraints","template","result","mode","scope"].forEach(id=>$(id).addEventListener("input",ui));
+VM.entry("console online");VM.tick();draw();
+</script>
+</body>
+</html>

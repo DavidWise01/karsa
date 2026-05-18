@@ -1,0 +1,15 @@
+{
+  "name": "gt_mesh_useful_ai_console",
+  "version": "3.0.0",
+  "purpose": "Turn the symbolic GT-MESH into a practical AI orchestration and anti-drift console.",
+  "useful_to_ai": [
+    "state packet generation",
+    "continuity/witness tracking",
+    "task decomposition",
+    "drift checks",
+    "prompt packet export",
+    "JSON copy target",
+    "operator controls for mode, scope, and next action"
+  ],
+  "signature": "GT-MESH::USEFUL::)(1)("
+}
