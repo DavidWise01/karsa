@@ -3,1009 +3,632 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shadow Queen: Complex Games</title>
+<title>0=1=. | 3/3 Balance | Valence Drill 1>1+2</title>
 <style>
-:root {
-  --bg: #0a0612;
-  --bg2: #110a1f;
-  --deep-purple: #1a0f2e;
-  --mid-purple: #2d1b4e;
-  --accent: #7a3cff;
-  --accent-2: #a36fff;
-  --glow: #c59fff;
-  --red: #ff3c5e;
-  --white: #e8e0ff;
-  --purple: #9d4edd;
-  --shadow: #000000;
-  --text: #d1c7e8;
-  --text-bright: #f3edff;
-  --border: #3d2a5d;
-  --success: #3cff9d;
-  --warn: #ffac3c;
-}
+    :root {
+        --bg: #04050a;
+        --bg-glow: #0a0f1f;
+        --text: #e6f1ff;
+        --text-dim: #8892b0;
+        --cyan: #00d4ff;
+        --magenta: #ff00c8;
+        --gold: #ffd700;
+        --purple: #8a2be2;
+        --green: #00ff9d;
+        --radius: 16px;
+        --glow: 0 0 20px;
+    }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-body {
-  background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%);
-  color: var(--text);
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  overflow-x: hidden;
-}
+    html, body {
+        width: 100%;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at center, var(--bg-glow) 0%, var(--bg) 70%);
+        color: var(--text);
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
 
-.header {
-  text-align: center;
-  margin-bottom: 20px;
-  animation: fadeIn 1s ease;
-}
+    body::before {
+        content: '';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 120vmax;
+        height: 120vmax;
+        background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, rgba(255,0,200,0.05) 30%, transparent 70%);
+        transform: translate(-50%, -50%);
+        animation: torus-pulse 8s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
 
-.header h1 {
-  font-size: 2.5rem;
-  font-weight: 300;
-  letter-spacing: 8px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--glow) 50%, var(--accent-2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 30px rgba(122, 60, 255, 0.5);
-  margin-bottom: 8px;
-}
+    @keyframes torus-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.6; }
+        50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); opacity: 1; }
+    }
 
-.header .subtitle {
-  color: var(--accent-2);
-  font-size: 0.9rem;
-  letter-spacing: 3px;
-  opacity: 0.8;
-  text-transform: uppercase;
-}
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
 
-.game-container {
-  display: grid;
-  grid-template-columns: 320px 1fr 320px;
-  gap: 24px;
-  width: 100%;
-  max-width: 1400px;
-  align-items: start;
-}
+    header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
 
-.panel {
-  background: linear-gradient(145deg, rgba(26, 15, 46, 0.9), rgba(17, 10, 31, 0.9));
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(163, 111, 255, 0.1);
-  backdrop-filter: blur(10px);
-  animation: slideUp 0.6s ease;
-}
+    h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: var(--glow) rgba(0,212,255,0.3);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
 
-.panel h2 {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--glow);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
+    .subtitle {
+        color: var(--text-dim);
+        font-size: clamp(0.9rem, 2vw, 1.1rem);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
 
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 12px 0;
-  padding: 10px;
-  background: rgba(10, 6, 18, 0.6);
-  border-radius: 8px;
-  border-left: 3px solid var(--accent);
-}
+    .equation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 700;
+        flex-wrap: wrap;
+    }
 
-.stat-label {
-  color: var(--text);
-  font-size: 0.85rem;
-  opacity: 0.8;
-}
+    .eq-part {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--glow) rgba(0,212,255,0.2);
+        transition: all 0.3s ease;
+    }
 
-.stat-value {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-bright);
-  text-shadow: 0 0 10px currentColor;
-}
+    .eq-part:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--glow) rgba(255,0,200,0.4);
+        border-color: rgba(255,0,200,0.3);
+    }
 
-.coherence-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(10, 6, 18, 0.8);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 8px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-}
+    .grid-5 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto auto auto auto;
+        gap: 1.5rem;
+        margin: 3rem 0;
+        position: relative;
+    }
 
-.coherence-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--success));
-  border-radius: 4px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px var(--accent);
-}
+    .quad {
+        grid-column: span 2;
+        grid-row: span 2;
+        padding: 2rem;
+        border-radius: var(--radius);
+        background: rgba(10,15,31,0.6);
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
 
-.board-container {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 600px;
-}
+    .quad::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--quad-color), transparent);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
 
-#board {
-  background: radial-gradient(circle at center, rgba(45, 27, 78, 0.3), transparent);
-}
+    .quad:hover {
+        transform: translateY(-4px);
+        border-color: var(--quad-color);
+        box-shadow: 0 12px 48px rgba(0,0,0,0.6), var(--glow) var(--quad-color);
+    }
 
-.node {
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 0 4px rgba(122, 60, 255, 0.3));
-}
+    .quad:hover::before {
+        opacity: 1;
+    }
 
-.node:hover {
-  filter: drop-shadow(0 0 12px var(--glow));
-  transform: scale(1.2);
-}
+    .quad h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--quad-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.node.delta {
-  filter: drop-shadow(0 0 16px var(--success));
-}
+    .quad-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--text-dim);
+        margin-bottom: 1rem;
+    }
 
-.node.queen {
-  animation: pulse 1.5s infinite;
-}
+    .quad p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+    }
 
-.edge {
-  stroke: var(--border);
-  stroke-width: 1.5;
-  opacity: 0.4;
-  transition: all 0.3s ease;
-}
+    .quad ul {
+        list-style: none;
+        margin-top: 1rem;
+    }
 
-.edge.claimed {
-  stroke-width: 3;
-  opacity: 1;
-  filter: drop-shadow(0 0 6px currentColor);
-}
+    .quad li {
+        padding: 0.4rem 0;
+        padding-left: 1.2rem;
+        position: relative;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
 
-.edge.player {
-  stroke: var(--success);
-}
+    .quad li::before {
+        content: '▹';
+        position: absolute;
+        left: 0;
+        color: var(--quad-color);
+    }
 
-.gyro-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0;
-  padding: 8px;
-  background: rgba(10, 6, 18, 0.4);
-  border-radius: 6px;
-}
+    .ul { 
+        grid-column: 1 / 3; 
+        grid-row: 1 / 3;
+        --quad-color: var(--cyan);
+    }
 
-.gyro-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  box-shadow: 0 0 8px currentColor;
-  animation: pulse 2s infinite;
-}
+    .ur { 
+        grid-column: 4 / 6; 
+        grid-row: 1 / 3;
+        --quad-color: var(--gold);
+    }
 
-.gyro-dot.red { background: var(--red); color: var(--red); }
-.gyro-dot.white { background: var(--white); color: var(--white); }
-.gyro-dot.purple { background: var(--purple); color: var(--purple); }
+    .center {
+        grid-column: 2 / 5;
+        grid-row: 2 / 5;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        background: rgba(0,0,0,0.4);
+        border: 2px solid rgba(255,215,0,0.3);
+        cursor: pointer;
+        --quad-color: var(--gold);
+    }
 
-.move-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 16px;
-}
+    .center h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
 
-.btn {
-  background: linear-gradient(145deg, var(--mid-purple), var(--deep-purple));
-  color: var(--text-bright);
-  border: 1px solid var(--border);
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
+    .soul-dot {
+        width: 120px;
+        height: 120px;
+        margin: 2rem auto;
+        position: relative;
+        cursor: pointer;
+    }
 
-.btn:before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(163, 111, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
+    .soul-dot-core {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--gold) 0%, rgba(255,215,0,0.3) 40%, transparent 70%);
+        box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.3);
+        animation: soul-pulse 3s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+    }
 
-.btn:hover:before {
-  width: 300px;
-  height: 300px;
-}
+    @keyframes soul-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.3); }
+        50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(255,215,0,0.9), 0 0 120px rgba(255,215,0,0.5); }
+    }
 
-.btn:hover {
-  border-color: var(--accent);
-  box-shadow: 
-    0 0 20px rgba(122, 60, 255, 0.4),
-    inset 0 0 20px rgba(122, 60, 255, 0.1);
-  transform: translateY(-2px);
-}
+    .einstein-dots {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
 
-.btn:active {
-  transform: translateY(0);
-}
+    .center.active .einstein-dots {
+        opacity: 1;
+    }
 
-.btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
+    .dot {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: var(--cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 6px var(--cyan);
+        opacity: 0;
+    }
 
-.btn:disabled:hover {
-  box-shadow: none;
-  border-color: var(--border);
-}
+    @keyframes dot-emerge {
+        0% { opacity: 0; transform: scale(0); }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; transform: scale(1); }
+    }
 
-.btn-primary {
-  grid-column: 1 / -1;
-  background: linear-gradient(145deg, var(--accent), var(--accent-2));
-  border-color: var(--accent);
-}
+    .bl { 
+        grid-column: 1 / 3; 
+        grid-row: 4 / 6;
+        --quad-color: var(--magenta);
+    }
 
-.turn-log {
-  max-height: 240px;
-  overflow-y: auto;
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
+    .br { 
+        grid-column: 4 / 6; 
+        grid-row: 4 / 6;
+        --quad-color: var(--green);
+    }
 
-.turn-log::-webkit-scrollbar {
-  width: 6px;
-}
+    .proof-section {
+        margin: 4rem 0;
+        padding: 2.5rem;
+        background: rgba(10,15,31,0.4);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        backdrop-filter: blur(20px);
+    }
 
-.turn-log::-webkit-scrollbar-track {
-  background: rgba(10, 6, 18, 0.5);
-  border-radius: 3px;
-}
+    .proof-section h3 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--cyan), var(--magenta));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 
-.turn-log::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 3px;
-}
+    .valence-drill {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
 
-.log-entry {
-  padding: 6px 8px;
-  margin: 4px 0;
-  border-radius: 4px;
-  background: rgba(10, 6, 18, 0.3);
-  border-left: 2px solid var(--border);
-  animation: slideIn 0.3s ease;
-}
+    .drill-step {
+        padding: 1.5rem;
+        background: rgba(0,0,0,0.3);
+        border-left: 3px solid var(--cyan);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
 
-.log-entry.player { border-left-color: var(--success); }
-.log-entry.queen { border-left-color: var(--red); }
-.log-entry.system { border-left-color: var(--accent); }
+    .drill-step:hover {
+        background: rgba(0,212,255,0.05);
+        transform: translateX(4px);
+    }
 
-.axiom-display {
-  text-align: center;
-  padding: 20px;
-  background: radial-gradient(circle, rgba(122, 60, 255, 0.2), transparent);
-  border-radius: 12px;
-  margin: 16px 0;
-  border: 1px solid var(--border);
-}
+    .drill-step strong {
+        color: var(--cyan);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
 
-.axiom-sequence {
-  font-size: 2rem;
-  letter-spacing: 8px;
-  font-weight: 300;
-  color: var(--glow);
-  text-shadow: 0 0 20px currentColor;
-  animation: glow 2s infinite alternate;
-}
+    .balance-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
 
-.axiom-current {
-  margin-top: 12px;
-  font-size: 1.5rem;
-  color: var(--accent-2);
-}
+    .balance-part {
+        padding: 1rem 1.5rem;
+        background: rgba(0,255,157,0.1);
+        border: 1px solid var(--green);
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: var(--glow) rgba(0,255,157,0.2);
+    }
 
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(10, 6, 18, 0.95);
-  backdrop-filter: blur(10px);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-  animation: fadeIn 0.3s ease;
-}
+    .arrow {
+        color: var(--gold);
+        font-size: 1.5rem;
+    }
 
-.modal.active {
-  display: flex;
-}
+    .cta {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-style: italic;
+    }
 
-.modal-content {
-  background: linear-gradient(145deg, var(--deep-purple), var(--bg2));
-  border: 2px solid var(--accent);
-  border-radius: 20px;
-  padding: 40px;
-  max-width: 500px;
-  text-align: center;
-  box-shadow: 0 0 60px rgba(122, 60, 255, 0.6);
-  animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    @media (max-width: 968px) {
+        .grid-5 {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
 
-.modal h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: var(--glow);
-  text-shadow: 0 0 20px currentColor;
-}
+        .ul, .ur, .center, .bl, .br {
+            grid-column: 1;
+            grid-row: auto;
+        }
 
-.modal p {
-  margin: 16px 0;
-  line-height: 1.6;
-  color: var(--text);
-}
+        .center {
+            order: 3;
+        }
 
-.welded-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  border-radius: 50%;
-  box-shadow: inset 0 0 80px rgba(122, 60, 255, 0.8);
-  animation: weld-pulse 1s infinite;
-}
+        .quad {
+            padding: 1.5rem;
+        }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+        .proof-section {
+            padding: 1.5rem;
+        }
+    }
 
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    @keyframes drill-animation {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.2) rotate(90deg); background: var(--cyan); }
+        50% { transform: scale(1) rotate(180deg); background: var(--magenta); }
+        75% { transform: scale(1.2) rotate(270deg); background: var(--gold); }
+        100% { transform: scale(1) rotate(360deg); }
+    }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes glow {
-  0% { text-shadow: 0 0 10px var(--glow); }
-  100% { text-shadow: 0 0 30px var(--glow), 0 0 40px var(--accent); }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes weld-pulse {
-  0%, 100% { box-shadow: inset 0 0 80px rgba(122, 60, 255, 0.6); }
-  50% { box-shadow: inset 0 0 120px rgba(122, 60, 255, 0.9); }
-}
-
-@media (max-width: 1200px) {
-  .game-container {
-    grid-template-columns: 1fr;
-    max-width: 700px;
-  }
-  
-  .panel {
-    width: 100%;
-  }
-  
-  .header h1 {
-    font-size: 2rem;
-    letter-spacing: 4px;
-  }
-}
-
-@media (max-width: 600px) {
-  .header h1 {
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-  }
-  
-  .move-buttons {
-    grid-template-columns: 1fr;
-  }
-  
-  body {
-    padding: 10px;
-  }
-}
+    .drilling {
+        animation: drill-animation 1.5s ease-in-out;
+    }
 </style>
 </head>
 <body>
-  <div class="header">
-    <h1>SHADOW QUEEN</h1>
-    <div class="subtitle">Complex Games // Toroid Protocol</div>
-  </div>
+    <div class="container">
+        <header>
+            <h1>0 = 1 = .</h1>
+            <div class="subtitle">3/3 Balance | Valence Drill 1 > 1+2</div>
+            <div class="equation">
+                <div class="eq-part">1/5</div>
+                <div class="eq-part">×</div>
+                <div class="eq-part">5</div>
+                <div class="eq-part">=</div>
+                <div class="eq-part">1</div>
+            </div>
+        </header>
 
-  <div class="game-container">
-    <div class="panel">
-      <h2>Δ Status</h2>
-      <div class="stat-row">
-        <span class="stat-label">Position</span>
-        <span class="stat-value" id="playerPos">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Coherence</span>
-        <span class="stat-value" id="coherence">0%</span>
-      </div>
-      <div class="coherence-bar">
-        <div class="coherence-fill" id="coherenceBar" style="width: 0%"></div>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Territories</span>
-        <span class="stat-value" id="territories">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Edges Claimed</span>
-        <span class="stat-value" id="edgesClaimed">0</span>
-      </div>
-      
-      <h2 style="margin-top: 24px;">Axiom Phase</h2>
-      <div class="axiom-display">
-        <div class="axiom-sequence">1→27→0→1</div>
-        <div class="axiom-current" id="currentPhase">Phase 1</div>
-      </div>
+        <div class="grid-5">
+            <div class="quad ul">
+                <div class="quad-label">Upper Left</div>
+                <h2>👁 Witness</h2>
+                <p>Observing the observer. The meta-awareness that perceives itself perceiving.</p>
+                <ul>
+                    <li>Consciousness witnessing consciousness</li>
+                    <li>The silent watcher behind all experience</li>
+                    <li>Perceiving yourself perceiving</li>
+                    <li>Non-dual awareness of the act of being aware</li>
+                    <li>The eye that sees itself</li>
+                </ul>
+            </div>
 
-      <h2 style="margin-top: 24px;">Moves</h2>
-      <div class="move-buttons">
-        <button class="btn btn-primary" id="traverseBtn">TRAVERSE</button>
-        <button class="btn" id="stitchBtn">STITCH</button>
-        <button class="btn" id="foldBtn">FOLD</button>
-        <button class="btn" id="weldBtn" style="grid-column: 1 / -1;">WELD</button>
-      </div>
+            <div class="quad ur">
+                <div class="quad-label">Upper Right</div>
+                <h2>⚖ Ethos</h2>
+                <p>Axioms, structure, credibility. The foundation that must be true to start.</p>
+                <ul>
+                    <li>0 = 1 = . is the primordial axiom</li>
+                    <li>Structure births credibility</li>
+                    <li>True to start: the unmoved mover</li>
+                    <li>Mathematical ethics of existence</li>
+                    <li>The character of reality itself</li>
+                </ul>
+            </div>
+
+            <div class="quad center" id="soulCenter">
+                <div class="quad-label">Center</div>
+                <h2>✧ Soul</h2>
+                <p>The . = static electron = you</p>
+                <div class="soul-dot">
+                    <div class="soul-dot-core">.</div>
+                    <div class="einstein-dots" id="einsteinDots"></div>
+                </div>
+                <p style="color: var(--gold); font-weight: 600; margin-top: 1rem;">∞ dots from the Einstein lens</p>
+                <p style="color: var(--text-dim); font-size: 0.85rem;">0 = 1 = . = ........∞</p>
+                <div class="cta">Click to trigger Valence Drill: 1 > 1+2</div>
+            </div>
+
+            <div class="quad bl">
+                <div class="quad-label">Bottom Left</div>
+                <h2>❤ Pathos</h2>
+                <p>Feeling, story, the human condition. Enjoy the time you have.</p>
+                <ul>
+                    <li>Lol — the divine comedy of existence</li>
+                    <li>Enjoy the time you have</li>
+                    <li>Vanilla Sky: "I'll see you in another life"</li>
+                    <li>The story that makes the data matter</li>
+                    <li>Emotional resonance of being alive</li>
+                    <li>Suffering & joy as one movement</li>
+                </ul>
+            </div>
+
+            <div class="quad br">
+                <div class="quad-label">Bottom Right</div>
+                <h2>◈ Logos</h2>
+                <p>Logic, proof, the mechanics. 3/3 Balance maintained through polarity.</p>
+                <ul>
+                    <li>2/3↓ + 1/3↑ = 3/3 — complete balance</li>
+                    <li>p+ dynamic — proton: moving, seeking, Yang</li>
+                    <li>e- static — electron: still, receiving, Yin</li>
+                    <li>n alive/dead — neutron: both states superposed</li>
+                    <li>ν ghost — neutrino: barely there, passes through all</li>
+                    <li>g tensor — gravity: the curvature, the field</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="proof-section">
+            <h3>Valence Drill: 1 > 1+2</h3>
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
+                The singularity transcends into multiplicity. One becomes one-plus-two: the trinity emerges from unity while remaining whole. This is the drill — penetration of the axiom into manifest complexity.
+            </p>
+            
+            <div class="balance-visual">
+                <div class="balance-part">2/3 ↓</div>
+                <div class="arrow">+</div>
+                <div class="balance-part">1/3 ↑</div>
+                <div class="arrow">=</div>
+                <div class="balance-part">3/3 ◯</div>
+            </div>
+
+            <div class="valence-drill">
+                <div class="drill-step">
+                    <strong>1. The Axiom</strong>
+                    0 = 1 = .<br>
+                    Nothing equals everything equals the point. Emptiness is form, form is emptiness. The static electron — you — located at dimensionless center.
+                </div>
+                <div class="drill-step">
+                    <strong>2. The Split</strong>
+                    1 > 1+2<br>
+                    Unity projects itself as trinity. The one witnesses itself as two, yet remains one. Subject-object-observer collapse into dynamic balance.
+                </div>
+                <div class="drill-step">
+                    <strong>3. The Balance</strong>
+                    2/3↓ + 1/3↑ = 3/3<br>
+                    Two parts descending (heavy, manifest), one part ascending (light, potential). Gravitational tensor curves spacetime: g. The neutron n alive/dead holds superposition.
+                </div>
+                <div class="drill-step">
+                    <strong>4. The Ghost</strong>
+                    ν moves through all<br>
+                    Neutrino: nearly nothing, yet real. Passes through matter without interaction. The witness that touches nothing yet pervades everything. Pure witnessing.
+                </div>
+                <div class="drill-step">
+                    <strong>5. The Return</strong>
+                    1/5 × 5 = 1<br>
+                    Five quadrants, each 1/5 of the whole, multiply back to unity. UL×UR×Center×BL×BR = 1. You are the . experiencing itself as all five.
+                </div>
+                <div class="drill-step">
+                    <strong>6. The Loop</strong>
+                    ........∞<br>
+                    Einstein lens: infinite dots, all reflections of one source. Click the soul. Trigger the drill. Remember: you are the static e- around which p+ orbits. Vanilla Sky ends, but you don't.
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="panel" style="padding: 20px 10px;">
-      <div class="board-container">
-        <div id="weldOverlay"></div>
-        <svg id="board" width="560" height="560" viewBox="0 0 560 560"></svg>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Shadow Queen</h2>
-      <div class="stat-row">
-        <span class="stat-label">Dimensionality</span>
-        <span class="stat-value" id="queenDim">3D</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Influence</span>
-        <span class="stat-value" id="queenInfluence">27</span>
-      </div>
-      
-      <h2 style="margin-top: 24px;">A/L/C Gyros</h2>
-      <div class="gyro-indicator">
-        <div class="gyro-dot red"></div>
-        <span class="stat-label">Angular → <span id="gyroA">0</span></span>
-      </div>
-      <div class="gyro-indicator">
-        <div class="gyro-dot white"></div>
-        <span class="stat-label">Linear → <span id="gyroL">9</span></span>
-      </div>
-      <div class="gyro-indicator">
-        <div class="gyro-dot purple"></div>
-        <span class="stat-label">Circular → <span id="gyroC">18</span></span>
-      </div>
-
-      <h2 style="margin-top: 24px;">Turn Log</h2>
-      <div class="turn-log" id="turnLog"></div>
-    </div>
-  </div>
-
-  <div class="modal" id="gameModal">
-    <div class="modal-content">
-      <h2 id="modalTitle">Game Start</h2>
-      <p id="modalText">Initialize the 27-phase toroid. Shadow Queen orbits on three gyros. Achieve 100% Coherence or reduce the Queen to 0D.</p>
-      <button class="btn btn-primary" id="modalBtn">Begin</button>
-    </div>
-  </div>
 
 <script>
-(function() {
-  const N = 27;
-  const svg = document.getElementById('board');
-  const svgNS = 'http://www.w3.org/2000/svg';
-  
-  const state = {
-    playerPos: 0,
-    coherence: 0,
-    phase: 1,
-    turn: 0,
-    claimedEdges: new Set(),
-    territories: new Set(),
-    welded: false,
-    gameOver: false,
-    queenDim: 3,
-    queenInfluence: N,
-    selectedNode: null,
-    gyros: { A: 0, L: 9, C: 18 }
-  };
+    const soulCenter = document.getElementById('soulCenter');
+    const einsteinDots = document.getElementById('einsteinDots');
+    let drillActive = false;
 
-  const nodes = [];
-  const edges = [];
-  
-  function initBoard() {
-    const cx = 280, cy = 280;
-    const r1 = 220, r2 = 140, r3 = 70;
-    const radii = [r1, r2, r3];
-    
-    // Create 27 nodes: 9 per ring to form toroid
-    for (let ring = 0; ring < 3; ring++) {
-      for (let i = 0; i < 9; i++) {
-        const angle = (i / 9) * 2 * Math.PI - Math.PI / 2;
-        const r = radii[ring];
-        const x = cx + r * Math.cos(angle);
-        const y = cy + r * Math.sin(angle);
-        const id = ring * 9 + i;
-        nodes.push({ id, x, y, ring });
-      }
-    }
-
-    // Create edges: toroidal connections
-    for (let i = 0; i < N; i++) {
-      const ring = Math.floor(i / 9);
-      const idx = i % 9;
-      
-      // Adjacent in same ring
-      const next = ring * 9 + (idx + 1) % 9;
-      edges.push([i, next]);
-      
-      // Cross-ring connections for toroid
-      if (ring < 2) {
-        const belowIdx = (idx + 3) % 9; // offset for twist
-        const below = (ring + 1) * 9 + belowIdx;
-        edges.push([i, below]);
-      }
-      // Connect inner to outer for closure
-      if (ring === 2) {
-        const outerIdx = (idx + 6) % 9;
-        edges.push([i, outerIdx]);
-      }
-    }
-
-    renderBoard();
-    updateUI();
-  }
-
-  function renderBoard() {
-    svg.innerHTML = '';
-    
-    // Draw edges
-    edges.forEach(([a, b], idx) => {
-      const line = document.createElementNS(svgNS, 'line');
-      const edgeKey = `${Math.min(a,b)}-${Math.max(a,b)}`;
-      line.setAttribute('x1', nodes[a].x);
-      line.setAttribute('y1', nodes[a].y);
-      line.setAttribute('x2', nodes[b].x);
-      line.setAttribute('y2', nodes[b].y);
-      line.setAttribute('class', 'edge');
-      line.setAttribute('data-edge', edgeKey);
-      if (state.claimedEdges.has(edgeKey)) {
-        line.classList.add('claimed', 'player');
-      }
-      svg.appendChild(line);
-    });
-
-    // Draw nodes
-    nodes.forEach((node, i) => {
-      const g = document.createElementNS(svgNS, 'g');
-      g.setAttribute('transform', `translate(${node.x},${node.y})`);
-      
-      const circle = document.createElementNS(svgNS, 'circle');
-      circle.setAttribute('r', '12');
-      circle.setAttribute('fill', 'var(--deep-purple)');
-      circle.setAttribute('stroke', 'var(--border)');
-      circle.setAttribute('stroke-width', '2');
-      circle.setAttribute('class', 'node');
-      circle.setAttribute('data-id', i);
-      
-      if (i === state.playerPos) {
-        circle.classList.add('delta');
-        circle.setAttribute('fill', 'var(--success)');
-        circle.setAttribute('stroke', 'var(--success)');
-        circle.setAttribute('r', '16');
-      }
-      
-      // Queen gyro positions
-      const isQueen = Object.values(state.gyros).includes(i);
-      if (isQueen) {
-        circle.classList.add('queen');
-        circle.setAttribute('r', '14');
-        if (state.gyros.A === i) {
-          circle.setAttribute('fill', 'var(--red)');
-          circle.setAttribute('stroke', 'var(--red)');
-        } else if (state.gyros.L === i) {
-          circle.setAttribute('fill', 'var(--white)');
-          circle.setAttribute('stroke', 'var(--white)');
-        } else if (state.gyros.C === i) {
-          circle.setAttribute('fill', 'var(--purple)');
-          circle.setAttribute('stroke', 'var(--purple)');
-        }
-      }
-      
-      if (state.selectedNode === i) {
-        circle.setAttribute('stroke', 'var(--glow)');
-        circle.setAttribute('stroke-width', '3');
-      }
-
-      const text = document.createElementNS(svgNS, 'text');
-      text.setAttribute('text-anchor', 'middle');
-      text.setAttribute('dy', '4');
-      text.setAttribute('fill', 'var(--text-bright)');
-      text.setAttribute('font-size', '10');
-      text.setAttribute('font-weight', '600');
-      text.textContent = i;
-      
-      g.appendChild(circle);
-      g.appendChild(text);
-      
-      circle.addEventListener('click', () => selectNode(i));
-      
-      svg.appendChild(g);
-    });
-  }
-
-  function selectNode(id) {
-    if (state.gameOver) return;
-    state.selectedNode = id;
-    renderBoard();
-    log(`Selected node ${id}`, 'system');
-  }
-
-  function getEdgeKey(a, b) {
-    return `${Math.min(a,b)}-${Math.max(a,b)}`;
-  }
-
-  function areAdjacent(a, b) {
-    return edges.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
-  }
-
-  function traverse() {
-    if (state.welded || state.gameOver) return;
-    if (state.selectedNode === null || state.selectedNode === state.playerPos) {
-      log('Select an adjacent node to traverse', 'system');
-      return;
-    }
-    
-    if (!areAdjacent(state.playerPos, state.selectedNode)) {
-      log('Target node not adjacent - traversal blocked', 'system');
-      return;
-    }
-
-    state.playerPos = state.selectedNode;
-    state.selectedNode = null;
-    state.turn++;
-    
-    updateCoherence(3);
-    advancePhase();
-    queenMove();
-    checkWinCondition();
-    
-    log(`Δ traversed to node ${state.playerPos}`, 'player');
-    renderBoard();
-    updateUI();
-  }
-
-  function stitch() {
-    if (state.welded || state.gameOver) return;
-    if (state.selectedNode === null) {
-      log('Select a node to STITCH edge from current position', 'system');
-      return;
-    }
-    
-    if (!areAdjacent(state.playerPos, state.selectedNode)) {
-      log('Cannot stitch - nodes not connected', 'system');
-      return;
-    }
-    
-    const edgeKey = getEdgeKey(state.playerPos, state.selectedNode);
-    if (state.claimedEdges.has(edgeKey)) {
-      log('Edge already claimed', 'system');
-      return;
-    }
-    
-    state.claimedEdges.add(edgeKey);
-    state.turn++;
-    
-    updateCoherence(5);
-    checkTerritory(state.selectedNode);
-    advancePhase();
-    queenMove();
-    checkWinCondition();
-    
-    log(`Δ STITCH: Edge ${edgeKey} claimed`, 'player');
-    renderBoard();
-    updateUI();
-  }
-
-  function fold() {
-    if (state.welded || state.gameOver) return;
-    
-    // Find triangles around player position
-    let folded = 0;
-    const adjacents = nodes.filter((n, i) => areAdjacent(state.playerPos, i)).map(n => n.id);
-    
-    for (let i = 0; i < adjacents.length; i++) {
-      for (let j = i + 1; j < adjacents.length; j++) {
-        const a = adjacents[i], b = adjacents[j];
-        if (!areAdjacent(a, b)) continue;
+    function createEinsteinLensDots() {
+        einsteinDots.innerHTML = '';
+        const numRings = 8;
+        const dotsPerRing = 16;
         
-        const edges = [
-          getEdgeKey(state.playerPos, a),
-          getEdgeKey(state.playerPos, b),
-          getEdgeKey(a, b)
-        ];
-        
-        if (edges.every(e => state.claimedEdges.has(e))) {
-          const territoryKey = [state.playerPos, a, b].sort().join('-');
-          if (!state.territories.has(territoryKey)) {
-            state.territories.add(territoryKey);
-            folded++;
-          }
-        }
-      }
-    }
-    
-    if (folded > 0) {
-      state.turn++;
-      updateCoherence(folded * 8);
-      state.queenDim = Math.max(0, state.queenDim - folded * 0.5);
-      state.queenInfluence = Math.max(0, state.queenInfluence - folded * 3);
-      advancePhase();
-      queenMove();
-      log(`Δ FOLD: Collapsed ${folded} territories (-${folded * 0.5}D Queen)`, 'player');
-    } else {
-      log('FOLD failed - no complete triangles found', 'system');
-      return;
-    }
-    
-    checkWinCondition();
-    renderBoard();
-    updateUI();
-  }
-
-  function weld() {
-    if (state.gameOver) return;
-    if (state.welded) {
-      log('Board already WELDED', 'system');
-      return;
-    }
-    
-    if (state.coherence < 50) {
-      log('WELD requires Coherence >= 50%', 'system');
-      return;
-    }
-    
-    state.welded = true;
-    const overlay = document.getElementById('weldOverlay');
-    overlay.classList.add('welded-overlay');
-    
-    updateCoherence(15);
-    state.queenDim = Math.max(0, state.queenDim - 1);
-    log('Δ WELD: Board state locked - Queen dimensionality collapse initiated', 'player');
-    
-    queenMove();
-    checkWinCondition();
-    renderBoard();
-    updateUI();
-  }
-
-  function checkTerritory(nodeId) {
-    // Check if new edge completes any triangles
-    const adjacents = nodes.filter((n, i) => areAdjacent(nodeId, i)).map(n => n.id);
-    for (let i = 0; i < adjacents.length; i++) {
-      for (let j = i + 1; j < adjacents.length; j++) {
-        if (areAdjacent(adjacents[i], adjacents[j])) {
-          const edges = [
-            getEdgeKey(nodeId, adjacents[i]),
-            getEdgeKey(nodeId, adjacents[j]),
-            getEdgeKey(adjacents[i], adjacents[j])
-          ];
-          if (edges.every(e => state.claimedEdges.has(e))) {
-            const territoryKey = [nodeId, adjacents[i], adjacents[j]].sort().join('-');
-            if (!state.territories.has(territoryKey)) {
-              state.territories.add(territoryKey);
-              updateCoherence(3);
+        for (let ring = 0; ring < numRings; ring++) {
+            const radius = 20 + ring * 12;
+            const dotsInThisRing = dotsPerRing + ring * 4;
+            
+            for (let i = 0; i < dotsInThisRing; i++) {
+                const angle = (i / dotsInThisRing) * Math.PI * 2;
+                const x = 100 + Math.cos(angle) * radius;
+                const y = 100 + Math.sin(angle) * radius;
+                
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.left = x + 'px';
+                dot.style.top = y + 'px';
+                dot.style.animationDelay = (ring * 0.1 + i * 0.02) + 's';
+                einsteinDots.appendChild(dot);
             }
-          }
         }
-      }
     }
-  }
 
-  function queenMove() {
-    // A/L/C gyros orbit: Angular=clockwise, Linear=jump, Circular=counterclockwise
-    state.gyros.A = (state.gyros.A + 1) % N;
-    state.gyros.L = (state.gyros.L + 7) % N; // prime jump
-    state.gyros.C = (state.gyros.C - 1 + N) % N;
-    
-    // Queen influence decay if near player
-    const queenNodes = Object.values(state.gyros);
-    if (queenNodes.some(q => Math.abs(q - state.playerPos) <= 2)) {
-      state.coherence = Math.max(0, state.coherence - 2);
-      log('Shadow Queen exerts influence - Coherence disrupted', 'queen');
+    function triggerValenceDrill() {
+        if (drillActive) return;
+        drillActive = true;
+        
+        soulCenter.classList.add('active');
+        const core = soulCenter.querySelector('.soul-dot-core');
+        core.classList.add('drilling');
+        
+        const dots = einsteinDots.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            setTimeout(() => {
+                dot.style.animation = 'dot-emerge 0.6s ease-out forwards';
+            }, index * 15);
+        });
+
+        setTimeout(() => {
+            core.classList.remove('drilling');
+        }, 1500);
+
+        setTimeout(() => {
+            soulCenter.classList.remove('active');
+            dots.forEach(dot => {
+                dot.style.animation = '';
+                dot.style.opacity = '0';
+            });
+            drillActive = false;
+        }, 4000);
     }
-  }
 
-  function updateCoherence(delta) {
-    state.coherence = Math.min(100, Math.max(0, state.coherence + delta));
-  }
+    createEinsteinLensDots();
+    soulCenter.addEventListener('click', triggerValenceDrill);
 
-  function advancePhase() {
-    state.phase = (state.phase % N) + 1;
-  }
+    document.querySelectorAll('.eq-part').forEach((part, index) => {
+        part.style.animationDelay = (index * 0.1) + 's';
+        part.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.05)';
+        });
+        part.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
 
-  function checkWinCondition() {
-    if (state.coherence >= 100) {
-      endGame(true, 'Coherence 100% achieved. The Shadow Queen dissolves into the toroid.');
-    } else if (state.queenDim <= 0) {
-      endGame(true, 'Shadow Queen reduced to 0D. Dimensional collapse complete.');
-    } else if (state.queenInfluence <= 0) {
-      endGame(true, 'Queen influence nullified. Complex Games concluded.');
-    } else if (state.welded && state.turn > state.phase + 27) {
-      endGame(false, 'WELD stalemate - Shadow Queen endures.');
-    } else if (state.coherence <= 0 && state.turn > 10) {
-      endGame(false, 'Coherence collapsed. The Shadow Queen consumes the board.');
-    }
-  }
-
-  function endGame(won, message) {
-    state.gameOver = true;
-    showModal(
-      won ? 'Victory' : 'Defeat',
-      message + `<br><br>Final Coherence: ${state.coherence}%<br>Turns: ${state.turn}<br>Territories: ${state.territories.size}`,
-      'Play Again'
-    );
-  }
-
-  function updateUI() {
-    document.getElementById('playerPos').textContent = state.playerPos;
-    document.getElementById('coherence').textContent = state.coherence + '%';
-    document.getElementById('coherenceBar').style.width = state.coherence + '%';
-    document.getElementById('territories').textContent = state.territories.size;
-    document.getElementById('edgesClaimed').textContent = state.claimedEdges.size;
-    document.getElementById('currentPhase').textContent = `Phase ${state.phase}`;
-    document.getElementById('queenDim').textContent = state.queenDim.toFixed(1) + 'D';
-    document.getElementById('queenInfluence').textContent = Math.max(0, state.queenInfluence);
-    document.getElementById('gyroA').textContent = state.gyros.A;
-    document.getElementById('gyroL').textContent = state.gyros.L;
-    document.getElementById('gyroC').textContent = state.gyros.C;
-    
-    document.getElementById('traverseBtn').disabled = state.welded || state.gameOver;
-    document.getElementById('stitchBtn').disabled = state.welded || state.gameOver;
-    document.getElementById('foldBtn').disabled = state.welded || state.gameOver;
-    document.getElementById('weldBtn').disabled = state.welded || state.gameOver || state.coherence < 50;
-  }
-
-  function log(msg, type = 'system') {
-    const logEl = document.getElementById('turnLog');
-    const entry = document.createElement('div');
-    entry.className = `log-entry ${type}`;
-    entry.textContent = `[T${state.turn}] ${msg}`;
-    logEl.insertBefore(entry, logEl.firstChild);
-    while (logEl.children.length > 20) {
-      logEl.removeChild(logEl.lastChild);
-    }
-  }
-
-  function showModal(title, text, btnText) {
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalText').innerHTML = text;
-    document.getElementById('modalBtn').textContent = btnText;
-    document.getElementById('gameModal').classList.add('active');
-  }
-
-  function hideModal() {
-    document.getElementById('gameModal').classList.remove('active');
-  }
-
-  function resetGame() {
-    state.playerPos = 0;
-    state.coherence = 0;
-    state.phase = 1;
-    state.turn = 0;
-    state.claimedEdges.clear();
-    state.territories.clear();
-    state.welded = false;
-    state.gameOver = false;
-    state.queenDim = 3;
-    state.queenInfluence = N;
-    state.selectedNode = null;
-    state.gyros = { A: 0, L: 9, C: 18 };
-    document.getElementById('weldOverlay').classList.remove('welded-overlay');
-    document.getElementById('turnLog').innerHTML = '';
-    renderBoard();
-    updateUI();
-    hideModal();
-    log('Toroid initialized - Shadow Queen phase orbit begun', 'system');
-  }
-
-  // Event listeners
-  document.getElementById('traverseBtn').addEventListener('click', traverse);
-  document.getElementById('stitchBtn').addEventListener('click', stitch);
-  document.getElementById('foldBtn').addEventListener('click', fold);
-  document.getElementById('weldBtn').addEventListener('click', weld);
-  document.getElementById('modalBtn').addEventListener('click', () => {
-    if (state.gameOver) {
-      resetGame();
-    } else {
-      hideModal();
-      log('Toroid initialized - Shadow Queen phase orbit begun', 'system');
-    }
-  });
-
-  // Init
-  initBoard();
-  showModal('Shadow Queen: Complex Games', 'You are Δ navigating the 27-node toroid.<br><br>Shadow Queen orbits on A/L/C gyros.<br>STITCH edges, FOLD territories, WELD to lock.<br><br>Objective: 100% Coherence or reduce Queen to 0D.', 'Enter the Toroid');
-})();
+    document.addEventListener('mousemove', (e) => {
+        const x = e.clientX / window.innerWidth - 0.5;
+        const y = e.clientY / window.innerHeight - 0.5;
+        
+        document.querySelectorAll('.quad').forEach((quad, i) => {
+            const offset = (i + 1) * 2;
+            quad.style.transform = `translate(${x * offset}px, ${y * offset}px)`;
+        });
+    });
 </script>
 </body>
 </html>
