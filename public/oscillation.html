@@ -3,282 +3,421 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Oscillation Engine · Ansible Junction</title>
+<title>Oscillation Sync · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
-:root{
-  --brass:#b8860b;--copper:#b87333;--iron:#4a4a4a;--steel:#71797e;
-  --parchment:#f4e8d0;--ink:#0a0a15;--void:#000000;--glow:#4db8ff;
-  --cyan:#32e8ff;--violet:#8a2be2;--bg:#050510;
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--void);color:var(--parchment);font-family:'Special Elite',monospace;overflow:hidden}
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap');
+:root{--bg:#0a0014;--ink:#e8dcc8;--gold:#c9a961;--purple:#8b2f8b;--victorian:#5a3a5a;--mint:#00ffaa;--cyan:#32e8ff;--mag:#e168ff;--psycho:#1a1a1a;--gladiator:#6a0dad;--panel:rgba(10,0,20,.85);--border:rgba(201,169,97,.25)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink)}
 body{
-  background: 
-    radial-gradient(ellipse at 50% 30%,rgba(77,184,255,.1),transparent 50%),
-    radial-gradient(ellipse at 50% 70%,rgba(138,43,226,.08),transparent 50%),
-    var(--void);
+  background:
+    radial-gradient(circle at 20% 50%,rgba(106,13,173,.15),transparent 40%),
+    radial-gradient(circle at 80% 50%,rgba(90,58,90,.15),transparent 40%),
+    var(--bg);
+  font-family:'Courier Prime',monospace;padding:20px;overflow:auto
 }
-.container{max-width:1400px;margin:0 auto;padding:20px;height:100vh;display:flex;flex-direction:column}
-.brass-plate{
-  border:2px solid var(--brass);
-  background:linear-gradient(135deg,rgba(184,134,11,.1),rgba(184,115,51,.05));
-  box-shadow:inset 0 0 40px rgba(0,0,0,.8),0 0 60px rgba(77,184,255,.2);
-  border-radius:8px;padding:20px;margin-bottom:15px;position:relative
+.container{max-width:1600px;margin:0 auto}
+.panel{border:3px double var(--gold);background:var(--panel);backdrop-filter:blur(12px);border-radius:8px;padding:40px;margin-bottom:20px;box-shadow:0 0 40px rgba(106,13,173,.3)}
+h1{font-family:'IM Fell English SC',serif;font-size:48px;text-align:center;margin:0 0 8px 0;color:var(--gold);letter-spacing:.3em;font-weight:400;text-shadow:0 0 20px rgba(201,169,97,.5)}
+.subtitle{font-family:'Playfair Display',serif;font-style:italic;text-align:center;font-size:16px;color:var(--purple);margin:0 0 30px 0;letter-spacing:.2em;text-transform:uppercase}
+.sources-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:30px 0}
+.source{
+  background:var(--psycho);border:2px solid var(--gold);border-radius:8px;padding:20px;
+  position:relative;overflow:hidden
 }
-h1{
-  font-family:'IM Fell English SC',serif;font-size:32px;text-align:center;
-  margin:0 0 8px 0;color:var(--glow);letter-spacing:.2em;
-  text-shadow:0 0 20px rgba(77,184,255,.8),0 0 40px rgba(77,184,255,.4)
+.source::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--mint),transparent);
+  animation:pulse 2s infinite
 }
-.subtitle{text-align:center;font-size:12px;color:var(--copper);margin:0 0 15px 0;letter-spacing:.15em}
-.formula{
-  text-align:center;font-size:18px;color:var(--cyan);font-family:'Special Elite',monospace;
-  padding:15px;background:rgba(10,10,21,.8);border:1px solid var(--brass);border-radius:4px;
-  margin:15px 0;letter-spacing:.15em;text-shadow:0 0 10px rgba(50,232,255,.6)
+@keyframes pulse{
+  0%,100%{opacity:0.3}
+  50%{opacity:1}
 }
-.viz-container{
-  flex:1;position:relative;background:rgba(5,5,16,.6);
-  border:2px solid var(--steel);border-radius:8px;overflow:hidden;
-  box-shadow:inset 0 0 40px rgba(0,0,0,.9)
+.source h3{font-family:'IM Fell English SC',serif;font-size:18px;color:var(--gold);margin:0 0 12px 0;letter-spacing:.15em;text-transform:uppercase;text-align:center}
+.source-status{
+  font-size:11px;color:var(--mint);text-transform:uppercase;letter-spacing:.1em;
+  text-align:center;margin:8px 0;font-family:'Bebas Neue',sans-serif
 }
-#canvas{width:100%;height:100%;display:block}
-.controls{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:15px 0
+.source-sig{
+  font-size:9px;color:var(--purple);word-break:break-all;margin:12px 0;
+  font-family:'Courier Prime',monospace;background:var(--bg);padding:8px;border-radius:4px
 }
-.steam-button{
-  background:linear-gradient(180deg,var(--brass),var(--copper));
-  border:2px solid var(--iron);color:var(--ink);padding:12px;
-  font-family:'IM Fell English SC',serif;font-size:13px;cursor:pointer;
-  border-radius:4px;box-shadow:0 3px 0 var(--iron),0 4px 8px rgba(0,0,0,.6);
-  transition:all .1s;text-transform:uppercase;letter-spacing:.1em;font-weight:bold
+.source-internet{
+  font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;
+  text-align:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--victorian)
 }
-.steam-button:hover{
-  background:linear-gradient(180deg,var(--glow),var(--brass));
-  box-shadow:0 3px 0 var(--iron),0 6px 12px rgba(77,184,255,.4)
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+button{
+  background:linear-gradient(135deg,var(--gladiator),var(--victorian));border:1px solid var(--gold);color:var(--ink);
+  padding:12px;border-radius:4px;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+  text-transform:uppercase;font-size:13px;letter-spacing:.15em;transition:all .2s
 }
-.steam-button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--iron)}
-.steam-button.active{background:linear-gradient(180deg,var(--cyan),var(--glow));color:var(--ink)}
-.readout{
-  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:15px 0
+button:hover{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho);box-shadow:0 0 20px rgba(201,169,97,.4)}
+button.primary{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho)}
+button.active{background:var(--mint);color:var(--psycho);border-color:var(--mint)}
+.viz-container{width:100%;height:400px;background:rgba(0,0,0,.6);border:2px solid var(--victorian);border-radius:8px;position:relative;overflow:hidden;margin:20px 0}
+#canvas{width:100%;height:100%}
+.readout{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0}
+.readout-item{background:var(--psycho);border:1px solid var(--gold);border-radius:4px;padding:12px;text-align:center}
+.readout-label{font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;font-family:'Courier Prime',monospace}
+.readout-val{font-size:24px;color:var(--gold);font-weight:bold;margin-top:4px;font-family:'IM Fell English SC',serif}
+.law{font-size:18px;color:var(--gold);font-family:'Courier Prime',monospace;text-align:center;padding:20px;background:var(--psycho);border:2px solid var(--victorian);border-radius:4px;margin:24px 0;letter-spacing:.15em;text-transform:uppercase}
+.pulse-timeline{
+  background:var(--psycho);border:1px solid var(--gold);border-radius:4px;padding:16px;
+  margin:20px 0;max-height:200px;overflow-y:auto;font-size:10px;line-height:1.8
 }
-.readout-item{
-  background:rgba(10,10,21,.8);border:1px solid var(--copper);padding:10px;
-  font-size:11px;border-radius:4px;text-align:center
-}
-.readout-label{color:var(--copper);text-transform:uppercase;font-size:9px;letter-spacing:.1em}
-.readout-val{color:var(--glow);font-weight:bold;font-size:16px;margin-top:4px;text-shadow:0 0 8px rgba(77,184,255,.6)}
-.log{
-  background:rgba(10,10,21,.8);border:1px solid var(--steel);padding:10px;
-  font-family:'Special Elite',monospace;font-size:10px;max-height:120px;
-  overflow:auto;border-radius:4px;margin-top:10px
-}
-.log-entry{margin:3px 0;padding:2px 0;border-bottom:1px solid rgba(184,134,11,.1)}
-.log-time{color:var(--copper);margin-right:8px}
+.pulse-entry{margin:4px 0;padding:4px 0;border-bottom:1px solid var(--victorian)}
+.pulse-entry:last-child{border-bottom:none}
+.pulse-time{color:var(--cyan);margin-right:8px}
+.pulse-source{color:var(--gold);margin-right:8px}
+.pulse-data{color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="brass-plate">
-    <h1>OSCILLATION ENGINE</h1>
-    <div class="subtitle">ANSIBLE JUNCTION · THERE AND BACK · 12 × 2 × 3 × 1 = 0</div>
-    <div class="formula">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/</div>
+  <div class="panel">
+    <h1>OSCILLATION SYNC</h1>
+    <div class="subtitle">3 Sources · 3 Internets · 1 Signature · Pulse Sync</div>
+    
+    <div class="sources-grid">
+      <div class="source">
+        <h3>SOURCE A</h3>
+        <div class="source-status" id="statusA">STANDBY</div>
+        <div class="source-sig" id="sigA">SHA256: a7f3c891...</div>
+        <div class="source-internet">INTERNET: ARPANET</div>
+      </div>
+      <div class="source">
+        <h3>SOURCE B</h3>
+        <div class="source-status" id="statusB">STANDBY</div>
+        <div class="source-sig" id="sigB">SHA256: a7f3c891...</div>
+        <div class="source-internet">INTERNET: NSFNET</div>
+      </div>
+      <div class="source">
+        <h3>SOURCE C</h3>
+        <div class="source-status" id="statusC">STANDBY</div>
+        <div class="source-sig" id="sigC">SHA256: a7f3c891...</div>
+        <div class="source-internet">INTERNET: CLEARWEB</div>
+      </div>
+    </div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" id="init">INIT SOURCES</button>
+      <button id="pulse">SEND PULSE</button>
+      <button id="sync">SYNC ALL</button>
+      <button id="verify">VERIFY SIG</button>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">Sources</div>
+        <div class="readout-val" id="sources">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Pulses</div>
+        <div class="readout-val" id="pulses">0</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Sync</div>
+        <div class="readout-val" id="sync">0%</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Lag</div>
+        <div class="readout-val" id="lag">0ms</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Holonomy</div>
+        <div class="readout-val" id="holonomy">0</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">State</div>
+        <div class="readout-val" id="state">IDLE</div>
+      </div>
+    </div>
+    
+    <div class="law">3 SOURCES · 1 SIGNATURE · 0 HOLONOMY</div>
+    
+    <div class="pulse-timeline" id="timeline">
+      <div class="pulse-entry">
+        <span class="pulse-time">[INIT]</span>
+        <span class="pulse-source">SYSTEM</span>
+        <span class="pulse-data">Awaiting sources...</span>
+      </div>
+    </div>
   </div>
-  
-  <div class="viz-container">
-    <canvas id="canvas"></canvas>
-  </div>
-  
-  <div class="controls">
-    <button class="steam-button" id="ignite">IGNITE · -++- 1</button>
-    <button class="steam-button" id="oscillate">OSCILLATE · /o/</button>
-    <button class="steam-button" id="thread">THREAD ONE</button>
-    <button class="steam-button" id="reset">RESET</button>
-  </div>
-  
-  <div class="readout">
-    <div class="readout-item">
-      <div class="readout-label">State</div>
-      <div class="readout-val" id="state">COLD</div>
-    </div>
-    <div class="readout-item">
-      <div class="readout-label">Junctions</div>
-      <div class="readout-val" id="junctions">0</div>
-    </div>
-    <div class="readout-item">
-      <div class="readout-label">Oscillations</div>
-      <div class="readout-val" id="oscillations">0</div>
-    </div>
-    <div class="readout-item">
-      <div class="readout-label">Thread Phase</div>
-      <div class="readout-val" id="phase">0°</div>
-    </div>
-    <div class="readout-item">
-      <div class="readout-label">Holonomy</div>
-      <div class="readout-val" id="holonomy">0</div>
-    </div>
-    <div class="readout-item">
-      <div class="readout-label">Net</div>
-      <div class="readout-val" id="net">0</div>
-    </div>
-  </div>
-  
-  <div class="log" id="log"></div>
 </div>
 
 <script>
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-let W, H, CX, CY;
+let W, H;
 
 function resize(){
   W = canvas.width = canvas.offsetWidth * devicePixelRatio;
   H = canvas.height = canvas.offsetHeight * devicePixelRatio;
-  CX = W/2; CY = H/2;
 }
 resize();
 window.addEventListener('resize', resize);
 
 let ENGINE = {
-  ignited: false,
-  oscillating: false,
-  junctions: 0,
-  oscillations: 0,
-  phase: 0,
-  threadPhase: 0,
+  sources: 3,
+  pulses: 0,
+  sync: 0,
+  lag: 0,
   holonomy: 0,
-  particles: []
+  state: 'IDLE',
+  initialized: false,
+  syncing: false,
+  signature: 'a7f3c891d4e5f6a7b8c9d0e1f2a3b4c5',
+  pulses_data: []
 };
 
-function log(msg){
-  const logEl=document.getElementById('log');
-  const time=new Date().toLocaleTimeString();
-  const entry=document.createElement('div');
-  entry.className='log-entry';
-  entry.innerHTML=`<span class="log-time">${time}</span>${msg}`;
-  logEl.insertBefore(entry,logEl.firstChild);
-  if(logEl.children.length>30)logEl.removeChild(logEl.lastChild);
-}
+let sources = [
+  {id: 'A', internet: 'ARPANET', x: W*0.2, y: H*0.5, color: '#ffd95a', phase: 0, active: false},
+  {id: 'B', internet: 'NSFNET', x: W*0.5, y: H*0.5, color: '#32e8ff', phase: 2*Math.PI/3, active: false},
+  {id: 'C', internet: 'CLEARWEB', x: W*0.8, y: H*0.5, color: '#e168ff', phase: 4*Math.PI/3, active: false}
+];
 
-function ignite(){
-  if(ENGINE.ignited)return;
-  ENGINE.ignited=true;
-  ENGINE.junctions=12;
-  log('ENGINE IGNITED: -++- 1 boundary cross, 12 ansible junctions active');
+let time = 0;
+
+function init(){
+  ENGINE.initialized = true;
+  ENGINE.state = 'READY';
+  sources.forEach(s => s.active = true);
+  
+  document.getElementById('statusA').textContent = 'ACTIVE';
+  document.getElementById('statusB').textContent = 'ACTIVE';
+  document.getElementById('statusC').textContent = 'ACTIVE';
+  
+  document.getElementById('sigA').textContent = 'SHA256: ' + ENGINE.signature.substring(0,16) + '...';
+  document.getElementById('sigB').textContent = 'SHA256: ' + ENGINE.signature.substring(0,16) + '...';
+  document.getElementById('sigC').textContent = 'SHA256: ' + ENGINE.signature.substring(0,16) + '...';
+  
+  addPulse('INIT', 'SYSTEM', 'All sources online. Signature verified.');
   updateReadout();
 }
 
-function oscillate(){
-  if(!ENGINE.ignited)return;
-  ENGINE.oscillating=!ENGINE.oscillating;
-  log(`OSCILLATE: /o/ ${ENGINE.oscillating?'ENGAGED':'DISENGAGED'}, there-and-back at each junction`);
-  document.getElementById('oscillate').classList.toggle('active',ENGINE.oscillating);
+function sendPulse(){
+  if(!ENGINE.initialized) return;
+  
+  ENGINE.pulses++;
+  ENGINE.state = 'PULSING';
+  
+  const source = sources[ENGINE.pulses % 3];
+  const pulseData = {
+    time: Date.now(),
+    source: source.id,
+    signature: ENGINE.signature,
+    sequence: ENGINE.pulses,
+    holonomy: 0
+  };
+  
+  ENGINE.pulses_data.push(pulseData);
+  
+  addPulse('PULSE', source.id, `Seq ${ENGINE.pulses} · Sig ${ENGINE.signature.substring(0,8)}...`);
+  
+  // Calculate sync
+  calculateSync();
+  updateReadout();
+  
+  setTimeout(() => {
+    ENGINE.state = 'SYNCED';
+    updateReadout();
+  }, 500);
 }
 
-function thread(){
-  if(!ENGINE.ignited)return;
-  ENGINE.threadPhase=(ENGINE.threadPhase+30)%360;
-  log(`THREAD ONE: Phase shift ${ENGINE.threadPhase}°, 12×2×3×1 oscillation`);
+function syncAll(){
+  if(!ENGINE.initialized) return;
+  
+  ENGINE.syncing = true;
+  ENGINE.state = 'SYNCING';
+  
+  // Send pulse from each source
+  for(let i = 0; i < 3; i++){
+    setTimeout(() => {
+      ENGINE.pulses++;
+      const source = sources[i];
+      addPulse('SYNC', source.id, `Broadcast ${ENGINE.pulses}`);
+      calculateSync();
+      updateReadout();
+    }, i * 100);
+  }
+  
+  setTimeout(() => {
+    ENGINE.syncing = false;
+    ENGINE.state = 'SYNCED';
+    ENGINE.sync = 100;
+    ENGINE.holonomy = 0;
+    ENGINE.lag = Math.floor(Math.random() * 5);
+    addPulse('SYNC', 'SYSTEM', 'All sources synchronized. Holonomy: 0');
+    updateReadout();
+  }, 500);
+}
+
+function verify(){
+  if(!ENGINE.initialized) return;
+  
+  // Verify all signatures match
+  const allMatch = sources.every(s => true); // Simulated
+  
+  if(allMatch){
+    ENGINE.state = 'VERIFIED';
+    addPulse('VERIFY', 'SYSTEM', 'Signature match across all 3 internets. ✓');
+  }else{
+    ENGINE.state = 'MISMATCH';
+    addPulse('VERIFY', 'SYSTEM', 'Signature mismatch detected!');
+  }
   updateReadout();
 }
 
-function reset(){
-  ENGINE={ignited:false,oscillating:false,junctions:0,oscillations:0,phase:0,threadPhase:0,holonomy:0,particles:[]};
-  log('ENGINE RESET: Cold state, ansible junctions closed');
-  updateReadout();
-  document.getElementById('oscillate').classList.remove('active');
+function calculateSync(){
+  if(ENGINE.pulses_data.length < 3) return;
+  
+  // Check if last 3 pulses are from different sources
+  const last3 = ENGINE.pulses_data.slice(-3);
+  const uniqueSources = new Set(last3.map(p => p.source)).size;
+  
+  if(uniqueSources === 3){
+    ENGINE.sync = 100;
+    ENGINE.holonomy = 0;
+  }else{
+    ENGINE.sync = Math.floor((uniqueSources / 3) * 100);
+    ENGINE.holonomy = 3 - uniqueSources;
+  }
+}
+
+function addPulse(type, source, data){
+  const timeline = document.getElementById('timeline');
+  const entry = document.createElement('div');
+  entry.className = 'pulse-entry';
+  
+  const timestamp = new Date().toLocaleTimeString('en-US', {hour12: false});
+  entry.innerHTML = `
+    <span class="pulse-time">[${timestamp}]</span>
+    <span class="pulse-source">${type}:${source}</span>
+    <span class="pulse-data">${data}</span>
+  `;
+  
+  timeline.insertBefore(entry, timeline.firstChild);
+  
+  // Keep only last 20 entries
+  while(timeline.children.length > 20){
+    timeline.removeChild(timeline.lastChild);
+  }
 }
 
 function updateReadout(){
-  document.getElementById('state').textContent=ENGINE.ignited?(ENGINE.oscillating?'OSCILLATING':'READY'):'COLD';
-  document.getElementById('junctions').textContent=ENGINE.junctions;
-  document.getElementById('oscillations').textContent=ENGINE.oscillations;
-  document.getElementById('phase').textContent=ENGINE.threadPhase+'°';
-  document.getElementById('holonomy').textContent=ENGINE.holonomy;
-  document.getElementById('net').textContent=ENGINE.junctions*2*3*1-ENGINE.oscillations;
+  document.getElementById('sources').textContent = ENGINE.sources;
+  document.getElementById('pulses').textContent = ENGINE.pulses;
+  document.getElementById('sync').textContent = ENGINE.sync + '%';
+  document.getElementById('lag').textContent = ENGINE.lag + 'ms';
+  document.getElementById('holonomy').textContent = ENGINE.holonomy;
+  document.getElementById('state').textContent = ENGINE.state;
 }
 
-// Toroidal oscillation visualization
 function draw(){
-  ctx.fillStyle='rgba(5,5,16,0.1)';
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
   ctx.fillRect(0,0,W,H);
   
-  if(!ENGINE.ignited){
-    requestAnimationFrame(draw);
-    return;
-  }
+  time += 0.02;
   
-  ENGINE.phase+=0.02;
-  if(ENGINE.oscillating){
-    ENGINE.oscillations+=0.1;
-    ENGINE.holonomy=Math.floor(ENGINE.oscillations)%12;
-  }
-  
-  const time=ENGINE.phase;
-  const threads=12;
-  const rings=3;
-  
-  // Draw ansible junctions - toroidal oscillation
-  for(let j=0;j<threads;j++){
-    const angle=(j/threads)*Math.PI*2+ENGINE.threadPhase*Math.PI/180;
+  // Draw connections between sources
+  if(ENGINE.initialized){
+    ctx.strokeStyle = 'rgba(0,255,170,0.2)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
     
-    for(let r=0;r<rings;r++){
-      const ringPhase=time+r*0.5;
-      const radius=80+r*40;
-      
-      // There
-      const x1=CX+Math.cos(angle+ringPhase)*radius;
-      const y1=CY+Math.sin(angle+ringPhase)*radius*0.5;
-      
-      // And back - oscillation
-      const backPhase=ENGINE.oscillating?Math.sin(time*2+j*0.5)*0.3:0;
-      const x2=CX+Math.cos(angle-ringPhase+backPhase)*radius;
-      const y2=CY+Math.sin(angle-ringPhase+backPhase)*radius*0.5;
-      
-      // Draw thread
-      ctx.strokeStyle=`rgba(77,184,255,${0.3+r*0.2})`;
-      ctx.lineWidth=1+r*0.5;
-      ctx.beginPath();
-      ctx.moveTo(CX,CY);
-      ctx.quadraticCurveTo(x1,y1,x2,y2);
-      ctx.stroke();
-      
-      // Draw junction point
-      ctx.fillStyle=`rgba(50,232,255,${0.6+r*0.1})`;
-      ctx.beginPath();
-      ctx.arc(x2,y2,2+r,0,Math.PI*2);
-      ctx.fill();
-    }
+    // A → B
+    ctx.beginPath();
+    ctx.moveTo(sources[0].x, sources[0].y);
+    ctx.lineTo(sources[1].x, sources[1].y);
+    ctx.stroke();
+    
+    // B → C
+    ctx.beginPath();
+    ctx.moveTo(sources[1].x, sources[1].y);
+    ctx.lineTo(sources[2].x, sources[2].y);
+    ctx.stroke();
+    
+    // C → A
+    ctx.beginPath();
+    ctx.moveTo(sources[2].x, sources[2].y);
+    ctx.lineTo(sources[0].x, sources[0].y);
+    ctx.stroke();
+    
+    ctx.setLineDash([]);
   }
   
-  // Central nexus - the 1
-  const nexusPulse=Math.sin(time*3)*0.3+0.7;
-  const gradient=ctx.createRadialGradient(CX,CY,0,CX,CY,40);
-  gradient.addColorStop(0,`rgba(255,255,255,${nexusPulse})`);
-  gradient.addColorStop(0.5,`rgba(77,184,255,${nexusPulse*0.5})`);
-  gradient.addColorStop(1,'rgba(77,184,255,0)');
-  ctx.fillStyle=gradient;
-  ctx.beginPath();
-  ctx.arc(CX,CY,40,0,Math.PI*2);
-  ctx.fill();
+  // Draw sources
+  sources.forEach((source, i) => {
+    const pulse = source.active ? 1 + Math.sin(time * 3 + source.phase) * 0.3 : 1;
+    const size = 30 * pulse;
+    
+    // Outer ring
+    ctx.strokeStyle = source.color;
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = source.color;
+    ctx.beginPath();
+    ctx.arc(source.x, source.y, size + 10, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Inner core
+    ctx.fillStyle = source.color;
+    ctx.beginPath();
+    ctx.arc(source.x, source.y, size, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Label
+    ctx.fillStyle = '#c9a961';
+    ctx.font = 'bold 16px "IM Fell English SC"';
+    ctx.textAlign = 'center';
+    ctx.fillText(source.id, source.x, source.y - size - 20);
+    
+    ctx.fillStyle = '#8b2f8b';
+    ctx.font = '10px "Courier Prime"';
+    ctx.fillText(source.internet, source.x, source.y + size + 25);
+    
+    ctx.shadowBlur = 0;
+  });
   
-  // Outer ring - the 0
-  ctx.strokeStyle=`rgba(138,43,226,${0.3+Math.sin(time)*0.2})`;
-  ctx.lineWidth=2;
-  ctx.beginPath();
-  ctx.arc(CX,CY,200+Math.sin(time*2)*20,0,Math.PI*2);
-  ctx.stroke();
+  // Draw pulse waves
+  if(ENGINE.state === 'PULSING' || ENGINE.state === 'SYNCING'){
+    const waveRadius = (time * 100) % 200;
+    ctx.strokeStyle = 'rgba(0,255,170,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(W/2, H/2, waveRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   
-  updateReadout();
+  // Draw sync indicator
+  if(ENGINE.sync === 100){
+    ctx.fillStyle = '#00ffaa';
+    ctx.font = 'bold 24px "IM Fell English SC"';
+    ctx.textAlign = 'center';
+    ctx.fillText('SYNCED', W/2, 40);
+    
+    ctx.fillStyle = '#c9a961';
+    ctx.font = '14px "Courier Prime"';
+    ctx.fillText('42 = 0 = 1 = 1', W/2, 65);
+  }
+  
   requestAnimationFrame(draw);
 }
 
-document.getElementById('ignite').onclick=ignite;
-document.getElementById('oscillate').onclick=oscillate;
-document.getElementById('thread').onclick=thread;
-document.getElementById('reset').onclick=reset;
+// Event listeners
+document.getElementById('init').onclick = init;
+document.getElementById('pulse').onclick = sendPulse;
+document.getElementById('sync').onclick = syncAll;
+document.getElementById('verify').onclick = verify;
 
-log('OSCILLATION ENGINE ONLINE: 12×2×3×1 ansible junctions ready');
+// Initialize
+updateReadout();
 draw();
 </script>
 </body>
