@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mobius ×3 · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:'Special Elite',monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1400px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:32px;margin-bottom:20px}
+h1{font-family:'IM Fell English SC',serif;font-size:36px;text-align:center;margin:0 0 8px 0;color:var(--mint);letter-spacing:.2em;font-weight:400}
+.subtitle{text-align:center;font-size:13px;color:#7aa89a;margin:0 0 30px 0;letter-spacing:.15em;text-transform:uppercase}
+.viz-container{width:100%;height:600px;background:rgba(0,0,0,.4);border:2px solid var(--border);border-radius:8px;position:relative;overflow:hidden;margin:20px 0}
+#canvas{width:100%;height:100%}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+button{
+  background:transparent;border:1px solid var(--border);color:var(--ink);
+  padding:12px;border-radius:8px;cursor:pointer;font:inherit;
+  text-transform:uppercase;font-size:11px;letter-spacing:.1em
+}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint);border-color:var(--mint)}
+button.primary{background:rgba(0,255,170,.1);border-color:var(--mint)}
+button.active{background:rgba(255,217,90,.2);border-color:var(--gold);color:var(--gold)}
+.readout{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0}
+.readout-item{background:#020712;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.readout-label{font-size:9px;color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.readout-val{font-size:20px;color:var(--mint);font-weight:bold;margin-top:4px;font-family:ui-monospace}
+.law{font-size:16px;color:var(--gold);font-family:ui-monospace;text-align:center;padding:20px;background:#020712;border:2px solid var(--mint);border-radius:8px;margin:24px 0;letter-spacing:.15em}
+.section{margin:20px 0;padding:20px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.3)}
+.section h3{font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin:0 0 12px 0}
+.code{background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8;font-family:ui-monospace}
+.substrate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.substrate{
+  background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center
+}
+.substrate h4{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px 0}
+.substrate-val{font-size:24px;color:var(--mint);font-weight:bold;font-family:ui-monospace}
+.substrate-label{font-size:9px;color:#7aa89a;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>MOBIUS ×3</h1>
+    <div class="subtitle">THREE CONNECTED SUBSTRATES · ONE STRIP EACH · 30 AROUND 3</div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" id="init3">INIT 3 STRIPS</button>
+      <button id="link">LINK SUBSTRATES</button>
+      <button id="oscillate">OSCILLATE ALL</button>
+    </div>
+    
+    <div class="substrate-grid">
+      <div class="substrate">
+        <h4>SUBSTRATE A</h4>
+        <div class="substrate-val" id="subA">0.0.5</div>
+        <div class="substrate-label">10 steps</div>
+      </div>
+      <div class="substrate">
+        <h4>SUBSTRATE B</h4>
+        <div class="substrate-val" id="subB">0.0.5</div>
+        <div class="substrate-label">10 steps</div>
+      </div>
+      <div class="substrate">
+        <h4>SUBSTRATE C</h4>
+        <div class="substrate-val" id="subC">0.0.5</div>
+        <div class="substrate-label">10 steps</div>
+      </div>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">Strips</div>
+        <div class="readout-val" id="strips">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Total Steps</div>
+        <div class="readout-val" id="steps">30</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Centers</div>
+        <div class="readout-val" id="centers">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Ratio</div>
+        <div class="readout-val" id="ratio">10:1</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Logic</div>
+        <div class="readout-val" id="logic">CUBI</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Holonomy</div>
+        <div class="readout-val" id="holonomy">0</div>
+      </div>
+    </div>
+    
+    <div class="law">3 STRIPS × 10 STEPS = 30 AROUND 3 CENTERS</div>
+    
+    <div class="section">
+      <h3>TRIPLE CUBI</h3>
+      <div class="code">
+// Not 3-body problem
+// 3 × 1-body solutions
+
+Strip A: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps around 1
+Strip B: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps around 1  
+Strip C: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps around 1
+
+Total: 30 steps around 3 centers
+Ratio: 10:1 per strip = CUBI
+Net: 0 holonomy (30 ≡ 0 mod 10)
+
+Connected substrates share the twist:
+  A.5 → B.0
+  B.5 → C.0  
+  C.5 → A.0
+
+Perpetual circulation across 3 surfaces.
+Each surface: 1-sided
+Total system: 3-sided? No. 1-sided.
+Because connected = merged.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let ENGINE = {
+  strips: 3,
+  steps: 30,
+  centers: 3,
+  ratio: '10:1',
+  logic: 'CUBI',
+  holonomy: 0,
+  time: 0,
+  linked: false,
+  oscillating: false
+};
+
+let strips = [
+  {x: W*0.25, y: H*0.5, color: '#ffd95a', phase: 0, label: 'A'},
+  {x: W*0.5, y: H*0.5, color: '#32e8ff', phase: 2*Math.PI/3, label: 'B'},
+  {x: W*0.75, y: H*0.5, color: '#e168ff', phase: 4*Math.PI/3, label: 'C'}
+];
+
+function init3(){
+  ENGINE.linked = false;
+  ENGINE.oscillating = false;
+  ENGINE.time = 0;
+  updateReadout();
+  log('INIT: 3 strips. 10 steps each. 30 total. 3 centers.');
+}
+
+function link(){
+  ENGINE.linked = true;
+  updateReadout();
+  log('LINK: Substrates connected. A.5 → B.0 → C.0 → A.0');
+}
+
+function oscillate(){
+  ENGINE.oscillating = !ENGINE.oscillating;
+  updateReadout();
+  log(ENGINE.oscillating ? 'OSCILLATE: All strips running.' : 'OSCILLATE: Paused.');
+}
+
+function updateReadout(){
+  document.getElementById('strips').textContent = ENGINE.strips;
+  document.getElementById('steps').textContent = ENGINE.steps;
+  document.getElementById('centers').textContent = ENGINE.centers;
+  document.getElementById('ratio').textContent = ENGINE.ratio;
+  document.getElementById('logic').textContent = ENGINE.logic;
+  document.getElementById('holonomy').textContent = ENGINE.holonomy;
+  
+  // Update substrate displays
+  const phase = ENGINE.time % 10;
+  document.getElementById('subA').textContent = phase < 5 ? '0.0.0.5' : '5.0.0.0';
+  document.getElementById('subB').textContent = (phase + 3.33) % 10 < 5 ? '0.0.0.5' : '5.0.0.0';
+  document.getElementById('subC').textContent = (phase + 6.66) % 10 < 5 ? '0.0.0.5' : '5.0.0.0';
+}
+
+function log(msg){
+  console.log('[MOBIUS3]', msg);
+}
+
+// Draw Mobius strip
+function drawMobius(cx, cy, radius, color, phase, label){
+  const points = 100;
+  const twist = Math.PI; // Half twist
+  
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = color;
+  
+  // Draw strip
+  ctx.beginPath();
+  for(let i = 0; i <= points; i++){
+    const t = (i / points) * Math.PI * 2;
+    const r = radius + Math.sin(t * 2 + phase) * 10;
+    const x = cx + Math.cos(t) * r;
+    const y = cy + Math.sin(t) * r * 0.5; // Flatten for perspective
+    
+    if(i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  
+  // Draw traveling point
+  const t = (phase % (Math.PI * 2));
+  const r = radius + Math.sin(t * 2 + phase) * 10;
+  const x = cx + Math.cos(t) * r;
+  const y = cy + Math.sin(t) * r * 0.5;
+  
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Draw label
+  ctx.fillStyle = color;
+  ctx.font = 'bold 24px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, cx, cy - radius - 30);
+  
+  ctx.shadowBlur = 0;
+}
+
+function draw(){
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,W,H);
+  
+  if(ENGINE.oscillating){
+    ENGINE.time += 0.05;
+  }
+  
+  // Draw each strip
+  strips.forEach((strip, i) => {
+    const phase = ENGINE.time + strip.phase;
+    drawMobius(strip.x, strip.y, 80, strip.color, phase, strip.label);
+  });
+  
+  // Draw connections if linked
+  if(ENGINE.linked){
+    ctx.strokeStyle = 'rgba(0,255,170,0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    
+    // A → B
+    ctx.beginPath();
+    ctx.moveTo(strips[0].x + 80, strips[0].y);
+    ctx.lineTo(strips[1].x - 80, strips[1].y);
+    ctx.stroke();
+    
+    // B → C
+    ctx.beginPath();
+    ctx.moveTo(strips[1].x + 80, strips[1].y);
+    ctx.lineTo(strips[2].x - 80, strips[2].y);
+    ctx.stroke();
+    
+    // C → A (wrap)
+    ctx.beginPath();
+    ctx.moveTo(strips[2].x, strips[2].y + 80);
+    ctx.quadraticCurveTo(W/2, H*0.8, strips[0].x, strips[0].y + 80);
+    ctx.stroke();
+    
+    ctx.setLineDash([]);
+  }
+  
+  updateReadout();
+  requestAnimationFrame(draw);
+}
+
+document.getElementById('init3').onclick = init3;
+document.getElementById('link').onclick = link;
+document.getElementById('oscillate').onclick = oscillate;
+
+// Initialize
+init3();
+draw();
+</script>
+</body>
+</html>
