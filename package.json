@@ -1,9 +1,0 @@
-{
-  "name": "karsa",
-  "version": "2.0.0",
-  "description": "Control Plane \u00b7 10 Pages Deep",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  }
-}

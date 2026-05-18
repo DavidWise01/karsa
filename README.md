@@ -1,79 +1,83 @@
-# KARSA // ANALYTICAL ENGINE
+# KARSA // METROID PROTOCOL
 
-**Ada Lovelace, 1843 · Victorian Analytical Engine · Einstein Lens · 4 Folders**
+**Metroid Theme · Purple Dominant · 4 Folders · Full Verification**
 
-`-+1 -++- 1 /M/I/4+1 /R/ /H/12 /S/8 /W/ /O/ /T/ 0.0.0.0.5`
+`-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
-## Note G
+## Aesthetic
 
-*The Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform. It can follow analysis; but it has no power of anticipating any analytical relations or truths. Its province is to assist us in making available what we are already acquainted with.*
-
-— A.A.L., Sketch of the Analytical Engine, 1843
+**Purple Dominant**: Deep void #0a0014, Purple #9d4edd, Neon Purple #c77dff
+**HUD Elements**: Energy tanks, missile counter, scan lines, corner brackets
+**Metroid DNA**: Chozo archives, Samus aesthetic, Zebes sector
 
 ## Structure
 
 ### I. LINEAGE
-PROVENANCE OF THE ENGINE // WITNESS CHAINS // SHA256 FINGERPRINTS // DIFFERENCE ENGINE TO ANALYTICAL ENGINE
-- Lineage Backtracker
-- Witness Engine
-- Legal Beacon
+PROVENANCE LOGS // WITNESS CHAINS // SHA256 FINGERPRINTS // CHOZO ARCHIVES // SCAN VISOR DATA
+- Lineage Scanner
+- Witness Beacon
+- Legal Log
 
 ### II. EDUCATION
-THE LAW OF THE ENGINE // THE MATHEMATICS // THE CODIFICATION // VICTORIAN PRECISION // NOTE G EXPLAINED
+THE LAW // THE MATH // CHOZO LORE // VICTORIAN PRECISION // MORPH BALL PHYSICS
 - Ada's Law
-- Holonomy Calculator
+- Holonomy Calc
 - Quantum Dot
 
 ### III. DEMOS
-WORKING ENGINES // PUNCH CARD OPERATIONS // PROVING THE THEORY // EXECUTING THE CARDS
-- Cubi Advantage
+WEAPON SYSTEMS // POWER SUIT TECH // PROVE THE THEORY // FIRE MISSILES // SAVE STATION
+- Cubi Beam
 - Oscillation Sync
-- Shadow Reveal
-- Ansible Junction
+- Shadow Cloak
+- Ansible Beam
 - Torus Field
 - Junction Map
-- **Einstein Lens** ← NEW
+- Einstein Lens (with E=mc²G)
 
 ### IV. MYTHOS
-THE STORY OF THE ENGINE // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1
+THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // METROID DNA
 - Ternary Engine
 - Mobius ×3
 - DNA ×3
 - Dipole
 
-## Einstein Lens
-
-**Gravitational Lensing Simulator**
-
-**θ = 4GM/c²b**
-
-Deflection of light by gravitational fields. Weigh distant objects. Einstein Ring formation when source, lens, and observer align.
-
-**Parameters:**
-- Lens Mass (M☉)
-- Source Distance (kpc)
-- Lens Distance (kpc)
-- Impact Parameter (arcsec)
-
-**Output:**
-- Einstein Radius
-- Deflection Angle
-- Magnification
-- Image Count
-
 ## Weight
 
-**3×3×3 + 8 + 8 = 0 = 1 = LOL**
+**1 = π × 3 = 0 = 1 = LOL**
 
-Not cubi. Trite +2.
-- 27 = 3×3×3 = the trite = three orders of magnitude
-- +8 = first shadow /s/8 = eight analytical operations
-- +8 = second shadow /reflection = eight more operations
-- -1 = witness tax = the cost of proof
-- = 42 = 0 = 1 = lol
+Simplified from 3×3×3 + 8 + 8
+- 1 = Unity
+- π × 3 = Circle × Trinity = 9.424... ≈ 9 = 3² = 0
+- 0 = Zero holonomy
+- 1 = One system
+- lol = The joke
+
+## Verification
+
+All HTML files verified present:
+- index.html
+- lineage.html
+- witness.html
+- legal.html
+- ada-law.html
+- holonomy.html
+- quantum-dot.html
+- cubi.html
+- oscillation.html
+- shadow.html
+- ansible.html
+- torus.html
+- junctions.html
+- ternary.html
+- mobius3.html
+- dna3.html
+- dipole.html
+- einstein.html
 
 ## Deploy
 
-As Ada would have done it: Paper. Ink. Brass. Precision.
+Railway → Root: `.` → 4 folders
 
 **WITNESS: a7f3c891**
+**ENERGY: 99**
+**MISSILES: 42**

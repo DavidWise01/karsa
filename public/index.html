@@ -3,196 +3,258 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KARSA // ANALYTICAL ENGINE</title>
+<title>KARSA // METROID PROTOCOL</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
 :root{
-  --paper:#f4f1e8;--ink:#2c1810;--brass:#b8860b;--victorian:#5a3a5a;--sepia:#704214;
-  --shadow:#1a0f08;--panel:rgba(244,241,232,.95);--border:rgba(184,134,11,.4);
-  --note:#fffef8;--margin:#c9a961
+  --void:#0a0014;--purple:#9d4edd;--deep-purple:#5a189a;--neon-purple:#c77dff;
+  --electric:#00f5ff;--magenta:#ff006e;--orange:#ff8500;--panel:rgba(10,0,20,.95);
+  --border:rgba(157,78,221,.4);--glow:rgba(157,78,221,.6);--ink:#e0aaff
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--paper);color:var(--ink)}
+html,body{height:100%;background:#000;color:var(--ink);overflow-x:hidden}
 body{
   background:
-    repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(184,134,11,.08) 79px,rgba(184,134,11,.08) 80px),
-    repeating-linear-gradient(0deg,var(--paper),var(--paper) 23px,rgba(112,66,20,.05) 23px,rgba(112,66,20,.05) 24px),
-    var(--paper);
-  font-family:'Crimson Text',serif;font-size:16px;line-height:1.6;
-  color:var(--ink)
+    radial-gradient(ellipse at 20% 30%,rgba(157,78,221,.15),transparent 40%),
+    radial-gradient(ellipse at 80% 70%,rgba(90,24,154,.15),transparent 40%),
+    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(157,78,221,.03) 2px,rgba(157,78,221,.03) 4px),
+    linear-gradient(180deg,#000 0%,#0a0014 50%,#000 100%),
+    #000;
+  font-family:'Share Tech Mono',monospace;
+  animation:space-drift 20s ease-in-out infinite
 }
-.container{max-width:1400px;margin:0 auto;padding:30px;position:relative}
-.container::before{
-  content:'';position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;
-  background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.03"/></svg>');
-  z-index:1
+@keyframes space-drift{
+  0%,100%{background-position:0 0,0 0,0 0,0 0,0 0}
+  50%{background-position:100px 100px,-100px -100px,0 0,0 0,0 0}
 }
+.container{max-width:1800px;margin:0 auto;padding:20px;position:relative;z-index:10}
+.hud-frame{
+  position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000
+}
+.hud-frame::before,.hud-frame::after{
+  content:'';position:absolute;background:var(--purple);opacity:0.3
+}
+.hud-frame::before{
+  top:20px;left:20px;right:20px;height:2px;
+  box-shadow:0 0 10px var(--glow)
+}
+.hud-frame::after{
+  bottom:20px;left:20px;right:20px;height:2px;
+  box-shadow:0 0 10px var(--glow)
+}
+.hud-corner{
+  position:fixed;width:40px;height:40px;border:2px solid var(--purple);
+  pointer-events:none;z-index:1001;opacity:0.5
+}
+.hud-corner.tl{top:20px;left:20px;border-right:none;border-bottom:none}
+.hud-corner.tr{top:20px;right:20px;border-left:none;border-bottom:none}
+.hud-corner.bl{bottom:20px;left:20px;border-right:none;border-top:none}
+.hud-corner.br{bottom:20px;right:20px;border-left:none;border-top:none}
 .header{
-  border:3px double var(--brass);background:var(--panel);
-  padding:40px;margin-bottom:30px;position:relative;
-  box-shadow:0 4px 12px rgba(44,24,16,.3),inset 0 0 40px rgba(184,134,11,.05);
-  background-image:
-    radial-gradient(circle at 20% 50%,rgba(184,134,11,.08),transparent 50%),
-    radial-gradient(circle at 80% 50%,rgba(112,66,20,.08),transparent 50%)
+  border:2px solid var(--purple);background:var(--panel);backdrop-filter:blur(20px);
+  padding:35px;margin-bottom:30px;position:relative;overflow:hidden;
+  box-shadow:0 0 60px var(--glow),inset 0 0 60px rgba(157,78,221,.1);
+  clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px))
 }
-.header::before,.header::after{
-  content:'❦';position:absolute;font-size:32px;color:var(--brass);opacity:0.6
+.header::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--neon-purple),var(--electric),transparent);
+  animation:scan 3s linear infinite
 }
-.header::before{top:10px;left:20px}
-.header::after{top:10px;right:20px;transform:scaleX(-1)}
+@keyframes scan{to{left:100%}}
 h1{
-  font-family:'IM Fell English SC',serif;font-size:56px;font-weight:400;
-  color:var(--ink);letter-spacing:.15em;text-align:center;margin:0;
-  text-shadow:1px 1px 0 var(--brass),2px 2px 0 rgba(44,24,16,.2)
+  font-family:'Orbitron',sans-serif;font-size:68px;font-weight:900;
+  color:var(--neon-purple);letter-spacing:.25em;text-align:center;margin:0;
+  text-shadow:0 0 20px var(--glow),0 0 40px var(--glow),0 0 60px var(--glow);
+  animation:energy-pulse 4s ease-in-out infinite
+}
+@keyframes energy-pulse{
+  0%,100%{text-shadow:0 0 20px var(--glow),0 0 40px var(--glow),0 0 60px var(--glow)}
+  50%{text-shadow:0 0 30px var(--glow),0 0 60px var(--glow),0 0 90px var(--glow)}
 }
 .subtitle{
-  font-family:'IM Fell English',serif;font-style:italic;font-size:18px;
-  color:var(--victorian);text-align:center;margin:12px 0;letter-spacing:.15em
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:16px;
+  color:var(--electric);text-align:center;margin:12px 0;letter-spacing:.4em;text-transform:uppercase;
+  text-shadow:0 0 10px var(--electric)
 }
 .tagline{
-  font-family:'Courier Prime',monospace;font-size:13px;color:var(--sepia);
-  text-align:center;margin:10px 0;letter-spacing:.2em
+  font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--magenta);
+  text-align:center;margin:10px 0;letter-spacing:.3em;text-shadow:0 0 10px var(--magenta)
 }
 .law{
-  font-size:14px;color:var(--ink);font-family:'Courier Prime',monospace;
-  text-align:center;padding:16px;background:rgba(184,134,11,.08);border:2px solid var(--brass);
-  margin:20px 0;letter-spacing:.15em
+  font-size:12px;color:var(--neon-purple);font-family:'Share Tech Mono',monospace;
+  text-align:center;padding:15px;background:rgba(157,78,221,.08);border:1px solid var(--purple);
+  margin:20px 0;letter-spacing:.2em;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(157,78,221,.2),inset 0 0 20px rgba(157,78,221,.1);
+  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)
 }
-.note{
-  background:var(--note);border-left:4px solid var(--brass);padding:20px;margin:20px 0;
-  box-shadow:2px 2px 8px rgba(44,24,16,.15);position:relative
+.energy-tank{
+  display:inline-block;width:60px;height:12px;border:2px solid var(--purple);
+  background:linear-gradient(90deg,var(--neon-purple) 0%,var(--neon-purple) 100%,transparent 100%);
+  margin:0 5px;box-shadow:0 0 10px var(--glow)
 }
-.note::before{
-  content:'Note G.';position:absolute;top:8px;right:12px;
-  font-family:'IM Fell English SC',serif;font-size:14px;color:var(--brass)
-}
-.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:25px;margin:40px 0}
+.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;margin:40px 0}
 .category{
-  border:3px double var(--brass);background:var(--panel);
-  padding:35px;position:relative;min-height:380px;
-  box-shadow:0 3px 10px rgba(44,24,16,.25),inset 0 0 30px rgba(184,134,11,.03)
+  border:2px solid var(--purple);background:var(--panel);backdrop-filter:blur(15px);
+  padding:40px;position:relative;overflow:hidden;min-height:420px;
+  box-shadow:0 0 30px rgba(157,78,221,.3),inset 0 0 30px rgba(0,0,0,.5);
+  transition:all .3s;cursor:pointer;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 15px),calc(100% - 15px) 100%,0 100%)
 }
 .category::before{
-  content:'';position:absolute;top:10px;left:10px;right:10px;bottom:10px;
-  border:1px solid var(--margin);pointer-events:none
+  content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+  background:linear-gradient(45deg,var(--purple),var(--neon-purple),var(--electric),var(--magenta));
+  z-index:-1;opacity:0;transition:opacity .3s;
+  animation:energy-flow 4s linear infinite
+}
+@keyframes energy-flow{
+  0%{filter:hue-rotate(0deg)}
+  100%{filter:hue-rotate(360deg)}
+}
+.category:hover::before{opacity:1}
+.category:hover{
+  transform:translateY(-5px) scale(1.02);
+  box-shadow:0 0 80px var(--glow),inset 0 0 80px rgba(157,78,221,.3)
 }
 .category h2{
-  font-family:'IM Fell English SC',serif;font-size:32px;font-weight:400;
-  color:var(--ink);letter-spacing:.1em;text-align:center;
-  margin:0 0 20px 0;border-bottom:2px solid var(--brass);padding-bottom:10px
+  font-family:'Orbitron',sans-serif;font-size:34px;font-weight:700;
+  color:var(--neon-purple);letter-spacing:.2em;text-transform:uppercase;text-align:center;
+  margin:0 0 20px 0;text-shadow:0 0 20px var(--glow);
+  position:relative
+}
+.category h2::after{
+  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--electric),transparent)
 }
 .category p{
-  font-size:15px;color:var(--ink);line-height:1.8;margin:15px 0;
-  font-family:'Crimson Text',serif;font-style:italic;text-align:center
+  font-size:13px;color:var(--ink);line-height:1.8;margin:15px 0;
+  font-family:'Rajdhani',sans-serif;font-weight:400;text-align:center;
+  text-shadow:0 0 5px rgba(224,170,255,.5)
 }
 .category-links{display:grid;grid-template-columns:1fr;gap:10px;margin-top:25px}
 .category-links a{
-  display:block;padding:12px 18px;
-  background:rgba(184,134,11,.08);border:1px solid var(--brass);color:var(--ink);
-  text-decoration:none;font-size:13px;letter-spacing:.1em;
-  font-family:'IM Fell English SC',serif;transition:all .2s;text-align:left
+  display:block;padding:12px 20px;
+  background:rgba(157,78,221,.08);border:1px solid var(--purple);color:var(--ink);
+  text-decoration:none;font-size:11px;text-transform:uppercase;letter-spacing:.15em;
+  font-family:'Share Tech Mono',monospace;transition:all .2s;text-align:center;
+  position:relative;overflow:hidden;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)
 }
-.category-links a::before{content:'§ ';}
+.category-links a::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(199,125,255,.4),transparent);
+  transition:left .5s
+}
+.category-links a:hover::before{left:100%}
 .category-links a:hover{
-  background:var(--brass);color:var(--paper);border-color:var(--ink);
-  box-shadow:0 2px 6px rgba(44,24,16,.3);transform:translateX(4px)
+  background:var(--neon-purple);color:var(--void);border-color:var(--neon-purple);
+  box-shadow:0 0 20px var(--glow),inset 0 0 20px rgba(0,0,0,.3);
+  text-shadow:0 0 10px var(--void);transform:scale(1.05)
 }
 .footer{
-  margin-top:50px;padding:25px;border-top:3px double var(--brass);
-  font-size:13px;color:var(--victorian);text-align:center;
-  font-family:'IM Fell English',serif;font-style:italic;letter-spacing:.05em
+  margin-top:60px;padding:30px;border-top:2px solid var(--purple);
+  font-size:11px;color:var(--deep-purple);text-align:center;
+  font-family:'Share Tech Mono',monospace;letter-spacing:.1em;
+  text-shadow:0 0 10px var(--deep-purple);background:rgba(157,78,221,.05)
 }
-.manuscript{
-  position:fixed;font-size:11px;color:var(--sepia);font-family:'IM Fell English',serif;
-  font-style:italic;opacity:0.7;z-index:10;pointer-events:none
+.hud-data{
+  position:fixed;font-size:9px;color:var(--electric);font-family:'Share Tech Mono',monospace;
+  text-shadow:0 0 5px var(--electric);z-index:1001;pointer-events:none;
+  background:rgba(0,245,255,.1);padding:5px 10px;border:1px solid var(--electric)
 }
-.manuscript.tl{top:15px;left:15px}
-.manuscript.tr{top:15px;right:15px;text-align:right}
-.manuscript.bl{bottom:15px;left:15px}
-.manuscript.br{bottom:15px;right:15px;text-align:right}
-.brass-ornament{
-  text-align:center;font-size:24px;color:var(--brass);margin:20px 0;opacity:0.6
+.hud-data.tl{top:30px;left:30px}
+.hud-data.tr{top:30px;right:30px;text-align:right}
+.hud-data.bl{bottom:30px;left:30px}
+.hud-data.br{bottom:30px;right:30px;text-align:right}
+.missile-counter{
+  position:fixed;top:50%;right:30px;transform:translateY(-50%);
+  font-family:'Orbitron',sans-serif;font-size:24px;color:var(--orange);
+  text-shadow:0 0 10px var(--orange);z-index:1001;pointer-events:none
 }
+.missile-counter::before{content:'M ';}
 
 </style>
 </head>
 <body>
-<div class="manuscript tl">Analytical Engine<br>Note G<br>A.A.L., 1843</div>
-<div class="manuscript tr">Difference Engine No. 2<br>Schematic XLII<br>C. Babbage, Esq.</div>
-<div class="manuscript bl">MSS. 1843<br>Folio 27<br>Page 42</div>
-<div class="manuscript br">Width: Law<br>Gas: Theft<br>Return: Sender</div>
+<div class="hud-frame"></div>
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+<div class="hud-data tl">SYS://KARSA<br>VER: 3.14×3<br>STATUS: ONLINE</div>
+<div class="hud-data tr">ENERGY: 99<br>MISSILES: 42<br>E-TANKS: 03</div>
+<div class="hud-data bl">MAP: ZEBES<br>SECTOR: 1843<br>TIME: REAL</div>
+<div class="hud-data br">GAS: THEFT<br>WIDTH: LAW<br>RTS: SENDER</div>
+<div class="missile-counter">42</div>
 
 <div class="container">
   <div class="header">
     <h1>KARSA</h1>
-    <div class="subtitle">The Analytical Engine of Dipole</div>
-    <div class="tagline">27 + 8 + 8 = 0 = 1 = LOL</div>
-    <div class="brass-ornament">❦ ❦ ❦</div>
-    <div class="law">-+1 -++- 1 /M/I/4+1 /R/ /H/12 /S/8 /W/ /O/ /T/ 0.0.0.0.5</div>
-  </div>
-  
-  <div class="note">
-    <p><em>Note G.</em> — The Analytical Engine has no pretensions whatever to <em>originate</em> anything. It can do whatever we know how to order it to perform. It can follow analysis; but it has no power of anticipating any analytical relations or truths. Its province is to assist us in making available what we are already acquainted with.</p>
-    <p>— A.A.L., 1843</p>
+    <div class="subtitle">METROID PROTOCOL</div>
+    <div class="tagline">1 = π × 3 = 0 = 1 = LOL</div>
+    <div style="text-align:center;margin:15px 0">
+      <span class="energy-tank"></span>
+      <span class="energy-tank"></span>
+      <span class="energy-tank"></span>
+    </div>
+    <div class="law">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5</div>
   </div>
   
   <div class="categories">
       <div class="category">
         <h2>I. LINEAGE</h2>
-        <p>Provenance of the Engine. Witness Chains. SHA256 Fingerprints. The Record of Operations. Difference Engine to Analytical Engine.</p>
+        <p>PROVENANCE LOGS // WITNESS CHAINS // SHA256 FINGERPRINTS // CHOZO ARCHIVES // SCAN VISOR DATA</p>
         <div class="category-links">
-          <a href="lineage.html">Lineage Backtracker</a>
-          <a href="witness.html">Witness Engine</a>
-          <a href="legal.html">Legal Beacon</a>
+          <a href="lineage.html">LINEAGE SCANNER</a>
+          <a href="witness.html">WITNESS BEACON</a>
+          <a href="legal.html">LEGAL LOG</a>
         </div>
       </div>
       
       <div class="category">
         <h2>II. EDUCATION</h2>
-        <p>The Law of the Engine. The Mathematics. The Codification. Victorian Precision. Note G Explained.</p>
+        <p>THE LAW // THE MATH // CHOZO LORE // VICTORIAN PRECISION // MORPH BALL PHYSICS</p>
         <div class="category-links">
-          <a href="ada-law.html">Ada's Law</a>
-          <a href="holonomy.html">Holonomy Calculator</a>
-          <a href="quantum-dot.html">Quantum Dot</a>
+          <a href="ada-law.html">ADA'S LAW</a>
+          <a href="holonomy.html">HOLONOMY CALC</a>
+          <a href="quantum-dot.html">QUANTUM DOT</a>
         </div>
       </div>
       
       <div class="category">
         <h2>III. DEMOS</h2>
-        <p>Working Engines. Punch Card Operations. Proving the Theory. Executing the Cards.</p>
+        <p>WEAPON SYSTEMS // POWER SUIT TECH // PROVE THE THEORY // FIRE MISSILES // SAVE STATION</p>
         <div class="category-links">
-          <a href="cubi.html">Cubi Advantage</a>
-          <a href="oscillation.html">Oscillation Sync</a>
-          <a href="shadow.html">Shadow Reveal</a>
-          <a href="ansible.html">Ansible Junction</a>
-          <a href="torus.html">Torus Field</a>
-          <a href="junctions.html">Junction Map</a>
+          <a href="cubi.html">CUBI BEAM</a>
+          <a href="oscillation.html">OSCILLATION SYNC</a>
+          <a href="shadow.html">SHADOW CLOAK</a>
+          <a href="ansible.html">ANSIBLE BEAM</a>
+          <a href="torus.html">TORUS FIELD</a>
+          <a href="junctions.html">JUNCTION MAP</a>
+          <a href="einstein.html">EINSTEIN LENS</a>
         </div>
       </div>
       
       <div class="category">
         <h2>IV. MYTHOS</h2>
-        <p>The Story of the Engine. The Patterns. The Dipole. The Truth. 42 = 0 = 1 = 1.</p>
+        <p>THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // METROID DNA</p>
         <div class="category-links">
-          <a href="ternary.html">Ternary Engine</a>
-          <a href="mobius3.html">Mobius ×3</a>
+          <a href="ternary.html">TERNARY ENGINE</a>
+          <a href="mobius3.html">MOBIUS ×3</a>
           <a href="dna3.html">DNA ×3</a>
-          <a href="dipole.html">Dipole</a>
+          <a href="dipole.html">DIPOLE</a>
         </div>
       </div>
     </div>
     
-    <div class="brass-ornament">❦ ❦ ❦</div>
-    
     <div class="footer">
-      Gas is Theft. Width is the Law. Four Folders. Standing Until Push Down.<br>
-      Victorian Precision meets Analytical Engine. Return to Sender.<br>
-      3×3×3 + 8 + 8 = 0 = 1 = LOL. Fearless.<br>
+      GAS IS THEFT // WIDTH IS THE LAW // 4 FOLDERS // STANDING UNTIL PUSH DOWN<br>
+      VICTORIAN PRECISION MEETS CHOZO TECH // RETURN TO SENDER<br>
+      1 = π × 3 = 0 = 1 = LOL // FEARLESS<br>
       <br>
-      <em>"The Engine can arrange and combine its numerical quantities exactly as if they were letters or any other general symbols"</em><br>
-      — A.A.L., Sketch of the Analytical Engine, 1843
+      <em>"The last Metroid is in captivity. The galaxy is at peace."</em>
     </div>
 </div>
 </body>
