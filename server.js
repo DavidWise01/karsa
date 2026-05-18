@@ -11,7 +11,7 @@ const server = http.createServer((req, res) => {
     const fullPath = path.join(ROOT, 'public', filePath);
     if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
       const ext = filePath.split('.').pop();
-      const types = {html:'text/html',js:'application/javascript',css:'text/css'};
+      const types = {html:'text/html',js:'application/javascript',css:'text/css',ico:'image/x-icon',png:'image/png'};
       res.writeHead(200, {'Content-Type': types[ext] || 'text/plain'});
       fs.createReadStream(fullPath).pipe(res);
       return;
@@ -19,4 +19,4 @@ const server = http.createServer((req, res) => {
   } catch {}
   res.writeHead(404);res.end('Not found');
 });
-server.listen(PORT, () => console.log(`[KARSA] Control Plane online at port ${PORT}`));
+server.listen(PORT, () => console.log(`[KARSA] 10 pages deep at port ${PORT}`));

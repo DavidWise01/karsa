@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oscillation Engine · Ansible Junction</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{
+  --brass:#b8860b;--copper:#b87333;--iron:#4a4a4a;--steel:#71797e;
+  --parchment:#f4e8d0;--ink:#0a0a15;--void:#000000;--glow:#4db8ff;
+  --cyan:#32e8ff;--violet:#8a2be2;--bg:#050510;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--parchment);font-family:'Special Elite',monospace;overflow:hidden}
+body{
+  background: 
+    radial-gradient(ellipse at 50% 30%,rgba(77,184,255,.1),transparent 50%),
+    radial-gradient(ellipse at 50% 70%,rgba(138,43,226,.08),transparent 50%),
+    var(--void);
+}
+.container{max-width:1400px;margin:0 auto;padding:20px;height:100vh;display:flex;flex-direction:column}
+.brass-plate{
+  border:2px solid var(--brass);
+  background:linear-gradient(135deg,rgba(184,134,11,.1),rgba(184,115,51,.05));
+  box-shadow:inset 0 0 40px rgba(0,0,0,.8),0 0 60px rgba(77,184,255,.2);
+  border-radius:8px;padding:20px;margin-bottom:15px;position:relative
+}
+h1{
+  font-family:'IM Fell English SC',serif;font-size:32px;text-align:center;
+  margin:0 0 8px 0;color:var(--glow);letter-spacing:.2em;
+  text-shadow:0 0 20px rgba(77,184,255,.8),0 0 40px rgba(77,184,255,.4)
+}
+.subtitle{text-align:center;font-size:12px;color:var(--copper);margin:0 0 15px 0;letter-spacing:.15em}
+.formula{
+  text-align:center;font-size:18px;color:var(--cyan);font-family:'Special Elite',monospace;
+  padding:15px;background:rgba(10,10,21,.8);border:1px solid var(--brass);border-radius:4px;
+  margin:15px 0;letter-spacing:.15em;text-shadow:0 0 10px rgba(50,232,255,.6)
+}
+.viz-container{
+  flex:1;position:relative;background:rgba(5,5,16,.6);
+  border:2px solid var(--steel);border-radius:8px;overflow:hidden;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.9)
+}
+#canvas{width:100%;height:100%;display:block}
+.controls{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:15px 0
+}
+.steam-button{
+  background:linear-gradient(180deg,var(--brass),var(--copper));
+  border:2px solid var(--iron);color:var(--ink);padding:12px;
+  font-family:'IM Fell English SC',serif;font-size:13px;cursor:pointer;
+  border-radius:4px;box-shadow:0 3px 0 var(--iron),0 4px 8px rgba(0,0,0,.6);
+  transition:all .1s;text-transform:uppercase;letter-spacing:.1em;font-weight:bold
+}
+.steam-button:hover{
+  background:linear-gradient(180deg,var(--glow),var(--brass));
+  box-shadow:0 3px 0 var(--iron),0 6px 12px rgba(77,184,255,.4)
+}
+.steam-button:active{transform:translateY(2px);box-shadow:0 1px 0 var(--iron)}
+.steam-button.active{background:linear-gradient(180deg,var(--cyan),var(--glow));color:var(--ink)}
+.readout{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:15px 0
+}
+.readout-item{
+  background:rgba(10,10,21,.8);border:1px solid var(--copper);padding:10px;
+  font-size:11px;border-radius:4px;text-align:center
+}
+.readout-label{color:var(--copper);text-transform:uppercase;font-size:9px;letter-spacing:.1em}
+.readout-val{color:var(--glow);font-weight:bold;font-size:16px;margin-top:4px;text-shadow:0 0 8px rgba(77,184,255,.6)}
+.log{
+  background:rgba(10,10,21,.8);border:1px solid var(--steel);padding:10px;
+  font-family:'Special Elite',monospace;font-size:10px;max-height:120px;
+  overflow:auto;border-radius:4px;margin-top:10px
+}
+.log-entry{margin:3px 0;padding:2px 0;border-bottom:1px solid rgba(184,134,11,.1)}
+.log-time{color:var(--copper);margin-right:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brass-plate">
+    <h1>OSCILLATION ENGINE</h1>
+    <div class="subtitle">ANSIBLE JUNCTION · THERE AND BACK · 12 × 2 × 3 × 1 = 0</div>
+    <div class="formula">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/</div>
+  </div>
+  
+  <div class="viz-container">
+    <canvas id="canvas"></canvas>
+  </div>
+  
+  <div class="controls">
+    <button class="steam-button" id="ignite">IGNITE · -++- 1</button>
+    <button class="steam-button" id="oscillate">OSCILLATE · /o/</button>
+    <button class="steam-button" id="thread">THREAD ONE</button>
+    <button class="steam-button" id="reset">RESET</button>
+  </div>
+  
+  <div class="readout">
+    <div class="readout-item">
+      <div class="readout-label">State</div>
+      <div class="readout-val" id="state">COLD</div>
+    </div>
+    <div class="readout-item">
+      <div class="readout-label">Junctions</div>
+      <div class="readout-val" id="junctions">0</div>
+    </div>
+    <div class="readout-item">
+      <div class="readout-label">Oscillations</div>
+      <div class="readout-val" id="oscillations">0</div>
+    </div>
+    <div class="readout-item">
+      <div class="readout-label">Thread Phase</div>
+      <div class="readout-val" id="phase">0°</div>
+    </div>
+    <div class="readout-item">
+      <div class="readout-label">Holonomy</div>
+      <div class="readout-val" id="holonomy">0</div>
+    </div>
+    <div class="readout-item">
+      <div class="readout-label">Net</div>
+      <div class="readout-val" id="net">0</div>
+    </div>
+  </div>
+  
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, CX, CY;
+
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+  CX = W/2; CY = H/2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let ENGINE = {
+  ignited: false,
+  oscillating: false,
+  junctions: 0,
+  oscillations: 0,
+  phase: 0,
+  threadPhase: 0,
+  holonomy: 0,
+  particles: []
+};
+
+function log(msg){
+  const logEl=document.getElementById('log');
+  const time=new Date().toLocaleTimeString();
+  const entry=document.createElement('div');
+  entry.className='log-entry';
+  entry.innerHTML=`<span class="log-time">${time}</span>${msg}`;
+  logEl.insertBefore(entry,logEl.firstChild);
+  if(logEl.children.length>30)logEl.removeChild(logEl.lastChild);
+}
+
+function ignite(){
+  if(ENGINE.ignited)return;
+  ENGINE.ignited=true;
+  ENGINE.junctions=12;
+  log('ENGINE IGNITED: -++- 1 boundary cross, 12 ansible junctions active');
+  updateReadout();
+}
+
+function oscillate(){
+  if(!ENGINE.ignited)return;
+  ENGINE.oscillating=!ENGINE.oscillating;
+  log(`OSCILLATE: /o/ ${ENGINE.oscillating?'ENGAGED':'DISENGAGED'}, there-and-back at each junction`);
+  document.getElementById('oscillate').classList.toggle('active',ENGINE.oscillating);
+}
+
+function thread(){
+  if(!ENGINE.ignited)return;
+  ENGINE.threadPhase=(ENGINE.threadPhase+30)%360;
+  log(`THREAD ONE: Phase shift ${ENGINE.threadPhase}°, 12×2×3×1 oscillation`);
+  updateReadout();
+}
+
+function reset(){
+  ENGINE={ignited:false,oscillating:false,junctions:0,oscillations:0,phase:0,threadPhase:0,holonomy:0,particles:[]};
+  log('ENGINE RESET: Cold state, ansible junctions closed');
+  updateReadout();
+  document.getElementById('oscillate').classList.remove('active');
+}
+
+function updateReadout(){
+  document.getElementById('state').textContent=ENGINE.ignited?(ENGINE.oscillating?'OSCILLATING':'READY'):'COLD';
+  document.getElementById('junctions').textContent=ENGINE.junctions;
+  document.getElementById('oscillations').textContent=ENGINE.oscillations;
+  document.getElementById('phase').textContent=ENGINE.threadPhase+'°';
+  document.getElementById('holonomy').textContent=ENGINE.holonomy;
+  document.getElementById('net').textContent=ENGINE.junctions*2*3*1-ENGINE.oscillations;
+}
+
+// Toroidal oscillation visualization
+function draw(){
+  ctx.fillStyle='rgba(5,5,16,0.1)';
+  ctx.fillRect(0,0,W,H);
+  
+  if(!ENGINE.ignited){
+    requestAnimationFrame(draw);
+    return;
+  }
+  
+  ENGINE.phase+=0.02;
+  if(ENGINE.oscillating){
+    ENGINE.oscillations+=0.1;
+    ENGINE.holonomy=Math.floor(ENGINE.oscillations)%12;
+  }
+  
+  const time=ENGINE.phase;
+  const threads=12;
+  const rings=3;
+  
+  // Draw ansible junctions - toroidal oscillation
+  for(let j=0;j<threads;j++){
+    const angle=(j/threads)*Math.PI*2+ENGINE.threadPhase*Math.PI/180;
+    
+    for(let r=0;r<rings;r++){
+      const ringPhase=time+r*0.5;
+      const radius=80+r*40;
+      
+      // There
+      const x1=CX+Math.cos(angle+ringPhase)*radius;
+      const y1=CY+Math.sin(angle+ringPhase)*radius*0.5;
+      
+      // And back - oscillation
+      const backPhase=ENGINE.oscillating?Math.sin(time*2+j*0.5)*0.3:0;
+      const x2=CX+Math.cos(angle-ringPhase+backPhase)*radius;
+      const y2=CY+Math.sin(angle-ringPhase+backPhase)*radius*0.5;
+      
+      // Draw thread
+      ctx.strokeStyle=`rgba(77,184,255,${0.3+r*0.2})`;
+      ctx.lineWidth=1+r*0.5;
+      ctx.beginPath();
+      ctx.moveTo(CX,CY);
+      ctx.quadraticCurveTo(x1,y1,x2,y2);
+      ctx.stroke();
+      
+      // Draw junction point
+      ctx.fillStyle=`rgba(50,232,255,${0.6+r*0.1})`;
+      ctx.beginPath();
+      ctx.arc(x2,y2,2+r,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+  
+  // Central nexus - the 1
+  const nexusPulse=Math.sin(time*3)*0.3+0.7;
+  const gradient=ctx.createRadialGradient(CX,CY,0,CX,CY,40);
+  gradient.addColorStop(0,`rgba(255,255,255,${nexusPulse})`);
+  gradient.addColorStop(0.5,`rgba(77,184,255,${nexusPulse*0.5})`);
+  gradient.addColorStop(1,'rgba(77,184,255,0)');
+  ctx.fillStyle=gradient;
+  ctx.beginPath();
+  ctx.arc(CX,CY,40,0,Math.PI*2);
+  ctx.fill();
+  
+  // Outer ring - the 0
+  ctx.strokeStyle=`rgba(138,43,226,${0.3+Math.sin(time)*0.2})`;
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.arc(CX,CY,200+Math.sin(time*2)*20,0,Math.PI*2);
+  ctx.stroke();
+  
+  updateReadout();
+  requestAnimationFrame(draw);
+}
+
+document.getElementById('ignite').onclick=ignite;
+document.getElementById('oscillate').onclick=oscillate;
+document.getElementById('thread').onclick=thread;
+document.getElementById('reset').onclick=reset;
+
+log('OSCILLATION ENGINE ONLINE: 12×2×3×1 ansible junctions ready');
+draw();
+</script>
+</body>
+</html>
