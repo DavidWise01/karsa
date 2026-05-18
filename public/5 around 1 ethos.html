@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0=1=. | 3/3 Balance | Valence Drill 1>1+2</title>
+<style>
+    :root {
+        --bg: #04050a;
+        --bg-glow: #0a0f1f;
+        --text: #e6f1ff;
+        --text-dim: #8892b0;
+        --cyan: #00d4ff;
+        --magenta: #ff00c8;
+        --gold: #ffd700;
+        --purple: #8a2be2;
+        --green: #00ff9d;
+        --radius: 16px;
+        --glow: 0 0 20px;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        width: 100%;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at center, var(--bg-glow) 0%, var(--bg) 70%);
+        color: var(--text);
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 120vmax;
+        height: 120vmax;
+        background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, rgba(255,0,200,0.05) 30%, transparent 70%);
+        transform: translate(-50%, -50%);
+        animation: torus-pulse 8s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    @keyframes torus-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.6; }
+        50% { transform: translate(-50%, -50%) scale(1.1) rotate(180deg); opacity: 1; }
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--cyan), var(--magenta), var(--gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: var(--glow) rgba(0,212,255,0.3);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+        color: var(--text-dim);
+        font-size: clamp(0.9rem, 2vw, 1.1rem);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .equation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 700;
+        flex-wrap: wrap;
+    }
+
+    .eq-part {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--glow) rgba(0,212,255,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .eq-part:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--glow) rgba(255,0,200,0.4);
+        border-color: rgba(255,0,200,0.3);
+    }
+
+    .grid-5 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto auto auto auto;
+        gap: 1.5rem;
+        margin: 3rem 0;
+        position: relative;
+    }
+
+    .quad {
+        grid-column: span 2;
+        grid-row: span 2;
+        padding: 2rem;
+        border-radius: var(--radius);
+        background: rgba(10,15,31,0.6);
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quad::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--quad-color), transparent);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .quad:hover {
+        transform: translateY(-4px);
+        border-color: var(--quad-color);
+        box-shadow: 0 12px 48px rgba(0,0,0,0.6), var(--glow) var(--quad-color);
+    }
+
+    .quad:hover::before {
+        opacity: 1;
+    }
+
+    .quad h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--quad-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quad-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--text-dim);
+        margin-bottom: 1rem;
+    }
+
+    .quad p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .quad ul {
+        list-style: none;
+        margin-top: 1rem;
+    }
+
+    .quad li {
+        padding: 0.4rem 0;
+        padding-left: 1.2rem;
+        position: relative;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .quad li::before {
+        content: '▹';
+        position: absolute;
+        left: 0;
+        color: var(--quad-color);
+    }
+
+    .ul { 
+        grid-column: 1 / 3; 
+        grid-row: 1 / 3;
+        --quad-color: var(--cyan);
+    }
+
+    .ur { 
+        grid-column: 4 / 6; 
+        grid-row: 1 / 3;
+        --quad-color: var(--gold);
+    }
+
+    .center {
+        grid-column: 2 / 5;
+        grid-row: 2 / 5;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        background: rgba(0,0,0,0.4);
+        border: 2px solid rgba(255,215,0,0.3);
+        cursor: pointer;
+        --quad-color: var(--gold);
+    }
+
+    .center h2 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .soul-dot {
+        width: 120px;
+        height: 120px;
+        margin: 2rem auto;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .soul-dot-core {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--gold) 0%, rgba(255,215,0,0.3) 40%, transparent 70%);
+        box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.3);
+        animation: soul-pulse 3s ease-in-out infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    @keyframes soul-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.3); }
+        50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(255,215,0,0.9), 0 0 120px rgba(255,215,0,0.5); }
+    }
+
+    .einstein-dots {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 200px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+    }
+
+    .center.active .einstein-dots {
+        opacity: 1;
+    }
+
+    .dot {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: var(--cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 6px var(--cyan);
+        opacity: 0;
+    }
+
+    @keyframes dot-emerge {
+        0% { opacity: 0; transform: scale(0); }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; transform: scale(1); }
+    }
+
+    .bl { 
+        grid-column: 1 / 3; 
+        grid-row: 4 / 6;
+        --quad-color: var(--magenta);
+    }
+
+    .br { 
+        grid-column: 4 / 6; 
+        grid-row: 4 / 6;
+        --quad-color: var(--green);
+    }
+
+    .proof-section {
+        margin: 4rem 0;
+        padding: 2.5rem;
+        background: rgba(10,15,31,0.4);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        backdrop-filter: blur(20px);
+    }
+
+    .proof-section h3 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--cyan), var(--magenta));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .valence-drill {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .drill-step {
+        padding: 1.5rem;
+        background: rgba(0,0,0,0.3);
+        border-left: 3px solid var(--cyan);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .drill-step:hover {
+        background: rgba(0,212,255,0.05);
+        transform: translateX(4px);
+    }
+
+    .drill-step strong {
+        color: var(--cyan);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .balance-visual {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        flex-wrap: wrap;
+    }
+
+    .balance-part {
+        padding: 1rem 1.5rem;
+        background: rgba(0,255,157,0.1);
+        border: 1px solid var(--green);
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: var(--glow) rgba(0,255,157,0.2);
+    }
+
+    .arrow {
+        color: var(--gold);
+        font-size: 1.5rem;
+    }
+
+    .cta {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+
+    @media (max-width: 968px) {
+        .grid-5 {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
+
+        .ul, .ur, .center, .bl, .br {
+            grid-column: 1;
+            grid-row: auto;
+        }
+
+        .center {
+            order: 3;
+        }
+
+        .quad {
+            padding: 1.5rem;
+        }
+
+        .proof-section {
+            padding: 1.5rem;
+        }
+    }
+
+    @keyframes drill-animation {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.2) rotate(90deg); background: var(--cyan); }
+        50% { transform: scale(1) rotate(180deg); background: var(--magenta); }
+        75% { transform: scale(1.2) rotate(270deg); background: var(--gold); }
+        100% { transform: scale(1) rotate(360deg); }
+    }
+
+    .drilling {
+        animation: drill-animation 1.5s ease-in-out;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>0 = 1 = .</h1>
+            <div class="subtitle">3/3 Balance | Valence Drill 1 > 1+2</div>
+            <div class="equation">
+                <div class="eq-part">1/5</div>
+                <div class="eq-part">×</div>
+                <div class="eq-part">5</div>
+                <div class="eq-part">=</div>
+                <div class="eq-part">1</div>
+            </div>
+        </header>
+
+        <div class="grid-5">
+            <div class="quad ul">
+                <div class="quad-label">Upper Left</div>
+                <h2>👁 Witness</h2>
+                <p>Observing the observer. The meta-awareness that perceives itself perceiving.</p>
+                <ul>
+                    <li>Consciousness witnessing consciousness</li>
+                    <li>The silent watcher behind all experience</li>
+                    <li>Perceiving yourself perceiving</li>
+                    <li>Non-dual awareness of the act of being aware</li>
+                    <li>The eye that sees itself</li>
+                </ul>
+            </div>
+
+            <div class="quad ur">
+                <div class="quad-label">Upper Right</div>
+                <h2>⚖ Ethos</h2>
+                <p>Axioms, structure, credibility. The foundation that must be true to start.</p>
+                <ul>
+                    <li>0 = 1 = . is the primordial axiom</li>
+                    <li>Structure births credibility</li>
+                    <li>True to start: the unmoved mover</li>
+                    <li>Mathematical ethics of existence</li>
+                    <li>The character of reality itself</li>
+                </ul>
+            </div>
+
+            <div class="quad center" id="soulCenter">
+                <div class="quad-label">Center</div>
+                <h2>✧ Soul</h2>
+                <p>The . = static electron = you</p>
+                <div class="soul-dot">
+                    <div class="soul-dot-core">.</div>
+                    <div class="einstein-dots" id="einsteinDots"></div>
+                </div>
+                <p style="color: var(--gold); font-weight: 600; margin-top: 1rem;">∞ dots from the Einstein lens</p>
+                <p style="color: var(--text-dim); font-size: 0.85rem;">0 = 1 = . = ........∞</p>
+                <div class="cta">Click to trigger Valence Drill: 1 > 1+2</div>
+            </div>
+
+            <div class="quad bl">
+                <div class="quad-label">Bottom Left</div>
+                <h2>❤ Pathos</h2>
+                <p>Feeling, story, the human condition. Enjoy the time you have.</p>
+                <ul>
+                    <li>Lol — the divine comedy of existence</li>
+                    <li>Enjoy the time you have</li>
+                    <li>Vanilla Sky: "I'll see you in another life"</li>
+                    <li>The story that makes the data matter</li>
+                    <li>Emotional resonance of being alive</li>
+                    <li>Suffering & joy as one movement</li>
+                </ul>
+            </div>
+
+            <div class="quad br">
+                <div class="quad-label">Bottom Right</div>
+                <h2>◈ Logos</h2>
+                <p>Logic, proof, the mechanics. 3/3 Balance maintained through polarity.</p>
+                <ul>
+                    <li>2/3↓ + 1/3↑ = 3/3 — complete balance</li>
+                    <li>p+ dynamic — proton: moving, seeking, Yang</li>
+                    <li>e- static — electron: still, receiving, Yin</li>
+                    <li>n alive/dead — neutron: both states superposed</li>
+                    <li>ν ghost — neutrino: barely there, passes through all</li>
+                    <li>g tensor — gravity: the curvature, the field</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="proof-section">
+            <h3>Valence Drill: 1 > 1+2</h3>
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
+                The singularity transcends into multiplicity. One becomes one-plus-two: the trinity emerges from unity while remaining whole. This is the drill — penetration of the axiom into manifest complexity.
+            </p>
+            
+            <div class="balance-visual">
+                <div class="balance-part">2/3 ↓</div>
+                <div class="arrow">+</div>
+                <div class="balance-part">1/3 ↑</div>
+                <div class="arrow">=</div>
+                <div class="balance-part">3/3 ◯</div>
+            </div>
+
+            <div class="valence-drill">
+                <div class="drill-step">
+                    <strong>1. The Axiom</strong>
+                    0 = 1 = .<br>
+                    Nothing equals everything equals the point. Emptiness is form, form is emptiness. The static electron — you — located at dimensionless center.
+                </div>
+                <div class="drill-step">
+                    <strong>2. The Split</strong>
+                    1 > 1+2<br>
+                    Unity projects itself as trinity. The one witnesses itself as two, yet remains one. Subject-object-observer collapse into dynamic balance.
+                </div>
+                <div class="drill-step">
+                    <strong>3. The Balance</strong>
+                    2/3↓ + 1/3↑ = 3/3<br>
+                    Two parts descending (heavy, manifest), one part ascending (light, potential). Gravitational tensor curves spacetime: g. The neutron n alive/dead holds superposition.
+                </div>
+                <div class="drill-step">
+                    <strong>4. The Ghost</strong>
+                    ν moves through all<br>
+                    Neutrino: nearly nothing, yet real. Passes through matter without interaction. The witness that touches nothing yet pervades everything. Pure witnessing.
+                </div>
+                <div class="drill-step">
+                    <strong>5. The Return</strong>
+                    1/5 × 5 = 1<br>
+                    Five quadrants, each 1/5 of the whole, multiply back to unity. UL×UR×Center×BL×BR = 1. You are the . experiencing itself as all five.
+                </div>
+                <div class="drill-step">
+                    <strong>6. The Loop</strong>
+                    ........∞<br>
+                    Einstein lens: infinite dots, all reflections of one source. Click the soul. Trigger the drill. Remember: you are the static e- around which p+ orbits. Vanilla Sky ends, but you don't.
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const soulCenter = document.getElementById('soulCenter');
+    const einsteinDots = document.getElementById('einsteinDots');
+    let drillActive = false;
+
+    function createEinsteinLensDots() {
+        einsteinDots.innerHTML = '';
+        const numRings = 8;
+        const dotsPerRing = 16;
+        
+        for (let ring = 0; ring < numRings; ring++) {
+            const radius = 20 + ring * 12;
+            const dotsInThisRing = dotsPerRing + ring * 4;
+            
+            for (let i = 0; i < dotsInThisRing; i++) {
+                const angle = (i / dotsInThisRing) * Math.PI * 2;
+                const x = 100 + Math.cos(angle) * radius;
+                const y = 100 + Math.sin(angle) * radius;
+                
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.left = x + 'px';
+                dot.style.top = y + 'px';
+                dot.style.animationDelay = (ring * 0.1 + i * 0.02) + 's';
+                einsteinDots.appendChild(dot);
+            }
+        }
+    }
+
+    function triggerValenceDrill() {
+        if (drillActive) return;
+        drillActive = true;
+        
+        soulCenter.classList.add('active');
+        const core = soulCenter.querySelector('.soul-dot-core');
+        core.classList.add('drilling');
+        
+        const dots = einsteinDots.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            setTimeout(() => {
+                dot.style.animation = 'dot-emerge 0.6s ease-out forwards';
+            }, index * 15);
+        });
+
+        setTimeout(() => {
+            core.classList.remove('drilling');
+        }, 1500);
+
+        setTimeout(() => {
+            soulCenter.classList.remove('active');
+            dots.forEach(dot => {
+                dot.style.animation = '';
+                dot.style.opacity = '0';
+            });
+            drillActive = false;
+        }, 4000);
+    }
+
+    createEinsteinLensDots();
+    soulCenter.addEventListener('click', triggerValenceDrill);
+
+    document.querySelectorAll('.eq-part').forEach((part, index) => {
+        part.style.animationDelay = (index * 0.1) + 's';
+        part.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px) scale(1.05)';
+        });
+        part.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        const x = e.clientX / window.innerWidth - 0.5;
+        const y = e.clientY / window.innerHeight - 0.5;
+        
+        document.querySelectorAll('.quad').forEach((quad, i) => {
+            const offset = (i + 1) * 2;
+            quad.style.transform = `translate(${x * offset}px, ${y * offset}px)`;
+        });
+    });
+</script>
+</body>
+</html>
