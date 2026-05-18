@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neutron Lens | Holographic Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --cyan: #00FFFF;
+        --blue: #0080FF;
+        --purple: #8A2BE2;
+        --bg: #020204;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+        background: var(--bg);
+        color: #e0f8ff;
+        font-family: 'Rajdhani', sans-serif;
+        overflow-x: hidden;
+        cursor: none;
+    }
+    
+    h1, h2, h3 { font-family: 'Orbitron', sans-serif; }
+    
+    /* Custom cursor */
+    .cursor {
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--cyan);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        mix-blend-mode: difference;
+        transition: transform 0.15s ease;
+    }
+    .cursor-dot {
+        position: fixed;
+        width: 4px;
+        height: 4px;
+        background: var(--cyan);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+    }
+    
+    /* Scanlines + volumetric light */
+    .scanlines::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        z-index: 1000;
+    }
+    
+    .godray {
+        position: absolute;
+        width: 2px;
+        height: 100vh;
+        background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+        opacity: 0.1;
+        animation: ray 8s linear infinite;
+    }
+    
+    @keyframes ray {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100%); }
+    }
+    
+    /* Glassmorphism */
+    .glass {
+        background: rgba(0, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 128, 255, 0.15), 
+                    inset 0 0 20px rgba(0, 255, 255, 0.05);
+    }
+    
+    /* Holographic text */
+    .holo-text {
+        color: var(--cyan);
+        text-shadow: 0 0 10px var(--cyan), 
+                     0 0 20px var(--cyan),
+                     0 0 40px var(--blue);
+        animation: flicker 3s infinite alternate;
+    }
+    
+    @keyframes flicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+        20%, 24%, 55% { opacity: 0.8; }
+    }
+    
+    /* Parallax containers */
+    .parallax-layer {
+        position: relative;
+        transform-style: preserve-3d;
+        will-change: transform;
+    }
+    
+    .back-layer { transform: translateZ(-3px) scale(2); }
+    .middle-layer { transform: translateZ(-1px) scale(1.5); }
+    .front-layer { transform: translateZ(0); }
+    
+    /* Glyph 3D tilt */
+    .glyph-container {
+        perspective: 1000px;
+        transform-style: preserve-3d;
+    }
+    
+    .glyph {
+        transition: transform 0.2s ease-out;
+        transform-style: preserve-3d;
+    }
+    
+    /* Pulse animation */
+    .pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.05); }
+    }
+    
+    /* Ripple effect */
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(0, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple 0.8s ease-out;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple {
+        to { transform: scale(4); opacity: 0; }
+    }
+    
+    /* Particle canvas */
+    #particle-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    
+    /* Equation tooltip */
+    .equation {
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        text-shadow: 0 0 8px var(--cyan);
+    }
+    
+    .tensor-trigger:hover .equation { opacity: 1; }
+    
+    /* Wave/particle */
+    .slit {
+        width: 4px;
+        height: 120px;
+        background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+        box-shadow: 0 0 20px var(--cyan);
+    }
+    
+    /* Transition overlay */
+    .portal-transition {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 4rem;
+        color: var(--cyan);
+    }
+    
+    .glitch {
+        animation: glitch 0.3s linear infinite;
+    }
+    
+    @keyframes glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        100% { transform: translate(0); }
+    }
+</style>
+</head>
+<body class="scanlines">
+<div class="cursor"></div>
+<div class="cursor-dot"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- Volumetric light rays -->
+<div class="godray" style="left: 10%; animation-delay: 0s;"></div>
+<div class="godray" style="left: 30%; animation-delay: 2s;"></div>
+<div class="godray" style="left: 50%; animation-delay: 4s;"></div>
+<div class="godray" style="left: 70%; animation-delay: 1s;"></div>
+<div class="godray" style="left: 90%; animation-delay: 3s;"></div>
+
+<!-- HERO SECTION - FRONT LAYER -->
+<section class="min-h-screen flex flex-col items-center justify-center relative parallax-layer front-layer px-6">
+    <div class="text-center z-10">
+        <h1 class="holo-text text-5xl md:text-8xl font-black mb-6 tracking-widest">NEUTRON LENS</h1>
+        
+        <!-- 
+          Glyph System: "1 ABOVE 2 TRUTH 3 BELOW" 
+          Represents a 3-level logic stack in balanced ternary.
+          1 = light/positive potential = ABOVE observer plane
+          2 = truth/dual/binary = decision gate at observer plane  
+          3 = below/shadow/negative potential = BELOW observer plane
+          Gravity = Lens × 2 : The "lens" of observation doubles/rectifies the potential field
+        -->
+        <div class="glyph-container mb-8">
+            <div id="glyph" class="glyph glass rounded-2xl p-8 md:p-12 inline-block">
+                <div class="text-3xl md:text-5xl holo-text font-bold leading-tight">
+                    <div>1 ABOVE</div>
+                    <div>2 TRUTH</div>
+                    <div>3 BELOW</div>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-xl md:text-2xl text-cyan-300 mb-8 tracking-wider">Gravity = Lens × 2</p>
+        
+        <button id="witness-btn" class="relative pulse text-6xl holo-text font-black hover:scale-125 transition-transform">
+            !
+        </button>
+    </div>
+</section>
+
+<!-- MIDDLE LAYER - THE TENSOR -->
+<section class="min-h-screen flex items-center justify-center relative parallax-layer middle-layer px-6 py-20">
+    <div class="glass rounded-3xl p-8 md:p-16 max-w-4xl w-full">
+        <h2 class="holo-text text-4xl md:text-6xl font-bold mb-12 text-center">THE TENSOR</h2>
+        
+        <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+            <!-- 3D Wireframe Canvas -->
+            <div id="tensor-canvas" class="w-full md:w-1/2 h-80"></div>
+            
+            <!-- Tensor Info -->
+            <div class="w-full md:w-1/2 space-y-6">
+                <div class="tensor-trigger glass rounded-xl p-6 hover:border-cyan-400 transition-all cursor-pointer">
+                    <h3 class="text-2xl text-cyan-300 mb-2">Structure: 321 00 123</h3>
+                    <p class="text-gray-300">Balanced ternary mirror sequence around null axis</p>
+                    <div class="equation mt-3 text-cyan-400 text-lg">1/60 × 60 = 1</div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="glass rounded-lg p-4">
+                        <div class="text-purple-400 text-3xl font-bold">-1</div>
+                        <div class="text-xs text-gray-400">SHADOW</div>
+                        <div class="text-xs">IN ↑</div>
+                    </div>
+                    <div class="glass rounded-lg p-4">
+                        <div class="text-cyan-400 text-3xl font-bold">0</div>
+                        <div class="text-xs text-gray-400">HOLD</div>
+                        <div class="text-xs">IN ↑</div>
+                    </div>
+                    <div class="glass rounded-lg p-4">
+                        <div class="text-blue-400 text-3xl font-bold">+1</div>
+                        <div class="text-xs text-gray-400">LIGHT</div>
+                        <div class="text-xs">IN ↑</div>
+                    </div>
+                </div>
+                
+                <div class="tensor-trigger glass rounded-xl p-6 hover:border-cyan-400 transition-all cursor-pointer">
+                    <h3 class="text-xl text-cyan-300 mb-2">Binary I/O: 2 Arrows</h3>
+                    <p class="text-gray-300">IN / OUT decision gate</p>
+                    <div class="equation mt-3 text-cyan-400 text-lg">× 2 = 0 = 1</div>
+                </div>
+                
+                <div class="glass rounded-xl p-6 text-center">
+                    <div class="text-4xl holo-text mb-2">•</div>
+                    <p class="text-gray-300">1 Central Dot = Observer Origin</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- BACK LAYER - DOUBLE SLIT -->
+<section class="min-h-screen flex items-center justify-center relative parallax-layer back-layer px-6 py-20">
+    <div class="glass rounded-3xl p-8 md:p-16 max-w-5xl w-full">
+        <h2 class="holo-text text-4xl md:text-6xl font-bold mb-12 text-center">DOUBLE SLIT</h2>
+        
+        <div class="flex flex-col items-center gap-12">
+            <!-- Slit Experiment -->
+            <div class="relative w-full max-w-md h-60 glass rounded-2xl p-8 flex items-center justify-around">
+                <div class="slit"></div>
+                <div class="slit"></div>
+                
+                <button id="observer-eye" class="absolute -bottom-6 text-5xl hover:scale-125 transition-transform">
+                    👁
+                </button>
+                
+                <canvas id="wave-canvas" class="absolute inset-0 w-full h-full"></canvas>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-3xl holo-text font-bold mb-4">2 + 1 = 0</p>
+                <p class="text-gray-400">Two paths + One observer = Collapsed state</p>
+            </div>
+            
+            <!-- Ternary Cubes -->
+            <div class="grid grid-cols-3 gap-8">
+                <div class="ternary-cube glass rounded-lg p-6 text-center" data-val="-1">
+                    <div class="text-4xl text-purple-400 font-bold">-1</div>
+                </div>
+                <div class="ternary-cube glass rounded-lg p-6 text-center" data-val="0">
+                    <div class="text-4xl text-cyan-400 font-bold">0</div>
+                </div>
+                <div class="ternary-cube glass rounded-lg p-6 text-center" data-val="1">
+                    <div class="text-4xl text-blue-400 font-bold">+1</div>
+                </div>
+            </div>
+            <p class="text-cyan-300">27 bits per × 3 = 0</p>
+            
+            <!-- 6 Unified -->
+            <button id="unify-btn" class="glass rounded-xl px-8 py-4 hover:bg-cyan-900/20 transition-all">
+                <span class="holo-text text-xl">6 FERMIONS + 6 BOSONS →</span>
+                <div id="unify-result" class="text-4xl mt-2">•</div>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER PORTAL -->
+<footer class="parallax-layer front-layer py-20 text-center">
+    <button id="enter-lens" class="glass rounded-xl px-12 py-6 hover:bg-cyan-900/20 transition-all group">
+        <span class="holo-text text-2xl md:text-3xl font-bold group-hover:tracking-widest transition-all">ENTER THE LENS</span>
+    </button>
+</footer>
+
+<!-- Portal Transition Overlay -->
+<div id="portal-overlay" class="portal-transition">
+    <div id="portal-text"></div>
+</div>
+
+<script>
+    // 1. CUSTOM CURSOR
+    const cursor = document.querySelector('.cursor');
+    const cursorDot = document.querySelector('.cursor-dot');
+    document.addEventListener('mousemove', e => {
+        gsap.to(cursor, { x: e.clientX - 10, y: e.clientY - 10, duration: 0.2 });
+        gsap.to(cursorDot, { x: e.clientX - 2, y: e.clientY - 2, duration: 0.1 });
+    });
+    
+    document.addEventListener('mousedown', () => cursor.style.transform = 'scale(0.8)');
+    document.addEventListener('mouseup', () => cursor.style.transform = 'scale(1)');
+
+    // 2. PARTICLE FIELD - Neural network aesthetic
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 100;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * particleCanvas.width;
+            this.y = Math.random() * particleCanvas.height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = Math.random() * 2;
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.x < 0 || this.x > particleCanvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > particleCanvas.height) this.vy *= -1;
+        }
+        
+        draw() {
+            pCtx.beginPath();
+            pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            pCtx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+            pCtx.fill();
+        }
+    }
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
+    function connectParticles() {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    pCtx.beginPath();
+                    pCtx.strokeStyle = `rgba(0, 255, 255, ${0.2 * (1 - dist / 100)})`;
+                    pCtx.lineWidth = 0.5;
+                    pCtx.moveTo(particles[i].x, particles[i].y);
+                    pCtx.lineTo(particles[j].x, particles[j].y);
+                    pCtx.stroke();
+                }
+            }
+        }
+    }
+    
+    function animateParticles() {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        connectParticles();
+        requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+    
+    window.addEventListener('resize', () => {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    });
+
+    // 3. GLYPH 3D TILT + RIPPLE
+    const glyph = document.getElementById('glyph');
+    document.addEventListener('mousemove', e => {
+        const xAxis = (window.innerWidth / 2 - e.clientX) / 25;
+        const yAxis = (window.innerHeight / 2 - e.clientY) / 25;
+        glyph.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    });
+    
+    document.getElementById('witness-btn').addEventListener('click', function(e) {
+        const ripple = document.createElement('div');
+        ripple.classList.add('ripple');
+        this.appendChild(ripple);
+        const rect = this.getBoundingClientRect();
+        ripple.style.left = `${e.clientX - rect.left}px`;
+        ripple.style.top = `${e.clientY - rect.top}px`;
+        setTimeout(() => ripple.remove(), 800);
+    });
+
+    // 4. THREE.JS TENSOR WIREFRAME - Shows 321 00 123 topology
+    const tensorContainer = document.getElementById('tensor-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, tensorContainer.clientWidth / tensorContainer.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(tensorContainer.clientWidth, tensorContainer.clientHeight);
+    tensorContainer.appendChild(renderer.domElement);
+    
+    // Wireframe geometry representing 3-2-1-0-0-1-2-3 tensor
+    const geometry = new THREE.IcosahedronGeometry(2, 1);
+    const material = new THREE.MeshBasicMaterial({ 
+        color: 0x00ffff, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+    });
+    const tensor = new THREE.Mesh(geometry, material);
+    scene.add(tensor);
+    
+    const arrowMaterial = new THREE.LineBasicMaterial({ color: 0x8a2be2 });
+    const arrowGeometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, -3, 0), 
+        new THREE.Vector3(0, 0, 0)
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const arrow = new THREE.Line(arrowGeometry, arrowMaterial);
+        arrow.rotation.z = i * Math.PI / 1.5;
+        scene.add(arrow);
+    }
+    
+    camera.position.z = 5;
+    
+    function animateTensor() {
+        requestAnimationFrame(animateTensor);
+        tensor.rotation.x += 0.005;
+        tensor.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    }
+    animateTensor();
+
+    // 5. DOUBLE SLIT WAVE/PARTICLE
+    const waveCanvas = document.getElementById('wave-canvas');
+    const wCtx = waveCanvas.getContext('2d');
+    waveCanvas.width = waveCanvas.offsetWidth;
+    waveCanvas.height = waveCanvas.offsetHeight;
+    let collapsed = false;
+    
+    function drawWave() {
+        wCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+        wCtx.strokeStyle = '#00ffff';
+        wCtx.lineWidth = 2;
+        wCtx.shadowBlur = 10;
+        wCtx.shadowColor = '#00ffff';
+        
+        if (!collapsed) {
+            // Wave interference pattern
+            for (let y = 0; y < waveCanvas.height; y += 4) {
+                wCtx.beginPath();
+                for (let x = 0; x < waveCanvas.width; x++) {
+                    const wave = Math.sin(x * 0.05 + Date.now() * 0.005) * 10;
+                    wCtx.lineTo(x, y + wave);
+                }
+                wCtx.stroke();
+            }
+        } else {
+            // Particle
+            wCtx.beginPath();
+            wCtx.fillStyle = '#00ffff';
+            wCtx.arc(waveCanvas.width / 2, waveCanvas.height / 2, 5, 0, Math.PI * 2);
+            wCtx.fill();
+        }
+        requestAnimationFrame(drawWave);
+    }
+    drawWave();
+    
+    document.getElementById('observer-eye').addEventListener('click', () => {
+        collapsed = !collapsed;
+        gsap.fromTo('#observer-eye', { scale: 1.5 }, { scale: 1, duration: 0.3 });
+    });
+
+    // 6. TERNARY CUBE ROTATION
+    document.querySelectorAll('.ternary-cube').forEach(cube => {
+        gsap.to(cube, {
+            rotationY: 360,
+            duration: 8,
+            repeat: -1,
+            ease: 'none'
+        });
+    });
+
+    // 7. 6 UNIFIED ANIMATION
+    document.getElementById('unify-btn').addEventListener('click', () => {
+        gsap.timeline()
+            .to('#unify-result', { scale: 0, duration: 0.3 })
+            .set('#unify-result', { textContent: '6+6' })
+            .to('#unify-result', { scale: 1.5, duration: 0.4 })
+            .to('#unify-result', { scale: 1, duration: 0.3 })
+            .set('#unify-result', { textContent: '•', delay: 0.3 });
+    });
+
+    // 8. PORTAL TRANSITION - Full screen glitch sequence
+    const overlay = document.getElementById('portal-overlay');
+    const portalText = document.getElementById('portal-text');
+    const sequence = ['.', '!', 'right', 'lol'];
+    
+    document.getElementById('enter-lens').addEventListener('click', () => {
+        overlay.style.display = 'flex';
+        let i = 0;
+        
+        function nextText() {
+            if (i < sequence.length) {
+                portalText.textContent = sequence[i];
+                portalText.classList.add('glitch');
+                setTimeout(() => {
+                    portalText.classList.remove('glitch');
+                    i++;
+                    setTimeout(nextText, 600);
+                }, 300);
+            } else {
+                gsap.to(overlay, {
+                    opacity: 0,
+                    duration: 1,
+                    onComplete: () => {
+                        overlay.style.display = 'none';
+                        overlay.style.opacity = 1;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            }
+        }
+        setTimeout(nextText, 500);
+    });
+
+    // 9. PARALLAX ON SCROLL
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        document.querySelectorAll('.parallax-layer').forEach(layer => {
+            const speed = layer.classList.contains('back-layer') ? 0.5 : 
+                         layer.classList.contains('middle-layer') ? 0.3 : 0.1;
+            layer.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+    });
+</script>
+</body>
+</html>
