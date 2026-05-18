@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0=1=. Frozen Artifact v1.0.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@200;300;400;500;700&display=swap');
+    
+    :root {
+        --glow-cyan: #00fff0;
+        --glow-violet: #b57bff;
+        --glow-amber: #ffc857;
+        --bg: #000000;
+        --dim: #0a0a0a;
+    }
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        pointer-events: none;
+    }
+    
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--glow-cyan);
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 240, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 255, 240, 0.03) 3px
+            );
+        pointer-events: none;
+        z-index: 9999;
+        animation: scan 8s linear infinite;
+    }
+    
+    @keyframes scan {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(10px); }
+    }
+    
+    .glow-text {
+        text-shadow: 
+            0 0 5px currentColor,
+            0 0 10px currentColor,
+            0 0 20px currentColor,
+            0 0 40px currentColor;
+    }
+    
+    .glow-border {
+        box-shadow: 
+            0 0 5px var(--glow-cyan),
+            inset 0 0 5px rgba(0, 255, 240, 0.2);
+        border: 1px solid var(--glow-cyan);
+    }
+    
+    .terminal-grid {
+        background-image: 
+            linear-gradient(rgba(0, 255, 240, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 240, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: center center;
+    }
+    
+    .falling-dots {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+        opacity: 0.6;
+    }
+    
+    .dot {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: var(--glow-cyan);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--glow-cyan), 0 0 16px var(--glow-cyan);
+        animation: fallDown linear infinite;
+    }
+    
+    .dot:nth-child(1) { left: 50%; animation-duration: 3s; animation-delay: 0s; }
+    .dot:nth-child(2) { left: 50%; animation-duration: 3s; animation-delay: 1s; }
+    .dot:nth-child(3) { left: 50%; animation-duration: 3s; animation-delay: 2s; }
+    
+    @keyframes fallDown {
+        0% {
+            top: -10px;
+            opacity: 0;
+        }
+        10% {
+            opacity: 1;
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            top: 110%;
+            opacity: 0;
+        }
+    }
+    
+    .ouroboros {
+        width: 120px;
+        height: 120px;
+        border: 2px solid var(--glow-violet);
+        border-radius: 50%;
+        position: relative;
+        animation: rotate 20s linear infinite;
+        box-shadow: 
+            0 0 20px var(--glow-violet),
+            inset 0 0 20px rgba(181, 123, 255, 0.2);
+    }
+    
+    .ouroboros::before, .ouroboros::after {
+        content: '';
+        position: absolute;
+        width: 80%;
+        height: 80%;
+        top: 10%;
+        left: 10%;
+        border: 2px solid var(--glow-violet);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--glow-violet);
+    }
+    
+    .ouroboros::after {
+        width: 60%;
+        height: 60%;
+        top: 20%;
+        left: 20%;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .tri-pole {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .pole {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: var(--glow-amber);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--glow-amber), 0 0 20px var(--glow-amber);
+    }
+    
+    .pole:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+    .pole:nth-child(2) { bottom: 20%; left: 10%; }
+    .pole:nth-child(3) { bottom: 20%; right: 10%; }
+    
+    .pole-line {
+        position: absolute;
+        background: var(--glow-amber);
+        height: 1px;
+        box-shadow: 0 0 5px var(--glow-amber);
+        opacity: 0.6;
+    }
+    
+    .line-1 {
+        width: 50px;
+        top: 4px;
+        left: 50%;
+        transform-origin: left;
+        transform: rotate(120deg);
+    }
+    
+    .line-2 {
+        width: 50px;
+        top: 4px;
+        left: 50%;
+        transform-origin: left;
+        transform: rotate(60deg);
+    }
+    
+    .line-3 {
+        width: 80px;
+        bottom: 24%;
+        left: 14%;
+    }
+    
+    .pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+    
+    .flicker {
+        animation: flicker 3s linear infinite;
+    }
+    
+    @keyframes flicker {
+        0%, 100% { opacity: 1; }
+        33% { opacity: 0.8; }
+        66% { opacity: 0.9; }
+    }
+    
+    .commit-hash {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        color: rgba(0, 255, 240, 0.5);
+    }
+    
+    .equation {
+        transition: none;
+    }
+    
+    .readwrite-block {
+        pointer-events: none !important;
+    }
+</style>
+</head>
+<body class="terminal-grid readwrite-block">
+    <div class="falling-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+    
+    <div class="relative z-10 w-full h-full flex flex-col p-4 md:p-8">
+        <!-- Header: Commit Status -->
+        <header class="w-full flex justify-between items-start mb-6 md:mb-8">
+            <div>
+                <div class="text-xs md:text-sm glow-text flicker mb-1">[ARTIFACT VIEWER] :: READ-ONLY MODE</div>
+                <div class="text-[0.6rem] md:text-xs text-cyan-400/50">COMMIT: FROZEN | BRANCH: main | HEAD: detached</div>
+            </div>
+            <div class="text-right">
+                <div class="inline-block px-2 py-1 text-[0.6rem] md:text-xs glow-border bg-red-900/20 text-red-400">
+                    IMMUTABLE
+                </div>
+                <div class="commit-hash mt-1">sha256:0e1a7c3f9b2d4e6f8a0c2e4d6f8b0a2c</div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 overflow-hidden">
+            <!-- Left Panel: Core Equations -->
+            <section class="glow-border bg-black/60 p-4 md:p-6 backdrop-blur-sm">
+                <h2 class="text-sm md:text-base glow-text text-violet-400 mb-4 pb-2 border-b border-violet-400/30">
+                    CORE::EQUATIONS
+                </h2>
+                <div class="space-y-3 text-xs md:text-sm font-light">
+                    <div class="equation glow-text">3×3×3 = 0</div>
+                    <div class="equation glow-text">1/10×10 = 1</div>
+                    <div class="equation glow-text">8×7-2 = 54</div>
+                    <div class="equation glow-text text-amber-400">7.8 gap bits</div>
+                    <div class="equation glow-text">Hamilton path: 27 steps</div>
+                    <div class="equation glow-text text-violet-400">10^10+1</div>
+                    <div class="equation glow-text">inf^inf+1 = !</div>
+                    <div class="equation glow-text text-amber-400 mt-4 pt-3 border-t border-amber-400/30">
+                        1>A>1+2 :: DRILL
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Center Panel: Visual Core -->
+            <section class="glow-border bg-black/60 p-4 md:p-6 backdrop-blur-sm flex flex-col items-center justify-center">
+                <h2 class="text-sm md:text-base glow-text text-cyan-400 mb-6">
+                    0=1=. :: SYSTEM
+                </h2>
+                
+                <!-- Ouroboros Nesting -->
+                <div class="mb-8">
+                    <div class="text-[0.6rem] text-violet-400/70 mb-3 text-center">OUROBOROS_NESTING</div>
+                    <div class="ouroboros"></div>
+                </div>
+                
+                <!-- Tri-Pole Ansible -->
+                <div>
+                    <div class="text-[0.6rem] text-amber-400/70 mb-3 text-center">TRI-POLE::ANSIBLE</div>
+                    <div class="tri-pole mx-auto">
+                        <div class="pole pulse"></div>
+                        <div class="pole pulse" style="animation-delay: 0.3s"></div>
+                        <div class="pole pulse" style="animation-delay: 0.6s"></div>
+                        <div class="pole-line line-1"></div>
+                        <div class="pole-line line-2"></div>
+                        <div class="pole-line line-3"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Right Panel: Tensors & Metadata -->
+            <section class="glow-border bg-black/60 p-4 md:p-6 backdrop-blur-sm">
+                <h2 class="text-sm md:text-base glow-text text-cyan-400 mb-4 pb-2 border-b border-cyan-400/30">
+                    TRI-POLE::GRAVITY_TENSORS
+                </h2>
+                <div class="space-y-4 text-[0.65rem] md:text-xs font-light">
+                    <div class="opacity-70">
+                        <div class="text-violet-400">TENSOR_ALPHA:</div>
+                        <div class="pl-2 glow-text">[∞ :: 0 :: 1]</div>
+                    </div>
+                    <div class="opacity-70">
+                        <div class="text-amber-400">TENSOR_BETA:</div>
+                        <div class="pl-2 glow-text">[1 :: ∞ :: 0]</div>
+                    </div>
+                    <div class="opacity-70">
+                        <div class="text-cyan-400">TENSOR_GAMMA:</div>
+                        <div class="pl-2 glow-text">[0 :: 1 :: ∞]</div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-cyan-400/30">
+                        <div class="text-[0.6rem] text-cyan-400/50 mb-2">SYSTEM_STATE:</div>
+                        <div class="space-y-1">
+                            <div>FROZEN: <span class="text-green-400 glow-text">TRUE</span></div>
+                            <div>ENTROPY: <span class="text-cyan-400 glow-text">0.000</span></div>
+                            <div>COHERENCE: <span class="text-violet-400 glow-text">1.000</span></div>
+                            <div>RECURSION_DEPTH: <span class="text-amber-400 glow-text">∞</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer: Artifact Signature -->
+        <footer class="w-full mt-4 md:mt-6 flex justify-between items-end text-[0.6rem] md:text-xs">
+            <div class="text-cyan-400/40">
+                <div>ARTIFACT_ID: 0=1=._v1.0.0.final</div>
+                <div>TIMESTAMP: 1970-01-01T00:00:00.000Z</div>
+            </div>
+            <div class="text-right text-red-400/60">
+                <div class="glow-text">WRITE_ACCESS_DENIED</div>
+                <div class="text-cyan-400/40">violation_detected: none</div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // Prevent all interaction - frozen state
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => e.preventDefault());
+        document.addEventListener('click', e => e.preventDefault());
+        document.addEventListener('mousedown', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+        
+        // Disable console
+        Object.defineProperty(window, 'console', {
+            value: {},
+            writable: false,
+            configurable: false
+        });
+        
+        // Freeze object to prevent modification
+        Object.freeze(document);
+    </script>
+</body>
+</html>
