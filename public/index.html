@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Holographic Workshop | Matter Transmitter</title>
+<title>Shadow Queen: Complex Games</title>
 <style>
 :root {
-  --bg: #02040a;
-  --bg-blue: #0a192f;
-  --accent: #00d4ff;
-  --accent2: #7b2dff;
-  --red: #ff3d5a;
-  --white: #e6f1ff;
-  --purple: #b24bff;
-  --text: #cbd5e1;
-  --text-bright: #f1f5f9;
-  --border: rgba(0, 212, 255, 0.2);
-  --glow: 0 0 20px rgba(0, 212, 255, 0.3);
-  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --bg: #0a0612;
+  --bg2: #110a1f;
+  --deep-purple: #1a0f2e;
+  --mid-purple: #2d1b4e;
+  --accent: #7a3cff;
+  --accent-2: #a36fff;
+  --glow: #c59fff;
+  --red: #ff3c5e;
+  --white: #e8e0ff;
+  --purple: #9d4edd;
+  --shadow: #000000;
+  --text: #d1c7e8;
+  --text-bright: #f3edff;
+  --border: #3d2a5d;
+  --success: #3cff9d;
+  --warn: #ffac3c;
 }
 
 * {
@@ -26,1141 +30,982 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
+  background: radial-gradient(ellipse at center, var(--bg2) 0%, var(--bg) 70%);
   color: var(--text);
-  overflow-x: hidden;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  overflow-x: hidden;
 }
 
-/* 0D Planck Quantum Foam Background */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  animation: fadeIn 1s ease;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--glow) 50%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(122, 60, 255, 0.5);
+  margin-bottom: 8px;
+}
+
+.header .subtitle {
+  color: var(--accent-2);
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.game-container {
+  display: grid;
+  grid-template-columns: 320px 1fr 320px;
+  gap: 24px;
   width: 100%;
-  height: 100%;
-  z-index: -2;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(123, 45, 255, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 1) 0%, var(--bg) 100%);
-  animation: quantumShift 20s ease-in-out infinite alternate;
-}
-
-@keyframes quantumShift {
-  0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
-  100% { transform: scale(1.05) rotate(1deg); filter: hue-rotate(10deg); }
-}
-
-/* 8D Octonion Lattice SVG Background */
-.octonion-lattice {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-/* Header & Navigation */
-header {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  background: rgba(2, 4, 10, 0.8);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-container {
   max-width: 1400px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
+  align-items: start;
+}
+
+.panel {
+  background: linear-gradient(145deg, rgba(26, 15, 46, 0.9), rgba(17, 10, 31, 0.9));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(163, 111, 255, 0.1);
+  backdrop-filter: blur(10px);
+  animation: slideUp 0.6s ease;
+}
+
+.panel h2 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--glow);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 12px 0;
+  padding: 10px;
+  background: rgba(10, 6, 18, 0.6);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 2px;
-  text-shadow: var(--glow);
-  cursor: pointer;
-}
-
-.nav-main {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-.nav-link {
+.stat-label {
   color: var(--text);
-  text-decoration: none;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  position: relative;
-  transition: var(--transition);
-  cursor: pointer;
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--accent);
-  transition: width 0.3s ease;
-}
-
-.nav-link:hover, .nav-link.active {
-  color: var(--accent);
-}
-
-.nav-link:hover::after, .nav-link.active::after {
-  width: 100%;
-}
-
-/* Breadcrumbs */
-.breadcrumbs {
-  max-width: 1400px;
-  margin: 5rem auto 0;
-  padding: 1rem 2rem;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
   font-size: 0.85rem;
-  color: var(--text);
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
-.crumb {
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.crumb:hover {
-  color: var(--accent);
-}
-
-.crumb-separator {
-  color: var(--accent);
-  opacity: 0.5;
-}
-
-/* Main Content */
-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  min-height: calc(100vh - 200px);
-}
-
-section {
-  display: none;
-  animation: fadeIn 0.6s ease;
-}
-
-section.active {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-h1 {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 800;
-  color: var(--text-bright);
-  margin-bottom: 1rem;
-  line-height: 1.1;
-  text-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
-}
-
-h2 {
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 1.5rem;
-  position: relative;
-  display: inline-block;
-}
-
-h2::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  width: 60%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-}
-
-h3 {
-  font-size: 1.5rem;
-  color: var(--text-bright);
-  margin: 2rem 0 1rem;
-}
-
-p {
-  line-height: 1.8;
-  margin-bottom: 1rem;
-  color: var(--text);
-}
-
-/* Hero */
-.hero {
-  text-align: center;
-  padding: 4rem 0;
-  position: relative;
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--accent);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  opacity: 0.9;
-}
-
-.hero-description {
-  max-width: 700px;
-  margin: 2rem auto;
-  font-size: 1.1rem;
-}
-
-/* Gyroscopes - A, L, C */
-.gyro-container {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  margin: 3rem 0;
-  flex-wrap: wrap;
-}
-
-.gyroscope {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: gyroRotate 8s linear infinite;
-}
-
-.gyroscope.gyro-a { animation-duration: 6s; }
-.gyroscope.gyro-l { animation-duration: 8s; animation-direction: reverse; }
-.gyroscope.gyro-c { animation-duration: 10s; }
-
-@keyframes gyroRotate {
-  from { transform: rotateY(0deg) rotateX(15deg); }
-  to { transform: rotateY(360deg) rotateX(15deg); }
-}
-
-.gyro-ring {
-  position: absolute;
-  border: 3px solid;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.gyro-ring.outer {
-  width: 120px;
-  height: 120px;
-  animation: ringPulse 2s ease-in-out infinite;
-}
-
-.gyro-ring.middle {
-  width: 80px;
-  height: 80px;
-  transform: translate(-50%, -50%) rotateX(60deg);
-  animation: ringPulse 2s ease-in-out infinite 0.3s;
-}
-
-.gyro-ring.inner {
-  width: 40px;
-  height: 40px;
-  transform: translate(-50%, -50%) rotateY(60deg);
-  animation: ringPulse 2s ease-in-out infinite 0.6s;
-}
-
-.gyro-a .gyro-ring { border-color: var(--red); box-shadow: 0 0 15px var(--red); }
-.gyro-l .gyro-ring { border-color: var(--white); box-shadow: 0 0 15px var(--white); }
-.gyro-c .gyro-ring { border-color: var(--purple); box-shadow: 0 0 15px var(--purple); }
-
-@keyframes ringPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-.gyro-label {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-weight: 700;
+.stat-value {
   font-size: 1.2rem;
-  letter-spacing: 2px;
+  font-weight: 600;
+  color: var(--text-bright);
+  text-shadow: 0 0 10px currentColor;
 }
 
-.gyro-a .gyro-label { color: var(--red); }
-.gyro-l .gyro-label { color: var(--white); }
-.gyro-c .gyro-label { color: var(--purple); }
+.coherence-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(10, 6, 18, 0.8);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
 
-/* Buttons & Interactive Operators */
-.btn-group {
+.coherence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.board-container {
+  position: relative;
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin: 2rem 0;
   justify-content: center;
+  align-items: center;
+  min-height: 600px;
+}
+
+#board {
+  background: radial-gradient(circle at center, rgba(45, 27, 78, 0.3), transparent);
+}
+
+.node {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 4px rgba(122, 60, 255, 0.3));
+}
+
+.node:hover {
+  filter: drop-shadow(0 0 12px var(--glow));
+  transform: scale(1.2);
+}
+
+.node.delta {
+  filter: drop-shadow(0 0 16px var(--success));
+}
+
+.node.queen {
+  animation: pulse 1.5s infinite;
+}
+
+.edge {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.edge.claimed {
+  stroke-width: 3;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.edge.player {
+  stroke: var(--success);
+}
+
+.gyro-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 8px;
+  background: rgba(10, 6, 18, 0.4);
+  border-radius: 6px;
+}
+
+.gyro-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  animation: pulse 2s infinite;
+}
+
+.gyro-dot.red { background: var(--red); color: var(--red); }
+.gyro-dot.white { background: var(--white); color: var(--white); }
+.gyro-dot.purple { background: var(--purple); color: var(--purple); }
+
+.move-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .btn {
-  padding: 0.9rem 2rem;
-  background: transparent;
-  border: 2px solid var(--accent);
-  color: var(--accent);
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  background: linear-gradient(145deg, var(--mid-purple), var(--deep-purple));
+  color: var(--text-bright);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: var(--transition);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  text-transform: uppercase;
 }
 
-.btn::before {
+.btn:before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 0;
   height: 0;
-  background: var(--accent);
   border-radius: 50%;
+  background: rgba(163, 111, 255, 0.3);
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
-  z-index: -1;
 }
 
-.btn:hover {
-  color: var(--bg);
-  box-shadow: var(--glow);
-}
-
-.btn:hover::before {
+.btn:hover:before {
   width: 300px;
   height: 300px;
 }
 
-.btn-operator {
-  border-color: var(--accent2);
-  color: var(--accent2);
-}
-
-.btn-operator::before {
-  background: var(--accent2);
-}
-
-.btn-operator.active {
-  background: var(--accent2);
-  color: var(--bg);
-  box-shadow: 0 0 25px rgba(123, 45, 255, 0.5);
-}
-
-/* Cards */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 3rem 0;
-}
-
-.card {
-  background: rgba(10, 25, 47, 0.4);
-  border: 1px solid var(--border);
-  padding: 2rem;
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  transition: left 0.6s ease;
-}
-
-.card:hover::before {
-  left: 100%;
-}
-
-.card:hover {
-  transform: translateY(-5px);
+.btn:hover {
   border-color: var(--accent);
-  box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
+  box-shadow: 
+    0 0 20px rgba(122, 60, 255, 0.4),
+    inset 0 0 20px rgba(122, 60, 255, 0.1);
+  transform: translateY(-2px);
 }
 
-.card-title {
-  color: var(--accent);
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+.btn:active {
+  transform: translateY(0);
 }
 
-/* Operator Console */
-.console {
-  background: rgba(2, 4, 10, 0.9);
-  border: 2px solid var(--accent);
-  padding: 2rem;
-  margin: 2rem 0;
-  font-family: 'Courier New', monospace;
-  box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.1), var(--glow);
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.console-display {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  padding: 1.5rem;
-  min-height: 200px;
-  margin-bottom: 1.5rem;
-  color: var(--accent);
-  font-size: 0.9rem;
-  line-height: 1.6;
+.btn:disabled:hover {
+  box-shadow: none;
+  border-color: var(--border);
+}
+
+.btn-primary {
+  grid-column: 1 / -1;
+  background: linear-gradient(145deg, var(--accent), var(--accent-2));
+  border-color: var(--accent);
+}
+
+.turn-log {
+  max-height: 240px;
   overflow-y: auto;
-  max-height: 300px;
+  font-size: 0.8rem;
+  line-height: 1.6;
 }
 
-.console-line {
-  margin: 0.5rem 0;
-  opacity: 0;
-  animation: lineAppear 0.3s ease forwards;
+.turn-log::-webkit-scrollbar {
+  width: 6px;
 }
 
-@keyframes lineAppear {
-  to { opacity: 1; }
+.turn-log::-webkit-scrollbar-track {
+  background: rgba(10, 6, 18, 0.5);
+  border-radius: 3px;
 }
 
-.console-input {
-  width: 100%;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-bright);
-  padding: 0.8rem;
-  font-family: inherit;
-  font-size: 1rem;
-}
-
-.console-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-}
-
-/* Fold Animation */
-.fold-container {
-  perspective: 1000px;
-  margin: 2rem 0;
-}
-
-.fold-element {
-  background: linear-gradient(135deg, var(--bg-blue), var(--accent2));
-  padding: 3rem;
-  border: 2px solid var(--accent);
-  text-align: center;
-  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  transform-style: preserve-3d;
-}
-
-.fold-element.folded {
-  transform: rotateX(90deg) scale(0.1);
-  opacity: 0;
-}
-
-.fold-element.unfolded {
-  transform: rotateX(0deg) scale(1);
-  opacity: 1;
-}
-
-/* Traversal Visualization */
-.traverse-field {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  background: rgba(10, 25, 47, 0.3);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  margin: 2rem 0;
-}
-
-.traverse-node {
-  position: absolute;
-  width: 12px;
-  height: 12px;
+.turn-log::-webkit-scrollbar-thumb {
   background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent);
-  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 3px;
 }
 
-.traverse-line {
-  position: absolute;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  transform-origin: left center;
-  opacity: 0.6;
+.log-entry {
+  padding: 6px 8px;
+  margin: 4px 0;
+  border-radius: 4px;
+  background: rgba(10, 6, 18, 0.3);
+  border-left: 2px solid var(--border);
+  animation: slideIn 0.3s ease;
 }
 
-/* Mobile Menu */
-.menu-toggle {
+.log-entry.player { border-left-color: var(--success); }
+.log-entry.queen { border-left-color: var(--red); }
+.log-entry.system { border-left-color: var(--accent); }
+
+.axiom-display {
+  text-align: center;
+  padding: 20px;
+  background: radial-gradient(circle, rgba(122, 60, 255, 0.2), transparent);
+  border-radius: 12px;
+  margin: 16px 0;
+  border: 1px solid var(--border);
+}
+
+.axiom-sequence {
+  font-size: 2rem;
+  letter-spacing: 8px;
+  font-weight: 300;
+  color: var(--glow);
+  text-shadow: 0 0 20px currentColor;
+  animation: glow 2s infinite alternate;
+}
+
+.axiom-current {
+  margin-top: 12px;
+  font-size: 1.5rem;
+  color: var(--accent-2);
+}
+
+.modal {
   display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  background: none;
-  border: none;
-}
-
-.menu-toggle span {
-  width: 25px;
-  height: 2px;
-  background: var(--accent);
-  transition: var(--transition);
-}
-
-/* Research Subnav */
-.research-nav {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin: 2rem 0;
-  padding: 1rem;
-  background: rgba(10, 25, 47, 0.4);
-  border: 1px solid var(--border);
-}
-
-.research-nav-item {
-  padding: 0.6rem 1.2rem;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-  cursor: pointer;
-  transition: var(--transition);
-  font-size: 0.9rem;
-}
-
-.research-nav-item:hover, .research-nav-item.active {
-  background: var(--accent);
-  color: var(--bg);
-  border-color: var(--accent);
-}
-
-/* Footer */
-footer {
-  margin-top: 6rem;
-  padding: 3rem 2rem;
-  text-align: center;
-  border-top: 1px solid var(--border);
-  color: var(--text);
-  opacity: 0.6;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .nav-main {
-    position: fixed;
-    top: 70px;
-    right: -100%;
-    flex-direction: column;
-    background: rgba(2, 4, 10, 0.98);
-    padding: 2rem;
-    width: 250px;
-    height: calc(100vh - 70px);
-    transition: right 0.4s ease;
-    border-left: 1px solid var(--border);
-  }
-
-  .nav-main.open {
-    right: 0;
-  }
-
-  .menu-toggle {
-    display: flex;
-  }
-
-  .gyro-container {
-    gap: 2rem;
-  }
-
-  .gyroscope {
-    width: 80px;
-    height: 80px;
-  }
-
-  .gyro-ring.outer {
-    width: 80px;
-    height: 80px;
-  }
-
-  .gyro-ring.middle {
-    width: 55px;
-    height: 55px;
-  }
-
-  .gyro-ring.inner {
-    width: 30px;
-    height: 30px;
-  }
-
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
-}
-
-/* Spec Table */
-.spec-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 2rem 0;
-  background: rgba(10, 25, 47, 0.4);
-}
-
-.spec-table th,
-.spec-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.spec-table th {
-  color: var(--accent);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-}
-
-.spec-table tr:hover {
-  background: rgba(0, 212, 255, 0.05);
-}
-
-/* Blueprint Grid Overlay */
-.blueprint-grid {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
+  background: rgba(10, 6, 18, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, var(--deep-purple), var(--bg2));
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(122, 60, 255, 0.6);
+  animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--glow);
+  text-shadow: 0 0 20px currentColor;
+}
+
+.modal p {
+  margin: 16px 0;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.welded-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: -1;
+  border-radius: 50%;
+  box-shadow: inset 0 0 80px rgba(122, 60, 255, 0.8);
+  animation: weld-pulse 1s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes glow {
+  0% { text-shadow: 0 0 10px var(--glow); }
+  100% { text-shadow: 0 0 30px var(--glow), 0 0 40px var(--accent); }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes weld-pulse {
+  0%, 100% { box-shadow: inset 0 0 80px rgba(122, 60, 255, 0.6); }
+  50% { box-shadow: inset 0 0 120px rgba(122, 60, 255, 0.9); }
+}
+
+@media (max-width: 1200px) {
+  .game-container {
+    grid-template-columns: 1fr;
+    max-width: 700px;
+  }
+  
+  .panel {
+    width: 100%;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+    letter-spacing: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+  
+  .move-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  body {
+    padding: 10px;
+  }
 }
 </style>
 </head>
 <body>
-
-<!-- 8D Octonion Lattice SVG -->
-<svg class="octonion-lattice" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <pattern id="lattice" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-      <circle cx="50" cy="50" r="1" fill="#00d4ff"/>
-      <line x1="0" y1="50" x2="100" y2="50" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
-      <line x1="50" y1="0" x2="50" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
-      <line x1="0" y1="0" x2="100" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.2"/>
-      <line x1="100" y1="0" x2="0" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.2"/>
-    </pattern>
-  </defs>
-  <rect width="100%" height="100%" fill="url(#lattice)"/>
-</svg>
-
-<div class="blueprint-grid"></div>
-
-<header>
-  <div class="nav-container">
-    <div class="logo" data-nav="home">HOLOWORKSHOP</div>
-    <nav class="nav-main" id="navMain">
-      <a class="nav-link active" data-nav="home">Home</a>
-      <a class="nav-link" data-nav="workshop">Workshop</a>
-      <a class="nav-link" data-nav="contact">Contact</a>
-    </nav>
-    <button class="menu-toggle" id="menuToggle">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+  <div class="header">
+    <h1>SHADOW QUEEN</h1>
+    <div class="subtitle">Complex Games // Toroid Protocol</div>
   </div>
-</header>
 
-<div class="breadcrumbs" id="breadcrumbs">
-  <span class="crumb" data-nav="home">Home</span>
-</div>
-
-<main>
-  <!-- HOME -->
-  <section id="home" class="active">
-    <div class="hero">
-      <div class="hero-subtitle">11D HOLOGRAPHIC PROTOCOL</div>
-      <h1>Matter Transmitter<br>Research Division</h1>
-      <p class="hero-description">
-        Exploring the fundamental architecture of spacetime through octonionic operators, 
-        toroidal field dynamics, and quantum foam manipulation. Access authorized for cleared operators only.
-      </p>
+  <div class="game-container">
+    <div class="panel">
+      <h2>Δ Status</h2>
+      <div class="stat-row">
+        <span class="stat-label">Position</span>
+        <span class="stat-value" id="playerPos">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Coherence</span>
+        <span class="stat-value" id="coherence">0%</span>
+      </div>
+      <div class="coherence-bar">
+        <div class="coherence-fill" id="coherenceBar" style="width: 0%"></div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Territories</span>
+        <span class="stat-value" id="territories">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Edges Claimed</span>
+        <span class="stat-value" id="edgesClaimed">0</span>
+      </div>
       
-      <div class="gyro-container">
-        <div class="gyroscope gyro-a">
-          <div class="gyro-ring outer"></div>
-          <div class="gyro-ring middle"></div>
-          <div class="gyro-ring inner"></div>
-          <div class="gyro-label">A</div>
-        </div>
-        <div class="gyroscope gyro-l">
-          <div class="gyro-ring outer"></div>
-          <div class="gyro-ring middle"></div>
-          <div class="gyro-ring inner"></div>
-          <div class="gyro-label">L</div>
-        </div>
-        <div class="gyroscope gyro-c">
-          <div class="gyro-ring outer"></div>
-          <div class="gyro-ring middle"></div>
-          <div class="gyro-label">C</div>
-        </div>
+      <h2 style="margin-top: 24px;">Axiom Phase</h2>
+      <div class="axiom-display">
+        <div class="axiom-sequence">1→27→0→1</div>
+        <div class="axiom-current" id="currentPhase">Phase 1</div>
       </div>
 
-      <div class="btn-group">
-        <button class="btn" data-nav="workshop">Enter Workshop</button>
-        <button class="btn btn-operator" data-nav="operator">Operator Console</button>
+      <h2 style="margin-top: 24px;">Moves</h2>
+      <div class="move-buttons">
+        <button class="btn btn-primary" id="traverseBtn">TRAVERSE</button>
+        <button class="btn" id="stitchBtn">STITCH</button>
+        <button class="btn" id="foldBtn">FOLD</button>
+        <button class="btn" id="weldBtn" style="grid-column: 1 / -1;">WELD</button>
       </div>
     </div>
 
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-title">Planck Scale Engineering</div>
-        <p>Manipulation at 10^-35m. Quantum foam stabilization through STITCH binding protocols. Zero-point field access authorized.</p>
-      </div>
-      <div class="card">
-        <div class="card-title">Octonion Algebra</div>
-        <p>8D non-associative lattice structures. Gyroscopic field rotations enable dimensional traversal via Δ operators.</p>
-      </div>
-      <div class="card">
-        <div class="card-title">Toroid Dynamics</div>
-        <p>Closed timelike curves contained within nested hyperspheres. FOLD collapse sequences prevent paradox formation.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- WORKSHOP -->
-  <section id="workshop">
-    <h2>Workshop</h2>
-    <p>Primary research and development facility for matter transmission protocols. All field operations require STITCH bind verification.</p>
-    
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-title">Transmitter Specs</div>
-        <p>Access detailed technical specifications for the Mark VII Matter Transmitter array.</p>
-        <button class="btn" data-nav="specs" style="margin-top: 1rem;">View Specs</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Operator Console</div>
-        <p>Initialize Δ traverse sequences, configure STITCH bind mode, execute FOLD collapse operations.</p>
-        <button class="btn" data-nav="operator" style="margin-top: 1rem;">Launch Console</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Research Division</div>
-        <p>Five active research threads: Axiom, Toroid, Lattice, Fold, and 11D fundamental theory.</p>
-        <button class="btn" data-nav="research" style="margin-top: 1rem;">Access Files</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRANSMITTER SPECS -->
-  <section id="specs">
-    <h2>Transmitter Specifications</h2>
-    <p>Mark VII Matter Transmitter Array - Dimensional Phase Displacement System</p>
-    
-    <table class="spec-table">
-      <thead>
-        <tr>
-          <th>Parameter</th>
-          <th>Specification</th>
-          <th>Tolerance</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Operational Dimensions</td>
-          <td>11D M-Theory Calabi-Yau Manifold</td>
-          <td>±0.001 Planck</td>
-        </tr>
-        <tr>
-          <td>Foam Frequency</td>
-          <td>10^43 Hz</td>
-          <td>±10^38 Hz</td>
-        </tr>
-        <tr>
-          <td>Gyroscope Matrix</td>
-          <td>A/L/C Octonion Rotation</td>
-          <td>Non-associative</td>
-        </tr>
-        <tr>
-          <td>STITCH Bind Rate</td>
-          <td>2.4 × 10^9 bindings/sec</td>
-          <td>±5%</td>
-        </tr>
-        <tr>
-          <td>FOLD Collapse Time</td>
-          <td>6.2 × 10^-44 seconds</td>
-          <td>Planck Time</td>
-        </tr>
-        <tr>
-          <td>Δ Traverse Range</td>
-          <td>1.6 × 10^26 meters</td>
-          <td>Observable Universe</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>Field Coils</h3>
-    <p>Triple-nested gyroscope array maintains spacetime curvature integrity during matter phase transitions. Red coil (A) handles antimatter polarity, White (L) manages lepton field coupling, Purple (C) governs chromodynamic binding.</p>
-  </section>
-
-  <!-- OPERATOR CONSOLE -->
-  <section id="operator">
-    <h2>Operator Console</h2>
-    <p>Initialize transmission protocols. Warning: Ensure STITCH bind mode is active before Δ traverse execution.</p>
-    
-    <div class="btn-group">
-      <button class="btn btn-operator" id="stitchBtn">STITCH Bind Mode</button>
-      <button class="btn btn-operator" id="deltaBtn">Δ Traverse</button>
-      <button class="btn btn-operator" id="foldBtn">FOLD Collapse</button>
-    </div>
-
-    <div class="console">
-      <div class="console-display" id="consoleDisplay">
-        <div class="console-line">HOLOGRAPHIC WORKSHOP OS v11.7.3</div>
-        <div class="console-line">Quantum foam stabilizer... ONLINE</div>
-        <div class="console-line">Octonion lattice... CALIBRATED</div>
-        <div class="console-line">Awaiting operator command...</div>
-      </div>
-      <input type="text" class="console-input" id="consoleInput" placeholder="Enter command: help, status, init, clear">
-    </div>
-
-    <div class="fold-container">
-      <div class="fold-element unfolded" id="foldElement">
-        <h3>SPACETIME MANIFOLD</h3>
-        <p>Click FOLD Collapse to demonstrate dimensional compression</p>
+    <div class="panel" style="padding: 20px 10px;">
+      <div class="board-container">
+        <div id="weldOverlay"></div>
+        <svg id="board" width="560" height="560" viewBox="0 0 560 560"></svg>
       </div>
     </div>
 
-    <div class="traverse-field" id="traverseField"></div>
-  </section>
+    <div class="panel">
+      <h2>Shadow Queen</h2>
+      <div class="stat-row">
+        <span class="stat-label">Dimensionality</span>
+        <span class="stat-value" id="queenDim">3D</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Influence</span>
+        <span class="stat-value" id="queenInfluence">27</span>
+      </div>
+      
+      <h2 style="margin-top: 24px;">A/L/C Gyros</h2>
+      <div class="gyro-indicator">
+        <div class="gyro-dot red"></div>
+        <span class="stat-label">Angular → <span id="gyroA">0</span></span>
+      </div>
+      <div class="gyro-indicator">
+        <div class="gyro-dot white"></div>
+        <span class="stat-label">Linear → <span id="gyroL">9</span></span>
+      </div>
+      <div class="gyro-indicator">
+        <div class="gyro-dot purple"></div>
+        <span class="stat-label">Circular → <span id="gyroC">18</span></span>
+      </div>
 
-  <!-- RESEARCH -->
-  <section id="research">
-    <h2>Research Division</h2>
-    <p>Classified research archives. Select thread below for detailed analysis.</p>
-    
-    <div class="research-nav">
-      <div class="research-nav-item active" data-research="axiom">Axiom</div>
-      <div class="research-nav-item" data-research="toroid">Toroid</div>
-      <div class="research-nav-item" data-research="lattice">Lattice</div>
-      <div class="research-nav-item" data-research="fold">Fold</div>
-      <div class="research-nav-item" data-research="11d">11D</div>
+      <h2 style="margin-top: 24px;">Turn Log</h2>
+      <div class="turn-log" id="turnLog"></div>
     </div>
+  </div>
 
-    <div id="researchContent">
-      <div class="research-section" data-content="axiom">
-        <h3>Axiom: Foundational Principles</h3>
-        <p>The Axiom framework establishes non-associative algebra as the mathematical foundation for dimensional traversal. Unlike traditional vector spaces, octonion algebra permits rotation in 8D without gimbal lock through gyroscopic field coupling.</p>
-        <p>Key Postulates: 1) Conservation of information across FOLD events, 2) Quantum foam permits localized Planck-scale manipulation, 3) STITCH operators maintain causal consistency during Δ traverse.</p>
-      </div>
-      <div class="research-section" data-content="toroid" style="display:none">
-        <h3>Toroid: Field Containment</h3>
-        <p>Toroidal field geometry enables closed timelike curves without paradox generation. Nested hyperspheres at 10^11m, 10^18m, and 10^26m scales correspond to galactic, cluster, and cosmic horizons.</p>
-        <p>Experimental data confirms zero energy loss across toroid boundaries when STITCH bind mode maintains 99.99997% phase coherence.</p>
-      </div>
-      <div class="research-section" data-content="lattice" style="display:none">
-        <h3>Lattice: Octonion Structure</h3>
-        <p>8D lattice employs Fano plane geometry for multiplication table generation. Each node connects to seven others through quantum entanglement channels, enabling holographic information storage.</p>
-        <p>Gyroscope A/L/C arrangement maps to octonion units e1, e2, e3 respectively. Rotations preserve norm but break associativity—critical for avoiding universe-scale computation barriers.</p>
-      </div>
-      <div class="research-section" data-content="fold" style="display:none">
-        <h3>Fold: Collapse Mechanics</h3>
-        <p>FOLD operations compress 11D M-theory manifolds into 4D observational spacetime. Process occurs at Planck time scales with energy requirements scaling as E = ħc^5/G per collapse event.</p>
-        <p>Safety protocol: STITCH bind must precede FOLD by minimum 10^-36 seconds to prevent vacuum decay scenarios. Emergency abort slaved to quantum foam decoherence detectors.</p>
-      </div>
-      <div class="research-section" data-content="11d" style="display:none">
-        <h3>11D: M-Theory Implementation</h3>
-        <p>Complete theory requires eleven dimensions: 3 spatial + 1 time + 7 compactified Calabi-Yau dimensions at 10^-35m. Matter transmitter accesses compactified dimensions through octonion bridge.</p>
-        <p>Breakthrough: Δ traverse operator identified as discrete symmetry breaking in SU(3)×SU(2)×U(1) gauge group, permitting localized dimensional tunneling without exotic matter requirements.</p>
-      </div>
+  <div class="modal" id="gameModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Game Start</h2>
+      <p id="modalText">Initialize the 27-phase toroid. Shadow Queen orbits on three gyros. Achieve 100% Coherence or reduce the Queen to 0D.</p>
+      <button class="btn btn-primary" id="modalBtn">Begin</button>
     </div>
-  </section>
-
-  <!-- CONTACT -->
-  <section id="contact">
-    <h2>Contact Protocol</h2>
-    <p>All communications encrypted via quantum key distribution. Clearance Level 7 required for transmission array access requests.</p>
-    
-    <div class="card">
-      <div class="card-title">Secure Channel</div>
-      <p>Direct communications to Workshop Command:</p>
-      <p style="color: var(--accent); font-family: monospace; margin: 1rem 0;">ETA-ALC@holoworkshop.11d</p>
-      <p>Response time: 6.2 × 10^-44 seconds standard. Paradox resolution may delay replies indefinitely.</p>
-    </div>
-
-    <div class="card" style="margin-top: 2rem;">
-      <div class="card-title">Emergency Protocols</div>
-      <p>In case of uncontrolled FOLD cascade: Execute STITCH bind override immediately. Contact nearest temporal enforcement division. Do not attempt to observe your own transmission.</p>
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  <p>HOLOGRAPHIC WORKSHOP // MATTER TRANSMITTER DIVISION // EST. 10^-43 SECONDS AFTER BIG BANG</p>
-  <p>WARNING: Unauthorized operation of Δ traverse systems violates Causality Preservation Act 11.3.7</p>
-</footer>
+  </div>
 
 <script>
-// Navigation System - 5 levels deep
-const navMap = {
-  'home': [],
-  'workshop': ['home'],
-  'specs': ['home', 'workshop'],
-  'operator': ['home', 'workshop', 'specs'],
-  'research': ['home', 'workshop', 'specs', 'operator'],
-  'contact': ['home']
-};
-
-let currentPage = 'home';
-const sections = document.querySelectorAll('section');
-const navLinks = document.querySelectorAll('[data-nav]');
-
-// Section switching with breadcrumb updates
-function navigateTo(page) {
-  if (!navMap.hasOwnProperty(page)) return;
+(function() {
+  const N = 27;
+  const svg = document.getElementById('board');
+  const svgNS = 'http://www.w3.org/2000/svg';
   
-  sections.forEach(s => s.classList.remove('active'));
-  document.getElementById(page).classList.add('active');
-  
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  navLinks.forEach(l => {
-    if (l.getAttribute('data-nav') === page || navMap[page].includes(l.getAttribute('data-nav'))) {
-      l.classList.add('active');
-    }
-  });
-  
-  updateBreadcrumbs(page);
-  currentPage = page;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  
-  document.getElementById('navMain').classList.remove('open');
-}
+  const state = {
+    playerPos: 0,
+    coherence: 0,
+    phase: 1,
+    turn: 0,
+    claimedEdges: new Set(),
+    territories: new Set(),
+    welded: false,
+    gameOver: false,
+    queenDim: 3,
+    queenInfluence: N,
+    selectedNode: null,
+    gyros: { A: 0, L: 9, C: 18 }
+  };
 
-function updateBreadcrumbs(page) {
-  const crumbs = [page, ...navMap[page]].reverse();
-  const bc = document.getElementById('breadcrumbs');
-  bc.innerHTML = crumbs.map((c, i) => {
-    const name = c.charAt(0).toUpperCase() + c.slice(1);
-    return `<span class="crumb" data-nav="${c}">${name}</span>${i < crumbs.length - 1 ? '<span class="crumb-separator">›</span>' : ''}`;
-  }).join('');
-  
-  bc.querySelectorAll('.crumb').forEach(c => {
-    c.addEventListener('click', () => navigateTo(c.getAttribute('data-nav')));
-  });
-}
-
-navLinks.forEach(link => {
-  link.addEventListener('click', () => navigateTo(link.getAttribute('data-nav')));
-});
-
-// Mobile Menu
-document.getElementById('menuToggle').addEventListener('click', () => {
-  document.getElementById('navMain').classList.toggle('open');
-});
-
-// Research Subpages: Axiom, Toroid, Lattice, Fold, 11D
-document.querySelectorAll('.research-nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.research-nav-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    
-    const target = item.getAttribute('data-research');
-    document.querySelectorAll('.research-section').forEach(s => {
-      s.style.display = s.getAttribute('data-content') === target ? 'block' : 'none';
-    });
-  });
-});
-
-// Operator Console Functionality
-let stitchActive = false;
-const consoleDisplay = document.getElementById('consoleDisplay');
-const consoleInput = document.getElementById('consoleInput');
-const foldElement = document.getElementById('foldElement');
-
-function addConsoleLine(text, delay = 0) {
-  setTimeout(() => {
-    const line = document.createElement('div');
-    line.className = 'console-line';
-    line.textContent = `> ${text}`;
-    consoleDisplay.appendChild(line);
-    consoleDisplay.scrollTop = consoleDisplay.scrollHeight;
-  }, delay);
-}
-
-// STITCH Bind Mode
-document.getElementById('stitchBtn').addEventListener('click', function() {
-  stitchActive = !stitchActive;
-  this.classList.toggle('active');
-  addConsoleLine(stitchActive ? 'STITCH BIND MODE: ACTIVE' : 'STITCH BIND MODE: DISABLED');
-  addConsoleLine(stitchActive ? 'Quantum foam coherence: 99.99997%' : 'Warning: Foam destabilized', 300);
-});
-
-// Δ Traverse Button
-document.getElementById('deltaBtn').addEventListener('click', () => {
-  if (!stitchActive) {
-    addConsoleLine('ERROR: STITCH bind required before Δ traverse');
-    addConsoleLine('Causality violation prevention: LOCKED', 200);
-    return;
-  }
-  
-  addConsoleLine('Δ TRAVERSE SEQUENCE INITIATED');
-  addConsoleLine('Calculating 11D manifold coordinates...', 400);
-  addConsoleLine('Octonion rotation: A=0.73, L=0.91, C=0.44 rad', 800);
-  addConsoleLine('Firing transdimensional pulse...', 1200);
-  addConsoleLine('TRAVERSE COMPLETE: Position locked', 1600);
-  
-  createTraverseVisualization();
-});
-
-// FOLD Collapse Animation
-document.getElementById('foldBtn').addEventListener('click', function() {
-  addConsoleLine('FOLD COLLAPSE SEQUENCE: INITIATED');
-  addConsoleLine('Compressing 11D to 4D observational frame...', 300);
-  
-  foldElement.classList.remove('unfolded');
-  foldElement.classList.add('folded');
-  
-  setTimeout(() => {
-    addConsoleLine('FOLD COMPLETE: Spacetime manifold compressed', 0);
-    addConsoleLine('Energy expended: 1.21 × 10^19 GeV', 200);
-    
-    setTimeout(() => {
-      foldElement.classList.remove('folded');
-      foldElement.classList.add('unfolded');
-      addConsoleLine('Manifold restored to baseline', 300);
-    }, 1500);
-  }, 800);
-});
-
-// Console Input
-consoleInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    const cmd = consoleInput.value.trim().toLowerCase();
-    addConsoleLine(`Command: ${cmd}`);
-    
-    switch(cmd) {
-      case 'help':
-        addConsoleLine('Commands: status, init, clear, help');
-        break;
-      case 'status':
-        addConsoleLine(`STITCH: ${stitchActive ? 'ACTIVE' : 'INACTIVE'}`);
-        addConsoleLine('Gyroscopes: A/L/C NOMINAL');
-        addConsoleLine('Foam Stability: 0.97 Planck');
-        break;
-      case 'init':
-        addConsoleLine('Initialization sequence complete');
-        addConsoleLine('All systems: OPERATIONAL');
-        break;
-      case 'clear':
-        consoleDisplay.innerHTML = '<div class="console-line">Console cleared</div>';
-        break;
-      default:
-        addConsoleLine(`Unknown command: ${cmd}`);
-    }
-    
-    consoleInput.value = '';
-  }
-});
-
-// Traverse Field Visualization
-function createTraverseVisualization() {
-  const field = document.getElementById('traverseField');
-  field.innerHTML = '';
-  
   const nodes = [];
-  for (let i = 0; i < 8; i++) {
-    const node = document.createElement('div');
-    node.className = 'traverse-node';
-    node.style.left = Math.random() * 90 + 5 + '%';
-    node.style.top = Math.random() * 90 + 5 + '%';
-    field.appendChild(node);
-    nodes.push(node);
-  }
+  const edges = [];
   
-  // Create connections
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      if (Math.random() > 0.6) {
-        const line = document.createElement('div');
-        line.className = 'traverse-line';
-        const n1 = nodes[i].getBoundingClientRect();
-        const n2 = nodes[j].getBoundingClientRect();
-        const f = field.getBoundingClientRect();
+  function initBoard() {
+    const cx = 280, cy = 280;
+    const r1 = 220, r2 = 140, r3 = 70;
+    const radii = [r1, r2, r3];
+    
+    // Create 27 nodes: 9 per ring to form toroid
+    for (let ring = 0; ring < 3; ring++) {
+      for (let i = 0; i < 9; i++) {
+        const angle = (i / 9) * 2 * Math.PI - Math.PI / 2;
+        const r = radii[ring];
+        const x = cx + r * Math.cos(angle);
+        const y = cy + r * Math.sin(angle);
+        const id = ring * 9 + i;
+        nodes.push({ id, x, y, ring });
+      }
+    }
+
+    // Create edges: toroidal connections
+    for (let i = 0; i < N; i++) {
+      const ring = Math.floor(i / 9);
+      const idx = i % 9;
+      
+      // Adjacent in same ring
+      const next = ring * 9 + (idx + 1) % 9;
+      edges.push([i, next]);
+      
+      // Cross-ring connections for toroid
+      if (ring < 2) {
+        const belowIdx = (idx + 3) % 9; // offset for twist
+        const below = (ring + 1) * 9 + belowIdx;
+        edges.push([i, below]);
+      }
+      // Connect inner to outer for closure
+      if (ring === 2) {
+        const outerIdx = (idx + 6) % 9;
+        edges.push([i, outerIdx]);
+      }
+    }
+
+    renderBoard();
+    updateUI();
+  }
+
+  function renderBoard() {
+    svg.innerHTML = '';
+    
+    // Draw edges
+    edges.forEach(([a, b], idx) => {
+      const line = document.createElementNS(svgNS, 'line');
+      const edgeKey = `${Math.min(a,b)}-${Math.max(a,b)}`;
+      line.setAttribute('x1', nodes[a].x);
+      line.setAttribute('y1', nodes[a].y);
+      line.setAttribute('x2', nodes[b].x);
+      line.setAttribute('y2', nodes[b].y);
+      line.setAttribute('class', 'edge');
+      line.setAttribute('data-edge', edgeKey);
+      if (state.claimedEdges.has(edgeKey)) {
+        line.classList.add('claimed', 'player');
+      }
+      svg.appendChild(line);
+    });
+
+    // Draw nodes
+    nodes.forEach((node, i) => {
+      const g = document.createElementNS(svgNS, 'g');
+      g.setAttribute('transform', `translate(${node.x},${node.y})`);
+      
+      const circle = document.createElementNS(svgNS, 'circle');
+      circle.setAttribute('r', '12');
+      circle.setAttribute('fill', 'var(--deep-purple)');
+      circle.setAttribute('stroke', 'var(--border)');
+      circle.setAttribute('stroke-width', '2');
+      circle.setAttribute('class', 'node');
+      circle.setAttribute('data-id', i);
+      
+      if (i === state.playerPos) {
+        circle.classList.add('delta');
+        circle.setAttribute('fill', 'var(--success)');
+        circle.setAttribute('stroke', 'var(--success)');
+        circle.setAttribute('r', '16');
+      }
+      
+      // Queen gyro positions
+      const isQueen = Object.values(state.gyros).includes(i);
+      if (isQueen) {
+        circle.classList.add('queen');
+        circle.setAttribute('r', '14');
+        if (state.gyros.A === i) {
+          circle.setAttribute('fill', 'var(--red)');
+          circle.setAttribute('stroke', 'var(--red)');
+        } else if (state.gyros.L === i) {
+          circle.setAttribute('fill', 'var(--white)');
+          circle.setAttribute('stroke', 'var(--white)');
+        } else if (state.gyros.C === i) {
+          circle.setAttribute('fill', 'var(--purple)');
+          circle.setAttribute('stroke', 'var(--purple)');
+        }
+      }
+      
+      if (state.selectedNode === i) {
+        circle.setAttribute('stroke', 'var(--glow)');
+        circle.setAttribute('stroke-width', '3');
+      }
+
+      const text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dy', '4');
+      text.setAttribute('fill', 'var(--text-bright)');
+      text.setAttribute('font-size', '10');
+      text.setAttribute('font-weight', '600');
+      text.textContent = i;
+      
+      g.appendChild(circle);
+      g.appendChild(text);
+      
+      circle.addEventListener('click', () => selectNode(i));
+      
+      svg.appendChild(g);
+    });
+  }
+
+  function selectNode(id) {
+    if (state.gameOver) return;
+    state.selectedNode = id;
+    renderBoard();
+    log(`Selected node ${id}`, 'system');
+  }
+
+  function getEdgeKey(a, b) {
+    return `${Math.min(a,b)}-${Math.max(a,b)}`;
+  }
+
+  function areAdjacent(a, b) {
+    return edges.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  }
+
+  function traverse() {
+    if (state.welded || state.gameOver) return;
+    if (state.selectedNode === null || state.selectedNode === state.playerPos) {
+      log('Select an adjacent node to traverse', 'system');
+      return;
+    }
+    
+    if (!areAdjacent(state.playerPos, state.selectedNode)) {
+      log('Target node not adjacent - traversal blocked', 'system');
+      return;
+    }
+
+    state.playerPos = state.selectedNode;
+    state.selectedNode = null;
+    state.turn++;
+    
+    updateCoherence(3);
+    advancePhase();
+    queenMove();
+    checkWinCondition();
+    
+    log(`Δ traversed to node ${state.playerPos}`, 'player');
+    renderBoard();
+    updateUI();
+  }
+
+  function stitch() {
+    if (state.welded || state.gameOver) return;
+    if (state.selectedNode === null) {
+      log('Select a node to STITCH edge from current position', 'system');
+      return;
+    }
+    
+    if (!areAdjacent(state.playerPos, state.selectedNode)) {
+      log('Cannot stitch - nodes not connected', 'system');
+      return;
+    }
+    
+    const edgeKey = getEdgeKey(state.playerPos, state.selectedNode);
+    if (state.claimedEdges.has(edgeKey)) {
+      log('Edge already claimed', 'system');
+      return;
+    }
+    
+    state.claimedEdges.add(edgeKey);
+    state.turn++;
+    
+    updateCoherence(5);
+    checkTerritory(state.selectedNode);
+    advancePhase();
+    queenMove();
+    checkWinCondition();
+    
+    log(`Δ STITCH: Edge ${edgeKey} claimed`, 'player');
+    renderBoard();
+    updateUI();
+  }
+
+  function fold() {
+    if (state.welded || state.gameOver) return;
+    
+    // Find triangles around player position
+    let folded = 0;
+    const adjacents = nodes.filter((n, i) => areAdjacent(state.playerPos, i)).map(n => n.id);
+    
+    for (let i = 0; i < adjacents.length; i++) {
+      for (let j = i + 1; j < adjacents.length; j++) {
+        const a = adjacents[i], b = adjacents[j];
+        if (!areAdjacent(a, b)) continue;
         
-        const x1 = n1.left - f.left + 6;
-        const y1 = n1.top - f.top + 6;
-        const x2 = n2.left - f.left + 6;
-        const y2 = n2.top - f.top + 6;
+        const edges = [
+          getEdgeKey(state.playerPos, a),
+          getEdgeKey(state.playerPos, b),
+          getEdgeKey(a, b)
+        ];
         
-        const length = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
-        const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
-        
-        line.style.width = length + 'px';
-        line.style.left = x1 + 'px';
-        line.style.top = y1 + 'px';
-        line.style.transform = `rotate(${angle}deg)`;
-        field.appendChild(line);
+        if (edges.every(e => state.claimedEdges.has(e))) {
+          const territoryKey = [state.playerPos, a, b].sort().join('-');
+          if (!state.territories.has(territoryKey)) {
+            state.territories.add(territoryKey);
+            folded++;
+          }
+        }
+      }
+    }
+    
+    if (folded > 0) {
+      state.turn++;
+      updateCoherence(folded * 8);
+      state.queenDim = Math.max(0, state.queenDim - folded * 0.5);
+      state.queenInfluence = Math.max(0, state.queenInfluence - folded * 3);
+      advancePhase();
+      queenMove();
+      log(`Δ FOLD: Collapsed ${folded} territories (-${folded * 0.5}D Queen)`, 'player');
+    } else {
+      log('FOLD failed - no complete triangles found', 'system');
+      return;
+    }
+    
+    checkWinCondition();
+    renderBoard();
+    updateUI();
+  }
+
+  function weld() {
+    if (state.gameOver) return;
+    if (state.welded) {
+      log('Board already WELDED', 'system');
+      return;
+    }
+    
+    if (state.coherence < 50) {
+      log('WELD requires Coherence >= 50%', 'system');
+      return;
+    }
+    
+    state.welded = true;
+    const overlay = document.getElementById('weldOverlay');
+    overlay.classList.add('welded-overlay');
+    
+    updateCoherence(15);
+    state.queenDim = Math.max(0, state.queenDim - 1);
+    log('Δ WELD: Board state locked - Queen dimensionality collapse initiated', 'player');
+    
+    queenMove();
+    checkWinCondition();
+    renderBoard();
+    updateUI();
+  }
+
+  function checkTerritory(nodeId) {
+    // Check if new edge completes any triangles
+    const adjacents = nodes.filter((n, i) => areAdjacent(nodeId, i)).map(n => n.id);
+    for (let i = 0; i < adjacents.length; i++) {
+      for (let j = i + 1; j < adjacents.length; j++) {
+        if (areAdjacent(adjacents[i], adjacents[j])) {
+          const edges = [
+            getEdgeKey(nodeId, adjacents[i]),
+            getEdgeKey(nodeId, adjacents[j]),
+            getEdgeKey(adjacents[i], adjacents[j])
+          ];
+          if (edges.every(e => state.claimedEdges.has(e))) {
+            const territoryKey = [nodeId, adjacents[i], adjacents[j]].sort().join('-');
+            if (!state.territories.has(territoryKey)) {
+              state.territories.add(territoryKey);
+              updateCoherence(3);
+            }
+          }
+        }
       }
     }
   }
-}
 
-// Initialize
-updateBreadcrumbs('home');
+  function queenMove() {
+    // A/L/C gyros orbit: Angular=clockwise, Linear=jump, Circular=counterclockwise
+    state.gyros.A = (state.gyros.A + 1) % N;
+    state.gyros.L = (state.gyros.L + 7) % N; // prime jump
+    state.gyros.C = (state.gyros.C - 1 + N) % N;
+    
+    // Queen influence decay if near player
+    const queenNodes = Object.values(state.gyros);
+    if (queenNodes.some(q => Math.abs(q - state.playerPos) <= 2)) {
+      state.coherence = Math.max(0, state.coherence - 2);
+      log('Shadow Queen exerts influence - Coherence disrupted', 'queen');
+    }
+  }
+
+  function updateCoherence(delta) {
+    state.coherence = Math.min(100, Math.max(0, state.coherence + delta));
+  }
+
+  function advancePhase() {
+    state.phase = (state.phase % N) + 1;
+  }
+
+  function checkWinCondition() {
+    if (state.coherence >= 100) {
+      endGame(true, 'Coherence 100% achieved. The Shadow Queen dissolves into the toroid.');
+    } else if (state.queenDim <= 0) {
+      endGame(true, 'Shadow Queen reduced to 0D. Dimensional collapse complete.');
+    } else if (state.queenInfluence <= 0) {
+      endGame(true, 'Queen influence nullified. Complex Games concluded.');
+    } else if (state.welded && state.turn > state.phase + 27) {
+      endGame(false, 'WELD stalemate - Shadow Queen endures.');
+    } else if (state.coherence <= 0 && state.turn > 10) {
+      endGame(false, 'Coherence collapsed. The Shadow Queen consumes the board.');
+    }
+  }
+
+  function endGame(won, message) {
+    state.gameOver = true;
+    showModal(
+      won ? 'Victory' : 'Defeat',
+      message + `<br><br>Final Coherence: ${state.coherence}%<br>Turns: ${state.turn}<br>Territories: ${state.territories.size}`,
+      'Play Again'
+    );
+  }
+
+  function updateUI() {
+    document.getElementById('playerPos').textContent = state.playerPos;
+    document.getElementById('coherence').textContent = state.coherence + '%';
+    document.getElementById('coherenceBar').style.width = state.coherence + '%';
+    document.getElementById('territories').textContent = state.territories.size;
+    document.getElementById('edgesClaimed').textContent = state.claimedEdges.size;
+    document.getElementById('currentPhase').textContent = `Phase ${state.phase}`;
+    document.getElementById('queenDim').textContent = state.queenDim.toFixed(1) + 'D';
+    document.getElementById('queenInfluence').textContent = Math.max(0, state.queenInfluence);
+    document.getElementById('gyroA').textContent = state.gyros.A;
+    document.getElementById('gyroL').textContent = state.gyros.L;
+    document.getElementById('gyroC').textContent = state.gyros.C;
+    
+    document.getElementById('traverseBtn').disabled = state.welded || state.gameOver;
+    document.getElementById('stitchBtn').disabled = state.welded || state.gameOver;
+    document.getElementById('foldBtn').disabled = state.welded || state.gameOver;
+    document.getElementById('weldBtn').disabled = state.welded || state.gameOver || state.coherence < 50;
+  }
+
+  function log(msg, type = 'system') {
+    const logEl = document.getElementById('turnLog');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[T${state.turn}] ${msg}`;
+    logEl.insertBefore(entry, logEl.firstChild);
+    while (logEl.children.length > 20) {
+      logEl.removeChild(logEl.lastChild);
+    }
+  }
+
+  function showModal(title, text, btnText) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalText').innerHTML = text;
+    document.getElementById('modalBtn').textContent = btnText;
+    document.getElementById('gameModal').classList.add('active');
+  }
+
+  function hideModal() {
+    document.getElementById('gameModal').classList.remove('active');
+  }
+
+  function resetGame() {
+    state.playerPos = 0;
+    state.coherence = 0;
+    state.phase = 1;
+    state.turn = 0;
+    state.claimedEdges.clear();
+    state.territories.clear();
+    state.welded = false;
+    state.gameOver = false;
+    state.queenDim = 3;
+    state.queenInfluence = N;
+    state.selectedNode = null;
+    state.gyros = { A: 0, L: 9, C: 18 };
+    document.getElementById('weldOverlay').classList.remove('welded-overlay');
+    document.getElementById('turnLog').innerHTML = '';
+    renderBoard();
+    updateUI();
+    hideModal();
+    log('Toroid initialized - Shadow Queen phase orbit begun', 'system');
+  }
+
+  // Event listeners
+  document.getElementById('traverseBtn').addEventListener('click', traverse);
+  document.getElementById('stitchBtn').addEventListener('click', stitch);
+  document.getElementById('foldBtn').addEventListener('click', fold);
+  document.getElementById('weldBtn').addEventListener('click', weld);
+  document.getElementById('modalBtn').addEventListener('click', () => {
+    if (state.gameOver) {
+      resetGame();
+    } else {
+      hideModal();
+      log('Toroid initialized - Shadow Queen phase orbit begun', 'system');
+    }
+  });
+
+  // Init
+  initBoard();
+  showModal('Shadow Queen: Complex Games', 'You are Δ navigating the 27-node toroid.<br><br>Shadow Queen orbits on A/L/C gyros.<br>STITCH edges, FOLD territories, WELD to lock.<br><br>Objective: 100% Coherence or reduce Queen to 0D.', 'Enter the Toroid');
+})();
 </script>
-
 </body>
 </html>
