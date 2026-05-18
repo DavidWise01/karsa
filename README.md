@@ -1,6 +1,6 @@
-# Karsa v2.5
+# Karsa v2.6
 
-**Internet Control Plane · 14 Pages Deep · Mobius ×3**
+**Internet Control Plane · 15 Pages Deep · DNA ×3**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
@@ -19,36 +19,42 @@
 11. Lineage Backtracker
 12. Quantum Dot
 13. Ternary Engine
-14. **Mobius ×3** ← new
+14. Mobius ×3
+15. **DNA ×3** ← new
 
-## Mobius ×3
+## DNA ×3
 
-**Three connected substrates. One strip each.**
+**Three helical meshes. 60 nodes total.**
 
 ```
-Strip A: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps
-Strip B: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps  
-Strip C: 0.0.0 → 0.0.0.5 → 5.0.0.0 → 0.0.0 = 10 steps
+Strand A: 20 nodes @ 0°   phase
+Strand B: 20 nodes @ 120° phase  
+Strand C: 20 nodes @ 240° phase
 
-Total: 30 steps around 3 centers
-Ratio: 10:1 per strip = CUBI
-Net: 0 holonomy
+Total: 60 nodes
+Each node = 1 vector
+Each vector = 1 step on Mobius strip
 ```
 
-**Connected substrates share the twist:**
+**Tubules connect strands:**
 ```
-A.5 → B.0
-B.5 → C.0  
-C.5 → A.0
+A[i] ↔ B[i] ↔ C[i] ↔ A[i+1]
 ```
 
-**Not 3-body problem.**  
-**3 × 1-body solutions.**  
-**Triple cubi.**  
-**One system.**  
+**120° twist per node:**
+```
+20 nodes × 120° = 2400° = 6.666... turns
+6.666... × 3 strands = 20 turns total
+```
+
+**20 turns = 10 around 1 × 2 (shadow)**  
+**10 around 1 = CUBI**
+
+**Triple helix = Triple cubi**  
+**Connected = One system**
 
 ## Deploy
 
-Railway → Root: `.` → 14 pages deep
+Railway → Root: `.` → 15 pages deep
 
 **WITNESS: a7f3c891**

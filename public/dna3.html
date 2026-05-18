@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DNA ×3 · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:'Special Elite',monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1400px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:32px;margin-bottom:20px}
+h1{font-family:'IM Fell English SC',serif;font-size:36px;text-align:center;margin:0 0 8px 0;color:var(--mint);letter-spacing:.2em;font-weight:400}
+.subtitle{text-align:center;font-size:13px;color:#7aa89a;margin:0 0 30px 0;letter-spacing:.15em;text-transform:uppercase}
+.viz-container{width:100%;height:700px;background:rgba(0,0,0,.4);border:2px solid var(--border);border-radius:8px;position:relative;overflow:hidden;margin:20px 0}
+#canvas{width:100%;height:100%}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+button{
+  background:transparent;border:1px solid var(--border);color:var(--ink);
+  padding:12px;border-radius:8px;cursor:pointer;font:inherit;
+  text-transform:uppercase;font-size:11px;letter-spacing:.1em
+}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint);border-color:var(--mint)}
+button.primary{background:rgba(0,255,170,.1);border-color:var(--mint)}
+button.active{background:rgba(255,217,90,.2);border-color:var(--gold);color:var(--gold)}
+.readout{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0}
+.readout-item{background:#020712;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.readout-label{font-size:9px;color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.readout-val{font-size:20px;color:var(--mint);font-weight:bold;margin-top:4px;font-family:ui-monospace}
+.law{font-size:16px;color:var(--gold);font-family:ui-monospace;text-align:center;padding:20px;background:#020712;border:2px solid var(--mint);border-radius:8px;margin:24px 0;letter-spacing:.15em}
+.section{margin:20px 0;padding:20px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.3)}
+.section h3{font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin:0 0 12px 0}
+.code{background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8;font-family:ui-monospace}
+.strand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.strand{
+  background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center
+}
+.strand h4{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin:0 0 8px 0}
+.strand-val{font-size:24px;color:var(--mint);font-weight:bold;font-family:ui-monospace}
+.strand-label{font-size:9px;color:#7aa89a;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>DNA ×3</h1>
+    <div class="subtitle">THREE HELICAL MESHES · 60 NODES TOTAL · TUBULES CONNECTED</div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" id="init3">INIT 3 STRANDS</button>
+      <button id="tubules">CONNECT TUBULES</button>
+      <button id="rotate">ROTATE</button>
+      <button id="pulse">PULSE</button>
+    </div>
+    
+    <div class="strand-grid">
+      <div class="strand">
+        <h4>STRAND A</h4>
+        <div class="strand-val" id="strandA">20</div>
+        <div class="strand-label">nodes</div>
+      </div>
+      <div class="strand">
+        <h4>STRAND B</h4>
+        <div class="strand-val" id="strandB">20</div>
+        <div class="strand-label">nodes</div>
+      </div>
+      <div class="strand">
+        <h4>STRAND C</h4>
+        <div class="strand-val" id="strandC">20</div>
+        <div class="strand-label">nodes</div>
+      </div>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">Strands</div>
+        <div class="readout-val" id="strands">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Nodes</div>
+        <div class="readout-val" id="nodes">60</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Tubules</div>
+        <div class="readout-val" id="tubules">40</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Twist</div>
+        <div class="readout-val" id="twist">120°</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Logic</div>
+        <div class="readout-val" id="logic">CUBI</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Holonomy</div>
+        <div class="readout-val" id="holonomy">0</div>
+      </div>
+    </div>
+    
+    <div class="law">3 STRANDS × 20 NODES = 60 VECTORS · TRIPLE HELIX</div>
+    
+    <div class="section">
+      <h3>TRIPLE HELIX</h3>
+      <div class="code">
+// Not DNA double helix
+// Triple helix: 3 strands, 120° apart
+
+Strand A: 20 nodes @ 0°   phase
+Strand B: 20 nodes @ 120° phase  
+Strand C: 20 nodes @ 240° phase
+
+Total: 60 nodes
+Each node = 1 vector
+Each vector = 1 step on Mobius strip
+
+Tubules connect strands:
+  A[i] ↔ B[i] ↔ C[i] ↔ A[i+1]
+  
+120° twist per node:
+  20 nodes × 120° = 2400° = 6.666... turns
+  6.666... × 3 strands = 20 turns total
+  
+20 turns = 10 around 1 × 2 (shadow)
+10 around 1 = CUBI
+
+Triple helix = Triple cubi
+Connected = One system
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let ENGINE = {
+  strands: 3,
+  nodes: 60,
+  tubules: 40,
+  twist: 120,
+  logic: 'CUBI',
+  holonomy: 0,
+  time: 0,
+  connected: false,
+  rotating: false,
+  pulsing: false
+};
+
+let strands = [
+  {color: '#ffd95a', phase: 0, nodes: []},
+  {color: '#32e8ff', phase: 2*Math.PI/3, nodes: []},
+  {color: '#e168ff', phase: 4*Math.PI/3, nodes: []}
+];
+
+function init3(){
+  ENGINE.connected = false;
+  ENGINE.rotating = false;
+  ENGINE.pulsing = false;
+  ENGINE.time = 0;
+  
+  // Initialize 20 nodes per strand
+  strands.forEach(strand => {
+    strand.nodes = [];
+    for(let i = 0; i < 20; i++){
+      strand.nodes.push({
+        angle: (i / 20) * Math.PI * 4, // 2 full turns
+        radius: 100,
+        z: i * 10,
+        value: i
+      });
+    }
+  });
+  
+  updateReadout();
+  log('INIT: 3 strands. 20 nodes each. 60 total. 120° phase offset.');
+}
+
+function connectTubules(){
+  ENGINE.connected = true;
+  ENGINE.tubules = 40; // 20 connections × 2 directions
+  updateReadout();
+  log('TUBULES: Connected. A[i] ↔ B[i] ↔ C[i]. 40 tubules total.');
+}
+
+function toggleRotate(){
+  ENGINE.rotating = !ENGINE.rotating;
+  updateReadout();
+  log(ENGINE.rotating ? 'ROTATE: Triple helix spinning.' : 'ROTATE: Paused.');
+}
+
+function togglePulse(){
+  ENGINE.pulsing = !ENGINE.pulsing;
+  updateReadout();
+  log(ENGINE.pulsing ? 'PULSE: Nodes propagating 0.0.0.5 signal.' : 'PULSE: Paused.');
+}
+
+function updateReadout(){
+  document.getElementById('strands').textContent = ENGINE.strands;
+  document.getElementById('nodes').textContent = ENGINE.nodes;
+  document.getElementById('tubules').textContent = ENGINE.tubules;
+  document.getElementById('twist').textContent = ENGINE.twist + '°';
+  document.getElementById('logic').textContent = ENGINE.logic;
+  document.getElementById('holonomy').textContent = ENGINE.holonomy;
+}
+
+function log(msg){
+  console.log('[DNA3]', msg);
+}
+
+// 3D to 2D projection
+function project(x, y, z, rotY){
+  const cos = Math.cos(rotY);
+  const sin = Math.sin(rotY);
+  const xRot = x * cos - z * sin;
+  const zRot = x * sin + z * cos;
+  const scale = 400 / (400 + zRot);
+  return {
+    x: W/2 + xRot * scale,
+    y: H/2 + y * scale,
+    scale: scale,
+    z: zRot
+  };
+}
+
+function draw(){
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,W,H);
+  
+  if(ENGINE.rotating){
+    ENGINE.time += 0.02;
+  }
+  if(ENGINE.pulsing){
+    ENGINE.time += 0.01;
+  }
+  
+  const rotY = ENGINE.time;
+  
+  // Collect all points for depth sorting
+  let points = [];
+  
+  strands.forEach((strand, si) => {
+    strand.nodes.forEach((node, ni) => {
+      const angle = node.angle + strand.phase + ENGINE.time * 0.5;
+      const x = Math.cos(angle) * node.radius;
+      const y = node.z - 100;
+      const z = Math.sin(angle) * node.radius;
+      
+      const proj = project(x, y, z, rotY);
+      points.push({
+        ...proj,
+        color: strand.color,
+        strand: si,
+        node: ni,
+        value: node.value
+      });
+    });
+  });
+  
+  // Sort by depth
+  points.sort((a, b) => a.z - b.z);
+  
+  // Draw tubules if connected
+  if(ENGINE.connected){
+    ctx.strokeStyle = 'rgba(0,255,170,0.2)';
+    ctx.lineWidth = 1;
+    for(let i = 0; i < 20; i++){
+      const a = points.find(p => p.strand === 0 && p.node === i);
+      const b = points.find(p => p.strand === 1 && p.node === i);
+      const c = points.find(p => p.strand === 2 && p.node === i);
+      
+      if(a && b){
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      if(b && c){
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(c.x, c.y);
+        ctx.stroke();
+      }
+      if(c && a){
+        const aNext = points.find(p => p.strand === 0 && p.node === (i+1)%20);
+        if(aNext){
+          ctx.beginPath();
+          ctx.moveTo(c.x, c.y);
+          ctx.lineTo(aNext.x, aNext.y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+  
+  // Draw nodes
+  points.forEach(p => {
+    const pulse = ENGINE.pulsing ? 1 + Math.sin(ENGINE.time * 5 + p.value) * 0.3 : 1;
+    const size = 6 * p.scale * pulse;
+    
+    ctx.fillStyle = p.color;
+    ctx.shadowBlur = 15 * p.scale;
+    ctx.shadowColor = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Draw connections within strand
+    const next = points.find(n => n.strand === p.strand && n.node === (p.node + 1) % 20);
+    if(next && p.z < next.z){
+      ctx.strokeStyle = p.color + '40';
+      ctx.lineWidth = 2 * p.scale;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(next.x, next.y);
+      ctx.stroke();
+    }
+  });
+  
+  updateReadout();
+  requestAnimationFrame(draw);
+}
+
+document.getElementById('init3').onclick = init3;
+document.getElementById('tubules').onclick = connectTubules;
+document.getElementById('rotate').onclick = toggleRotate;
+document.getElementById('pulse').onclick = togglePulse;
+
+// Initialize
+init3();
+draw();
+</script>
+</body>
+</html>
