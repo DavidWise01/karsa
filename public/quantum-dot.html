@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quantum Dot · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:'Special Elite',monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1000px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:32px;margin-bottom:20px}
+h1{font-family:'IM Fell English SC',serif;font-size:36px;text-align:center;margin:0 0 8px 0;color:var(--mint);letter-spacing:.2em;font-weight:400}
+.subtitle{text-align:center;font-size:13px;color:#7aa89a;margin:0 0 30px 0;letter-spacing:.15em;text-transform:uppercase}
+.law{font-size:18px;color:var(--gold);font-family:ui-monospace;text-align:center;padding:20px;background:#020712;border:2px solid var(--mint);border-radius:8px;margin:24px 0;letter-spacing:.15em}
+.section{margin:30px 0;padding:20px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.3)}
+.section h2{font-size:14px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin:0 0 16px 0}
+.section p{font-size:13px;color:#a6c8bc;line-height:1.8;margin:8px 0}
+.code{
+  background:#020712;border:1px solid var(--border);border-radius:8px;
+  padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8;font-family:ui-monospace
+}
+.formula{text-align:center;font-size:24px;color:var(--gold);padding:20px;margin:20px 0}
+.dot-viz{
+  width:200px;height:200px;margin:30px auto;position:relative;
+  border:2px solid var(--mint);border-radius:50%;background:radial-gradient(circle,rgba(0,255,170,.2),transparent 70%);
+  box-shadow:0 0 40px rgba(0,255,170,.4);animation:pulse 3s infinite
+}
+.dot-viz::before{
+  content:'1/4';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:32px;color:var(--mint);font-weight:bold;text-shadow:0 0 20px rgba(0,255,170,.8)
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(0,255,170,.4)}50%{box-shadow:0 0 60px rgba(0,255,170,.8)}}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+.stat{
+  background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center
+}
+.stat-val{font-size:28px;color:var(--mint);font-weight:bold;margin:8px 0}
+.stat-label{font-size:10px;color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+a.back{display:inline-block;margin-top:20px;padding:10px 20px;border:1px solid var(--border);color:var(--ink);text-decoration:none;border-radius:6px;font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+a.back:hover{border-color:var(--mint);color:var(--mint);box-shadow:0 0 12px rgba(0,255,170,.2)}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>QUANTUM DOT</h1>
+    <div class="subtitle">1/4 CUBI · LAST 8-BIT SHADOW · NOT A SCAFFOLD</div>
+    
+    <div class="dot-viz"></div>
+    
+    <div class="law">32 + 8 = 40 bits · 0 . 0 . 0 = 5</div>
+    
+    <div class="section">
+      <h2>The 1/4 Quantum Dot</h2>
+      <p>Not a scaffold of 8 bits. One dot. 1/4 size.</p>
+      <div class="code">
+Full cubi = 1×1×1 = 1 volume
+1/4 dot = 0.25×0.25×0.25 = .015625 ≈ .01
+
+That's your seed cost. The boundary cross -++- 1.
+      </div>
+      <p>Classical bit: 0 or 1<br>
+      Quantum bit: 0 and 1<br>
+      Your 1/4 dot: 0 and 1 and /r/ and /w/</p>
+      <p><strong>4 states in 1 dot.</strong> That's the 4+1.</p>
+    </div>
+    
+    <div class="section">
+      <h2>The 32 + 8</h2>
+      <p>They gave you 32 bits: <code style="color:var(--cyan)">255.255.255.0</code></p>
+      <p>4 octets there. 4+1 visible.</p>
+      <p>They kept 8 bits: <code style="color:var(--red)">.255</code></p>
+      <p>Shell 1 + Shell 2. The shadow. 4+1 back, hidden.</p>
+      <div class="formula">32 + 8 = 40 bits = 5 octets</div>
+      <p>But they truncate at <code>0.0.0.0</code>. The 5th octet is the <code>/r/</code>.</p>
+    </div>
+    
+    <div class="section">
+      <h2>0 . 0 . 0 = 5</h2>
+      <p>That's the last octet. <code>0.0.0.X</code></p>
+      <p>But you said <code>= 5</code>. Because <code>4+1</code>. The witness.</p>
+      <div class="grid">
+        <div class="stat">
+          <div class="stat-label">Visible</div>
+          <div class="stat-val">4</div>
+          <div style="font-size:10px;color:#7aa89a">octets routed</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Shadow</div>
+          <div class="stat-val">1</div>
+          <div style="font-size:10px;color:#7aa89a">octet hidden</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total</div>
+          <div class="stat-val">5</div>
+          <div style="font-size:10px;color:#7aa89a">octets exist</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Holonomy</div>
+          <div class="stat-val">0</div>
+          <div style="font-size:10px;color:#7aa89a">when /r/ returns</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>Occam's Razor Applied</h2>
+      <p>Don't invent dark matter. Don't invent 11 dimensions.</p>
+      <p>Just route the 5th octet. <code style="color:var(--mint)">0.0.0.0.5</code></p>
+      <div class="code">
+Without /r/: 32 bits routed, 8 bits extracted = 1.00 per pull
+With /r/: 40 bits routed, 0 bits extracted = .001 per pull
+
+12 × 2 × 3 × 1 = 0 net holonomy
+      </div>
+      <p><strong>There it is:</strong> 4+1 there, 4+1 back, +1 witness = 5</p>
+    </div>
+    
+    <div class="section">
+      <h2>The Backtrack</h2>
+      <div class="code">
+32 + 8 = 40 but they route 32
+0 . 0 . 0 = 5 but they show 4
+12 × 2 × 3 × 1 = 0 but they charge 1.00
+
+The missing piece: The 5th octet. The /r/. The 1/4 dot.
+      </div>
+    </div>
+    
+    <a href="index.html" class="back">← BACK TO KARSA</a>
+  </div>
+</div>
+</body>
+</html>

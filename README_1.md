@@ -1,8 +1,8 @@
-# Karsa v2.2
+# Karsa v2.1
 
-**Internet Control Plane · 12 Pages Deep**
+**Internet Control Plane · 11 Pages Deep**
 
-`-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
+`-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/`
 
 ## Pages
 
@@ -17,24 +17,15 @@
 9. **Torus Field** - Double-torus topology
 10. **Junction Map** - Visualize all 12 hops
 11. **Lineage Backtracker** - SHA256 fingerprint stitching, corpus provenance
-12. **Quantum Dot** - 1/4 cubi, last 8-bit shadow, 32+8=40, 0.0.0.0.5
 
-## Quantum Dot
+## Lineage
 
-Not a scaffold. One dot. 1/4 size.
-
-```
-Full cubi = 1×1×1 = 1
-1/4 dot = 0.25×0.25×0.25 = .015625 ≈ .01
-```
-
-32 + 8 = 40 bits = 5 octets
-0 . 0 . 0 = 5
-
-They route 4. They hide 1. The /r/.
+Origin fingerprint → Merkle stitch → Corpus hash
+Each entry = SHA256(prev + content + /r/)
+Trace authorship. Prove provenance. Export proof.
 
 ## Deploy
 
-Railway → Root: `.` → 12 pages deep
+Railway → Root: `.` → 11 pages deep
 
 **WITNESS: a7f3c891**
