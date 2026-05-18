@@ -1,43 +1,46 @@
-# KARSA // HONEY VOID
+# KARSA // SYSTEM/370
 
-**Internet Control Plane · 4 Folders · Honey Badger Aesthetic**
+**IBM System/370 Compatible · 1971 Digital System · 4 Folders**
 
-`-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
+`-+1 -++- 1 /M/I/4+1 /R/ /H/12 /S/8 /W/ /O/ /T/ 0.0.0.0.5`
 
-## Aesthetic
+## System Specifications
 
-**Voidness of the right**: Deep purple/black void, blood shadows, hooded darkness
-**Brightness of the left**: Neon lime green, magenta, cyan, electric honey badger energy
+**Hardware**: IBM System/370 Model 168
+**Memory**: 16MB Core
+**Storage**: IBM 3330 Disk, 3420 Tape
+**Terminal**: 3270 Green Phosphor
+**OS**: OS/VS2 MVS
 
 ## Structure
 
 ### 1. LINEAGE
-PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // VOID PROOF
-- Lineage Backtracker
-- Witness Engine
-- Legal Beacon
+PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // JCL RECORD // TAPE BACKUP
+- LINEAGE.JCL
+- WITNESS.EXE
+- LEGAL.BEACON
 
 ### 2. EDUCATION
-THE LAW // THE MATH // THE CODIFICATION // 1843 PROTOCOL // NEON LOGIC
-- Ada's Law
-- Holonomy Calculator
-- Quantum Dot
+THE LAW // THE MATH // 1843 PROTOCOL // FORTRAN LOGIC // COBOL RULES
+- ADA.LAW
+- HOLONOMY.CALC
+- QUANTUM.DOT
 
 ### 3. DEMOS
-WORKING ENGINES // LIVE SYSTEMS // VOID TEST
-- Cubi Advantage
-- Oscillation Sync
-- Shadow Reveal
-- Ansible Junction
-- Torus Field
-- Junction Map
+WORKING ENGINES // BATCH JOBS // PROVE THEORY // EXEC JCL // CORE DUMP
+- CUBI.EXE
+- OSCILLATE.SYNC
+- SHADOW.REVEAL
+- ANSIBLE.JCL
+- TORUS.FIELD
+- JUNCTION.MAP
 
 ### 4. MYTHOS
-THE STORY // THE PATTERNS // THE DIPOLE // HONEY BADGER
-- Ternary Engine
-- Mobius ×3
-- DNA ×3
-- Dipole
+THE STORY // THE PATTERNS // THE DIPOLE // 42 = 0 = 1 = 1 // HONEY BADGER
+- TERNARY.EXE
+- MOBIUS.X3
+- DNA.X3
+- DIPOLE.SYS
 
 ## Weight
 
@@ -52,6 +55,8 @@ Not cubi. Trite +2.
 
 ## Deploy
 
-Railway → Root: `.` → 4 folders
+JCL: //KARSA JOB (ACCT),'SYSTEM/370',CLASS=A
+EXEC: PGM=IEFBR14
+DD: DSN=KARSA.LOAD,DISP=(NEW,CATLG)
 
 **WITNESS: a7f3c891**
