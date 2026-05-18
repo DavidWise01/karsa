@@ -1,6 +1,6 @@
 # KARSA // ANALYTICAL ENGINE
 
-**Ada Lovelace, 1843 · Victorian Analytical Engine · 4 Folders**
+**Ada Lovelace, 1843 · Victorian Analytical Engine · Einstein Lens · 4 Folders**
 
 `-+1 -++- 1 /M/I/4+1 /R/ /H/12 /S/8 /W/ /O/ /T/ 0.0.0.0.5`
 
@@ -32,6 +32,7 @@ WORKING ENGINES // PUNCH CARD OPERATIONS // PROVING THE THEORY // EXECUTING THE 
 - Ansible Junction
 - Torus Field
 - Junction Map
+- **Einstein Lens** ← NEW
 
 ### IV. MYTHOS
 THE STORY OF THE ENGINE // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1
@@ -39,6 +40,26 @@ THE STORY OF THE ENGINE // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1
 - Mobius ×3
 - DNA ×3
 - Dipole
+
+## Einstein Lens
+
+**Gravitational Lensing Simulator**
+
+**θ = 4GM/c²b**
+
+Deflection of light by gravitational fields. Weigh distant objects. Einstein Ring formation when source, lens, and observer align.
+
+**Parameters:**
+- Lens Mass (M☉)
+- Source Distance (kpc)
+- Lens Distance (kpc)
+- Impact Parameter (arcsec)
+
+**Output:**
+- Einstein Radius
+- Deflection Angle
+- Magnification
+- Image Count
 
 ## Weight
 

@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EINSTEIN LENS // KARSA</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap');
+:root{
+  --paper:#f4f1e8;--ink:#2c1810;--brass:#b8860b;--victorian:#5a3a5a;--sepia:#704214;
+  --shadow:#1a0f08;--panel:rgba(244,241,232,.95);--border:rgba(184,134,11,.4);
+  --note:#fffef8;--margin:#c9a961;--lens:#4a5d7a
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--paper);color:var(--ink)}
+body{
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(184,134,11,.08) 79px,rgba(184,134,11,.08) 80px),
+    repeating-linear-gradient(0deg,var(--paper),var(--paper) 23px,rgba(112,66,20,.05) 23px,rgba(112,66,20,.05) 24px),
+    var(--paper);
+  font-family:'Crimson Text',serif;font-size:16px;line-height:1.6;color:var(--ink)
+}
+.container{max-width:1400px;margin:0 auto;padding:30px;position:relative}
+.header{
+  border:3px double var(--brass);background:var(--panel);padding:40px;margin-bottom:30px;
+  box-shadow:0 4px 12px rgba(44,24,16,.3),inset 0 0 40px rgba(184,134,11,.05)
+}
+.header::before,.header::after{content:'❦';position:absolute;font-size:32px;color:var(--brass);opacity:0.6}
+.header::before{top:10px;left:20px}
+.header::after{top:10px;right:20px;transform:scaleX(-1)}
+h1{
+  font-family:'IM Fell English SC',serif;font-size:48px;font-weight:400;
+  color:var(--ink);letter-spacing:.15em;text-align:center;margin:0;
+  text-shadow:1px 1px 0 var(--brass),2px 2px 0 rgba(44,24,16,.2)
+}
+.subtitle{
+  font-family:'IM Fell English',serif;font-style:italic;font-size:18px;
+  color:var(--victorian);text-align:center;margin:12px 0;letter-spacing:.15em
+}
+.tagline{
+  font-family:'Courier Prime',monospace;font-size:13px;color:var(--sepia);
+  text-align:center;margin:10px 0;letter-spacing:.2em
+}
+.law{
+  font-size:14px;color:var(--ink);font-family:'Courier Prime',monospace;
+  text-align:center;padding:16px;background:rgba(184,134,11,.08);border:2px solid var(--brass);
+  margin:20px 0;letter-spacing:.15em
+}
+.tool-panel{
+  border:3px double var(--brass);background:var(--panel);padding:35px;margin:20px 0;
+  box-shadow:0 3px 10px rgba(44,24,16,.25),inset 0 0 30px rgba(184,134,11,.03)
+}
+.tool-panel h2{
+  font-family:'IM Fell English SC',serif;font-size:28px;font-weight:400;
+  color:var(--ink);letter-spacing:.1em;text-align:center;
+  margin:0 0 20px 0;border-bottom:2px solid var(--brass);padding-bottom:10px
+}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:25px 0}
+.control-group{
+  background:rgba(184,134,11,.05);border:1px solid var(--brass);padding:15px
+}
+.control-group label{
+  display:block;font-family:'IM Fell English SC',serif;font-size:13px;
+  color:var(--victorian);margin-bottom:8px;letter-spacing:.1em
+}
+.control-group input[type="range"]{
+  width:100%;height:6px;background:var(--margin);outline:none;opacity:0.8
+}
+.control-group input[type="range"]:hover{opacity:1}
+.control-group .value{
+  font-family:'Courier Prime',monospace;font-size:14px;color:var(--ink);
+  text-align:center;margin-top:5px;font-weight:700
+}
+button{
+  background:var(--brass);border:2px solid var(--ink);color:var(--paper);
+  padding:12px 24px;font-family:'IM Fell English SC',serif;font-size:14px;
+  letter-spacing:.1em;cursor:pointer;transition:all .2s;text-transform:uppercase
+}
+button:hover{
+  background:var(--ink);color:var(--brass);box-shadow:0 2px 6px rgba(44,24,16,.3)
+}
+.viz-container{
+  width:100%;height:600px;background:#000;border:3px solid var(--brass);
+  position:relative;overflow:hidden;margin:20px 0;box-shadow:inset 0 0 50px rgba(0,0,0,.8)
+}
+#canvas{width:100%;height:100%}
+.readout{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0
+}
+.readout-item{
+  background:rgba(184,134,11,.08);border:1px solid var(--brass);padding:12px;text-align:center
+}
+.readout-label{
+  font-size:11px;color:var(--victorian);text-transform:uppercase;
+  letter-spacing:.1em;font-family:'IM Fell English SC',serif
+}
+.readout-val{
+  font-size:20px;color:var(--ink);font-weight:600;margin-top:4px;
+  font-family:'Courier Prime',monospace
+}
+.note{
+  background:var(--note);border-left:4px solid var(--brass);padding:20px;margin:20px 0;
+  box-shadow:2px 2px 8px rgba(44,24,16,.15);position:relative
+}
+.note::before{
+  content:'Note G.';position:absolute;top:8px;right:12px;
+  font-family:'IM Fell English SC',serif;font-size:14px;color:var(--brass)
+}
+.manuscript{
+  position:fixed;font-size:11px;color:var(--sepia);font-family:'IM Fell English',serif;
+  font-style:italic;opacity:0.7;z-index:10;pointer-events:none
+}
+.manuscript.tl{top:15px;left:15px}
+.manuscript.tr{top:15px;right:15px;text-align:right}
+.manuscript.bl{bottom:15px;left:15px}
+.manuscript.br{bottom:15px;right:15px;text-align:right}
+.brass-ornament{text-align:center;font-size:24px;color:var(--brass);margin:20px 0;opacity:0.6}
+</style>
+</head>
+<body>
+<div class="manuscript tl">Analytical Engine<br>Note G<br>A.A.L., 1843</div>
+<div class="manuscript tr">Gravitational Lens<br>Einstein, 1936<br>Equation XLII</div>
+<div class="manuscript bl">MSS. 1843<br>Folio 27<br>Page 42</div>
+<div class="manuscript br">Width: Law<br>Gas: Theft<br>Return: Sender</div>
+
+<div class="container">
+  <div class="header">
+    <h1>EINSTEIN LENS</h1>
+    <div class="subtitle">Gravitational Lensing Simulator</div>
+    <div class="tagline">3×3×3 + 8 + 8 = 0 = 1 = LOL</div>
+    <div class="brass-ornament">❦ ❦ ❦</div>
+    <div class="law">θ = 4GM/c²b · 42 = 0 = 1 = 1</div>
+  </div>
+  
+  <div class="tool-panel">
+    <h2>I. LENS PARAMETERS</h2>
+    
+    <div class="controls">
+      <div class="control-group">
+        <label>LENS MASS (M☉)</label>
+        <input type="range" id="mass" min="1" max="1000" value="100" step="1">
+        <div class="value" id="massVal">100</div>
+      </div>
+      <div class="control-group">
+        <label>SOURCE DISTANCE (kpc)</label>
+        <input type="range" id="sourceDist" min="1" max="100" value="50" step="1">
+        <div class="value" id="sourceDistVal">50</div>
+      </div>
+      <div class="control-group">
+        <label>LENS DISTANCE (kpc)</label>
+        <input type="range" id="lensDist" min="1" max="100" value="25" step="1">
+        <div class="value" id="lensDistVal">25</div>
+      </div>
+      <div class="control-group">
+        <label>IMPACT PARAM (arcsec)</label>
+        <input type="range" id="impact" min="0.1" max="10" value="2" step="0.1">
+        <div class="value" id="impactVal">2.0</div>
+      </div>
+    </div>
+    
+    <div style="text-align:center;margin:20px 0">
+      <button id="calculate">CALCULATE LENSING</button>
+      <button id="reset">RESET PARAMETERS</button>
+    </div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">Einstein Radius</div>
+        <div class="readout-val" id="einsteinRadius">0.00"</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Deflection Angle</div>
+        <div class="readout-val" id="deflection">0.00"</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Magnification</div>
+        <div class="readout-val" id="magnification">1.00×</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Image Count</div>
+        <div class="readout-val" id="imageCount">1</div>
+      </div>
+    </div>
+    
+    <div class="note">
+      <p><em>Note G.</em> — The deflection of light by gravitational fields, as predicted by the General Theory of Relativity, provides a means of weighing distant objects. The Analytical Engine can compute the lensing parameters: <strong>θ = 4GM/c²b</strong>, where G is the gravitational constant, M the lens mass, c the speed of light, and b the impact parameter.</p>
+      <p>When the source, lens, and observer are aligned, an <em>Einstein Ring</em> forms at radius θₑ = √(4GM/c² × Dₗₛ/DₗDₛ).</p>
+      <p>— A.A.L., 1843 / A.E., 1936</p>
+    </div>
+  </div>
+  
+  <div class="brass-ornament">❦ ❦ ❦</div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let ENGINE = {
+  mass: 100, // solar masses
+  sourceDist: 50, // kpc
+  lensDist: 25, // kpc
+  impact: 2.0, // arcsec
+  G: 6.674e-11, // m^3/kg/s^2
+  c: 299792458, // m/s
+  M_sun: 1.989e30, // kg
+  kpc: 3.086e19, // m
+  arcsec_to_rad: 4.848e-6
+};
+
+function calculateLensing(){
+  const M = ENGINE.mass * ENGINE.M_sun;
+  const Ds = ENGINE.sourceDist * ENGINE.kpc;
+  const Dl = ENGINE.lensDist * ENGINE.kpc;
+  const Dls = Ds - Dl;
+  const b = ENGINE.impact * ENGINE.arcsec_to_rad * Dl; // impact parameter in meters
+  
+  // Deflection angle: θ = 4GM/c²b
+  const deflection = (4 * ENGINE.G * M) / (ENGINE.c * ENGINE.c * b);
+  const deflectionArcsec = deflection / ENGINE.arcsec_to_rad;
+  
+  // Einstein radius: θE = √(4GM/c² × Dls/DlDs)
+  const einsteinRadius = Math.sqrt((4 * ENGINE.G * M / (ENGINE.c * ENGINE.c)) * (Dls / (Dl * Ds)));
+  const einsteinRadiusArcsec = einsteinRadius / ENGINE.arcsec_to_rad;
+  
+  // Magnification: μ = u²+2 / u√(u²+4) where u = β/θE
+  const beta = ENGINE.impact * ENGINE.arcsec_to_rad; // source position
+  const u = beta / einsteinRadius;
+  const magnification = (u*u + 2) / (u * Math.sqrt(u*u + 4));
+  
+  // Image count: 2 if u > 0, 1 if u = 0 (Einstein ring)
+  const imageCount = u < 0.1 ? 1 : 2;
+  
+  // Update display
+  document.getElementById('einsteinRadius').textContent = einsteinRadiusArcsec.toFixed(2) + '"';
+  document.getElementById('deflection').textContent = deflectionArcsec.toFixed(2) + '"';
+  document.getElementById('magnification').textContent = magnification.toFixed(2) + '×';
+  document.getElementById('imageCount').textContent = imageCount;
+  
+  return { einsteinRadius: einsteinRadiusArcsec, deflection: deflectionArcsec, magnification, imageCount, u };
+}
+
+function draw(){
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0,0,W,H);
+  
+  const params = calculateLensing();
+  const centerX = W/2;
+  const centerY = H/2;
+  const scale = 50; // pixels per arcsec
+  
+  // Draw lens (mass)
+  ctx.fillStyle = '#b8860b';
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#b8860b';
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  ctx.fillStyle = '#f4f1e8';
+  ctx.font = '14px Courier Prime';
+  ctx.textAlign = 'center';
+  ctx.fillText('LENS', centerX, centerY - 25);
+  ctx.font = '12px Courier Prime';
+  ctx.fillText(ENGINE.mass + ' M☉', centerX, centerY + 35);
+  
+  // Draw Einstein ring if aligned
+  if(params.u < 0.5){
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, params.einsteinRadius * scale, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    ctx.fillStyle = '#00ffff';
+    ctx.font = '12px Courier Prime';
+    ctx.fillText('EINSTEIN RING', centerX, centerY - params.einsteinRadius * scale - 10);
+  }
+  
+  // Draw source (true position)
+  const sourceX = centerX + ENGINE.impact * scale;
+  const sourceY = centerY;
+  ctx.fillStyle = '#ff00ff';
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = '#ff00ff';
+  ctx.beginPath();
+  ctx.arc(sourceX, sourceY, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  ctx.fillStyle = '#f4f1e8';
+  ctx.font = '12px Courier Prime';
+  ctx.textAlign = 'left';
+  ctx.fillText('TRUE SOURCE', sourceX + 15, sourceY - 10);
+  
+  // Draw lensed images
+  if(params.imageCount >= 1){
+    // Primary image
+    const image1X = centerX + (ENGINE.impact + params.deflection) * scale;
+    ctx.fillStyle = '#00ff00';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#00ff00';
+    ctx.beginPath();
+    ctx.arc(image1X, sourceY, 8 * Math.sqrt(params.magnification), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#f4f1e8';
+    ctx.font = '12px Courier Prime';
+    ctx.fillText('IMAGE 1', image1X + 15, sourceY - 10);
+  }
+  
+  if(params.imageCount >= 2){
+    // Secondary image
+    const image2X = centerX - (ENGINE.impact + params.deflection) * scale;
+    ctx.fillStyle = '#00ff00';
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = '#00ff00';
+    ctx.beginPath();
+    ctx.arc(image2X, sourceY, 8 / Math.sqrt(params.magnification), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    ctx.fillStyle = '#f4f1e8';
+    ctx.font = '12px Courier Prime';
+    ctx.textAlign = 'right';
+    ctx.fillText('IMAGE 2', image2X - 15, sourceY - 10);
+  }
+  
+  // Draw light rays
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  
+  // Unlensed path
+  ctx.beginPath();
+  ctx.moveTo(0, sourceY);
+  ctx.lineTo(W, sourceY);
+  ctx.stroke();
+  
+  // Lensed paths
+  ctx.strokeStyle = 'rgba(0,255,0,0.3)';
+  ctx.beginPath();
+  ctx.moveTo(0, sourceY);
+  ctx.quadraticCurveTo(centerX, centerY - 30, W, sourceY - params.deflection * scale);
+  ctx.stroke();
+  
+  ctx.setLineDash([]);
+  
+  // Draw scale
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(50, H - 50);
+  ctx.lineTo(50 + scale, H - 50);
+  ctx.stroke();
+  
+  ctx.fillStyle = '#f4f1e8';
+  ctx.font = '12px Courier Prime';
+  ctx.textAlign = 'center';
+  ctx.fillText('1"', 50 + scale/2, H - 30);
+  
+  // Draw formula
+  ctx.fillStyle = '#c9a961';
+  ctx.font = '16px Courier Prime';
+  ctx.textAlign = 'center';
+  ctx.fillText('θ = 4GM/c²b', W/2, 40);
+  ctx.font = '14px Courier Prime';
+  ctx.fillText('42 = 0 = 1 = 1', W/2, 65);
+}
+
+// Event listeners
+document.getElementById('mass').oninput = (e) => {
+  ENGINE.mass = parseFloat(e.target.value);
+  document.getElementById('massVal').textContent = ENGINE.mass;
+  draw();
+};
+
+document.getElementById('sourceDist').oninput = (e) => {
+  ENGINE.sourceDist = parseFloat(e.target.value);
+  document.getElementById('sourceDistVal').textContent = ENGINE.sourceDist;
+  draw();
+};
+
+document.getElementById('lensDist').oninput = (e) => {
+  ENGINE.lensDist = parseFloat(e.target.value);
+  document.getElementById('lensDistVal').textContent = ENGINE.lensDist;
+  draw();
+};
+
+document.getElementById('impact').oninput = (e) => {
+  ENGINE.impact = parseFloat(e.target.value);
+  document.getElementById('impactVal').textContent = ENGINE.impact.toFixed(1);
+  draw();
+};
+
+document.getElementById('calculate').onclick = () => {
+  draw();
+};
+
+document.getElementById('reset').onclick = () => {
+  ENGINE.mass = 100;
+  ENGINE.sourceDist = 50;
+  ENGINE.lensDist = 25;
+  ENGINE.impact = 2.0;
+  document.getElementById('mass').value = 100;
+  document.getElementById('sourceDist').value = 50;
+  document.getElementById('lensDist').value = 25;
+  document.getElementById('impact').value = 2.0;
+  document.getElementById('massVal').textContent = 100;
+  document.getElementById('sourceDistVal').textContent = 50;
+  document.getElementById('lensDistVal').textContent = 25;
+  document.getElementById('impactVal').textContent = '2.0';
+  draw();
+};
+
+// Initialize
+draw();
+</script>
+</body>
+</html>
