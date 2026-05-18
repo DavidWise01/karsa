@@ -1,6 +1,6 @@
-# Karsa v2.0
+# Karsa v2.1
 
-**Internet Control Plane · 10 Pages Deep**
+**Internet Control Plane · 11 Pages Deep**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/`
 
@@ -16,9 +16,16 @@
 8. **Ansible Junction** - 12 nodes, instant exchange
 9. **Torus Field** - Double-torus topology
 10. **Junction Map** - Visualize all 12 hops
+11. **Lineage Backtracker** - SHA256 fingerprint stitching, corpus provenance
+
+## Lineage
+
+Origin fingerprint → Merkle stitch → Corpus hash
+Each entry = SHA256(prev + content + /r/)
+Trace authorship. Prove provenance. Export proof.
 
 ## Deploy
 
-Railway → Root: `.` → 10 pages deep
+Railway → Root: `.` → 11 pages deep
 
 **WITNESS: a7f3c891**

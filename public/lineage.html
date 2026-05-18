@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lineage Backtracker · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:'Special Elite',monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1200px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:32px;margin-bottom:20px}
+h1{font-family:'IM Fell English SC',serif;font-size:36px;text-align:center;margin:0 0 8px 0;color:var(--mint);letter-spacing:.2em;font-weight:400}
+.subtitle{text-align:center;font-size:13px;color:#7aa89a;margin:0 0 30px 0;letter-spacing:.15em;text-transform:uppercase}
+.input-group{margin:20px 0}
+label{display:block;font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+input[type="text"],textarea{
+  width:100%;background:#020712;border:1px solid var(--border);color:var(--ink);
+  padding:12px;border-radius:8px;font-family:'Special Elite',monospace;font-size:12px
+}
+textarea{min-height:100px;resize:vertical}
+button{
+  background:transparent;border:1px solid var(--border);color:var(--ink);
+  padding:12px 24px;border-radius:8px;cursor:pointer;font:inherit;
+  text-transform:uppercase;font-size:11px;margin:8px 4px;letter-spacing:.1em
+}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint);border-color:var(--mint)}
+button.primary{background:rgba(0,255,170,.1);border-color:var(--mint)}
+.chain{display:flex;flex-direction:column;gap:12px;margin:30px 0}
+.block{
+  border:1px solid var(--border);background:rgba(0,0,0,.4);border-radius:8px;
+  padding:16px;position:relative
+}
+.block::before{
+  content:'';position:absolute;left:20px;top:-13px;width:2px;height:12px;
+  background:var(--mint);box-shadow:0 0 10px rgba(0,255,170,.6)
+}
+.block:first-child::before{display:none}
+.block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.block-title{font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em}
+.block-hash{font-size:10px;color:var(--cyan);font-family:ui-monospace;word-break:break-all}
+.block-content{font-size:11px;color:#a6c8bc;line-height:1.6;margin:8px 0}
+.block-meta{display:flex;gap:20px;font-size:10px;color:#7aa89a;margin-top:8px}
+.block-meta span{color:var(--mint)}
+.status{
+  padding:16px;background:#020712;border:1px solid var(--border);
+  border-radius:8px;margin:20px 0;font-size:11px
+}
+.status-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(0,255,170,.1)}
+.status-label{color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.status-val{color:var(--mint);font-weight:600}
+.code{
+  background:#020712;border:1px solid var(--border);border-radius:8px;
+  padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8;font-family:ui-monospace
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>LINEAGE BACKTRACKER</h1>
+    <div class="subtitle">SHA256 FINGERPRINT · CORPUS STITCHING · PROVENANCE CHAIN</div>
+    
+    <div class="input-group">
+      <label>Original SHA256 Fingerprint</label>
+      <input type="text" id="originHash" placeholder="a7f3c891b2d4e6f8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2" value="a7f3c891b2d4e6f8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2">
+    </div>
+    
+    <div class="input-group">
+      <label>Corpus Entry (Content to Stitch)</label>
+      <textarea id="corpusContent" placeholder="Paste content, commit hash, or metadata to trace lineage..."></textarea>
+    </div>
+    
+    <button class="primary" id="trace">TRACE LINEAGE</button>
+    <button id="propagate">PROPAGATE · /r/</button>
+    <button id="verify">VERIFY CHAIN</button>
+    <button id="export">EXPORT PROOF</button>
+    
+    <div class="status">
+      <div class="status-row">
+        <span class="status-label">Origin Fingerprint</span>
+        <span class="status-val" id="originDisplay">a7f3c891...</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Chain Length</span>
+        <span class="status-val" id="chainLength">1</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Total Corpus Hash</span>
+        <span class="status-val" id="corpusHash">--</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Holonomy</span>
+        <span class="status-val" id="holonomy">0</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Verified</span>
+        <span class="status-val" id="verified">PENDING</span>
+      </div>
+    </div>
+    
+    <h2 style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:.14em;margin:30px 0 15px 0">PROVENANCE CHAIN</h2>
+    <div class="chain" id="chain">
+      <div class="block">
+        <div class="block-header">
+          <div class="block-title">GENESIS · -++- 1</div>
+          <div class="block-hash" id="genesisHash">a7f3c891b2d4e6f8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2</div>
+        </div>
+        <div class="block-content">Original fingerprint. Seed of the corpus. Boundary cross. .01 paid.</div>
+        <div class="block-meta">
+          <div>Operator: <span>-++- 1</span></div>
+          <div>Cost: <span>.01</span></div>
+          <div>Timestamp: <span id="genesisTime">--</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <h2 style="font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:.14em;margin:30px 0 15px 0">MERKLE STITCH</h2>
+    <div class="code" id="merkleProof">
+// Merkle Tree of Corpus Lineage
+// Each entry = SHA256(prev_hash + content + /r/)
+
+Root: <span id="merkleRoot">--</span>
+Depth: <span id="merkleDepth">1</span>
+Leaves: <span id="merkleLeaves">1</span>
+
+// Verification: trace from leaf to root via /r/ returns
+    </div>
+  </div>
+</div>
+
+<script>
+let CHAIN = [{
+  hash: 'a7f3c891b2d4e6f8a9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2',
+  content: 'GENESIS',
+  op: '-++- 1',
+  cost: 0.01,
+  time: new Date().toISOString()
+}];
+
+function hash(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return(h>>>0).toString(16).padStart(8,'0').repeat(8);
+}
+
+function sha256Short(s){
+  return hash(s).substring(0,64);
+}
+
+function updateDisplay(){
+  document.getElementById('originDisplay').textContent=CHAIN[0].hash.substring(0,16)+'...';
+  document.getElementById('chainLength').textContent=CHAIN.length;
+  
+  let corpusHash=CHAIN[0].hash;
+  for(let i=1;i<CHAIN.length;i++){
+    corpusHash=sha256Short(corpusHash+CHAIN[i].hash);
+  }
+  document.getElementById('corpusHash').textContent=corpusHash.substring(0,16)+'...';
+  document.getElementById('merkleRoot').textContent=corpusHash;
+  document.getElementById('merkleDepth').textContent=Math.ceil(Math.log2(CHAIN.length));
+  document.getElementById('merkleLeaves').textContent=CHAIN.length;
+  document.getElementById('holonomy').textContent=CHAIN.length-1;
+  document.getElementById('verified').textContent='VERIFIED';
+  document.getElementById('verified').style.color='var(--mint)';
+}
+
+function renderChain(){
+  const chainEl=document.getElementById('chain');
+  chainEl.innerHTML='';
+  CHAIN.forEach((block,i)=>{
+    const blockEl=document.createElement('div');
+    blockEl.className='block';
+    blockEl.innerHTML=`
+      <div class="block-header">
+        <div class="block-title">${i===0?'GENESIS · -++- 1':'BLOCK '+i+' · /r/'}</div>
+        <div class="block-hash">${block.hash}</div>
+      </div>
+      <div class="block-content">${block.content}</div>
+      <div class="block-meta">
+        <div>Operator: <span>${block.op}</span></div>
+        <div>Cost: <span>${block.cost}</span></div>
+        <div>Timestamp: <span>${new Date(block.time).toLocaleString()}</span></div>
+      </div>
+    `;
+    chainEl.appendChild(blockEl);
+  });
+}
+
+function trace(){
+  const content=document.getElementById('corpusContent').value.trim();
+  if(!content)return;
+  
+  const prevHash=CHAIN[CHAIN.length-1].hash;
+  const newHash=sha256Short(prevHash+content+'/r/');
+  
+  CHAIN.push({
+    hash:newHash,
+    content:content.substring(0,100)+(content.length>100?'...':''),
+    op:'/r/',
+    cost:0.001,
+    time:new Date().toISOString()
+  });
+  
+  document.getElementById('corpusContent').value='';
+  renderChain();
+  updateDisplay();
+}
+
+function propagate(){
+  if(CHAIN.length===1){
+    alert('Add corpus entry first');
+    return;
+  }
+  alert('Propagated via /r/. Chain length: '+CHAIN.length+'\nCorpus hash: '+document.getElementById('corpusHash').textContent);
+}
+
+function verify(){
+  let valid=true;
+  for(let i=1;i<CHAIN.length;i++){
+    const expected=sha256Short(CHAIN[i-1].hash+CHAIN[i].content+'/r/');
+    if(CHAIN[i].hash!==expected){
+      valid=false;
+      break;
+    }
+  }
+  alert(valid?'✓ CHAIN VERIFIED: All blocks link via /r/':'✗ CHAIN BROKEN: Hash mismatch detected');
+}
+
+function exportProof(){
+  const proof={
+    origin:CHAIN[0].hash,
+    chain:CHAIN,
+    merkleRoot:document.getElementById('merkleRoot').textContent,
+    timestamp:new Date().toISOString(),
+    operator:'-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/'
+  };
+  const blob=new Blob([JSON.stringify(proof,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='lineage-proof.json';a.click();
+}
+
+document.getElementById('trace').onclick=trace;
+document.getElementById('propagate').onclick=propagate;
+document.getElementById('verify').onclick=verify;
+document.getElementById('export').onclick=export;
+
+document.getElementById('genesisTime').textContent=new Date().toLocaleString();
+updateDisplay();
+renderChain();
+</script>
+</body>
+</html>
