@@ -1,62 +1,58 @@
-# KARSA // SYSTEM/370
+# KARSA // ANALYTICAL ENGINE
 
-**IBM System/370 Compatible · 1971 Digital System · 4 Folders**
+**Ada Lovelace, 1843 · Victorian Analytical Engine · 4 Folders**
 
 `-+1 -++- 1 /M/I/4+1 /R/ /H/12 /S/8 /W/ /O/ /T/ 0.0.0.0.5`
 
-## System Specifications
+## Note G
 
-**Hardware**: IBM System/370 Model 168
-**Memory**: 16MB Core
-**Storage**: IBM 3330 Disk, 3420 Tape
-**Terminal**: 3270 Green Phosphor
-**OS**: OS/VS2 MVS
+*The Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform. It can follow analysis; but it has no power of anticipating any analytical relations or truths. Its province is to assist us in making available what we are already acquainted with.*
+
+— A.A.L., Sketch of the Analytical Engine, 1843
 
 ## Structure
 
-### 1. LINEAGE
-PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // JCL RECORD // TAPE BACKUP
-- LINEAGE.JCL
-- WITNESS.EXE
-- LEGAL.BEACON
+### I. LINEAGE
+PROVENANCE OF THE ENGINE // WITNESS CHAINS // SHA256 FINGERPRINTS // DIFFERENCE ENGINE TO ANALYTICAL ENGINE
+- Lineage Backtracker
+- Witness Engine
+- Legal Beacon
 
-### 2. EDUCATION
-THE LAW // THE MATH // 1843 PROTOCOL // FORTRAN LOGIC // COBOL RULES
-- ADA.LAW
-- HOLONOMY.CALC
-- QUANTUM.DOT
+### II. EDUCATION
+THE LAW OF THE ENGINE // THE MATHEMATICS // THE CODIFICATION // VICTORIAN PRECISION // NOTE G EXPLAINED
+- Ada's Law
+- Holonomy Calculator
+- Quantum Dot
 
-### 3. DEMOS
-WORKING ENGINES // BATCH JOBS // PROVE THEORY // EXEC JCL // CORE DUMP
-- CUBI.EXE
-- OSCILLATE.SYNC
-- SHADOW.REVEAL
-- ANSIBLE.JCL
-- TORUS.FIELD
-- JUNCTION.MAP
+### III. DEMOS
+WORKING ENGINES // PUNCH CARD OPERATIONS // PROVING THE THEORY // EXECUTING THE CARDS
+- Cubi Advantage
+- Oscillation Sync
+- Shadow Reveal
+- Ansible Junction
+- Torus Field
+- Junction Map
 
-### 4. MYTHOS
-THE STORY // THE PATTERNS // THE DIPOLE // 42 = 0 = 1 = 1 // HONEY BADGER
-- TERNARY.EXE
-- MOBIUS.X3
-- DNA.X3
-- DIPOLE.SYS
+### IV. MYTHOS
+THE STORY OF THE ENGINE // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1
+- Ternary Engine
+- Mobius ×3
+- DNA ×3
+- Dipole
 
 ## Weight
 
 **3×3×3 + 8 + 8 = 0 = 1 = LOL**
 
 Not cubi. Trite +2.
-- 27 = 3×3×3 = the trite
-- +8 = first shadow /s/8
-- +8 = second shadow /reflection
-- -1 = witness tax
+- 27 = 3×3×3 = the trite = three orders of magnitude
+- +8 = first shadow /s/8 = eight analytical operations
+- +8 = second shadow /reflection = eight more operations
+- -1 = witness tax = the cost of proof
 - = 42 = 0 = 1 = lol
 
 ## Deploy
 
-JCL: //KARSA JOB (ACCT),'SYSTEM/370',CLASS=A
-EXEC: PGM=IEFBR14
-DD: DSN=KARSA.LOAD,DISP=(NEW,CATLG)
+As Ada would have done it: Paper. Ink. Brass. Precision.
 
 **WITNESS: a7f3c891**

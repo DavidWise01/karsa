@@ -7,132 +7,124 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;600&family=Courier+Prime:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap');
 :root{
-  --bg:#000000;--phosphor:#00ff00;--amber:#ffb000;--dim-green:#00aa00;
-  --card:#f5f5dc;--punch:#000000;--panel:rgba(0,0,0,.98);--border:#00ff00;
-  --glow:rgba(0,255,0,.4);--ink:#00ff00
+  --paper:#f4f1e8;--ink:#2c1810;--brass:#b8860b;--victorian:#5a3a5a;--sepia:#704214;
+  --shadow:#1a0f08;--panel:rgba(244,241,232,.95);--border:rgba(184,134,11,.4);
+  --note:#fffef8;--margin:#c9a961
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#000;color:var(--phosphor);overflow-x:hidden}
+html,body{height:100%;background:var(--paper);color:var(--ink)}
 body{
   background:
-    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,0,.03) 2px,rgba(0,255,0,.03) 4px),
-    radial-gradient(ellipse at center,rgba(0,255,0,.05),transparent 70%),
-    #000;
-  font-family:'VT323','Courier Prime',monospace;font-size:18px;line-height:1.2;
-  animation:crt-flicker 0.15s infinite
+    repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(184,134,11,.08) 79px,rgba(184,134,11,.08) 80px),
+    repeating-linear-gradient(0deg,var(--paper),var(--paper) 23px,rgba(112,66,20,.05) 23px,rgba(112,66,20,.05) 24px),
+    var(--paper);
+  font-family:'Crimson Text',serif;font-size:16px;line-height:1.6;
+  color:var(--ink)
 }
-@keyframes crt-flicker{
-  0%{opacity:0.97}
-  50%{opacity:1}
-  100%{opacity:0.98}
-}
-.container{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:10}
+.container{max-width:1400px;margin:0 auto;padding:30px;position:relative}
 .container::before{
   content:'';position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);
-  z-index:1000;animation:scan-lines 8s linear infinite
+  background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.03"/></svg>');
+  z-index:1
 }
-@keyframes scan-lines{to{transform:translateY(4px)}}
 .header{
-  border:2px solid var(--phosphor);background:var(--panel);
-  padding:20px;margin-bottom:20px;position:relative;
-  box-shadow:0 0 20px var(--glow),inset 0 0 20px rgba(0,255,0,.1)
+  border:3px double var(--brass);background:var(--panel);
+  padding:40px;margin-bottom:30px;position:relative;
+  box-shadow:0 4px 12px rgba(44,24,16,.3),inset 0 0 40px rgba(184,134,11,.05);
+  background-image:
+    radial-gradient(circle at 20% 50%,rgba(184,134,11,.08),transparent 50%),
+    radial-gradient(circle at 80% 50%,rgba(112,66,20,.08),transparent 50%)
 }
-.header::after{
-  content:'SYSTEM/370';position:absolute;top:5px;right:10px;
-  font-size:12px;color:var(--dim-green);font-family:'IBM Plex Mono',monospace
+.header::before,.header::after{
+  content:'❦';position:absolute;font-size:32px;color:var(--brass);opacity:0.6
 }
+.header::before{top:10px;left:20px}
+.header::after{top:10px;right:20px;transform:scaleX(-1)}
 h1{
-  font-family:'VT323',monospace;font-size:48px;font-weight:400;
-  color:var(--phosphor);letter-spacing:.1em;text-align:center;margin:0;
-  text-shadow:0 0 10px var(--glow);text-transform:uppercase
+  font-family:'IM Fell English SC',serif;font-size:56px;font-weight:400;
+  color:var(--ink);letter-spacing:.15em;text-align:center;margin:0;
+  text-shadow:1px 1px 0 var(--brass),2px 2px 0 rgba(44,24,16,.2)
 }
-h1::before{content:'> ';}
-h1::after{content:' _';animation:cursor-blink 1s infinite}
-@keyframes cursor-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
 .subtitle{
-  font-family:'IBM Plex Mono',monospace;font-size:14px;
-  color:var(--amber);text-align:center;margin:10px 0;letter-spacing:.2em;text-transform:uppercase;
-  text-shadow:0 0 5px rgba(255,176,0,.5)
+  font-family:'IM Fell English',serif;font-style:italic;font-size:18px;
+  color:var(--victorian);text-align:center;margin:12px 0;letter-spacing:.15em
 }
 .tagline{
-  font-family:'VT323',monospace;font-size:16px;color:var(--dim-green);
-  text-align:center;margin:10px 0;letter-spacing:.1em
+  font-family:'Courier Prime',monospace;font-size:13px;color:var(--sepia);
+  text-align:center;margin:10px 0;letter-spacing:.2em
 }
 .law{
-  font-size:14px;color:var(--phosphor);font-family:'IBM Plex Mono',monospace;
-  text-align:center;padding:12px;background:rgba(0,255,0,.05);border:1px dashed var(--phosphor);
-  margin:15px 0;letter-spacing:.1em;text-transform:uppercase
+  font-size:14px;color:var(--ink);font-family:'Courier Prime',monospace;
+  text-align:center;padding:16px;background:rgba(184,134,11,.08);border:2px solid var(--brass);
+  margin:20px 0;letter-spacing:.15em
 }
-.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:30px 0}
+.note{
+  background:var(--note);border-left:4px solid var(--brass);padding:20px;margin:20px 0;
+  box-shadow:2px 2px 8px rgba(44,24,16,.15);position:relative
+}
+.note::before{
+  content:'Note G.';position:absolute;top:8px;right:12px;
+  font-family:'IM Fell English SC',serif;font-size:14px;color:var(--brass)
+}
+.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:25px;margin:40px 0}
 .category{
-  border:2px solid var(--phosphor);background:var(--panel);
-  padding:25px;position:relative;min-height:350px;
-  box-shadow:0 0 15px rgba(0,255,0,.2),inset 0 0 15px rgba(0,0,0,.8)
+  border:3px double var(--brass);background:var(--panel);
+  padding:35px;position:relative;min-height:380px;
+  box-shadow:0 3px 10px rgba(44,24,16,.25),inset 0 0 30px rgba(184,134,11,.03)
 }
 .category::before{
-  content:'[ ]';position:absolute;top:5px;left:5px;
-  font-size:10px;color:var(--dim-green)
-}
-.category::after{
-  content:'EOF';position:absolute;bottom:5px;right:5px;
-  font-size:10px;color:var(--dim-green)
-}
-.category:hover{
-  box-shadow:0 0 30px var(--glow),inset 0 0 30px rgba(0,255,0,.2);
-  border-color:var(--amber)
+  content:'';position:absolute;top:10px;left:10px;right:10px;bottom:10px;
+  border:1px solid var(--margin);pointer-events:none
 }
 .category h2{
-  font-family:'VT323',monospace;font-size:28px;font-weight:400;
-  color:var(--amber);letter-spacing:.1em;text-transform:uppercase;text-align:left;
-  margin:0 0 15px 0;text-shadow:0 0 8px rgba(255,176,0,.5)
+  font-family:'IM Fell English SC',serif;font-size:32px;font-weight:400;
+  color:var(--ink);letter-spacing:.1em;text-align:center;
+  margin:0 0 20px 0;border-bottom:2px solid var(--brass);padding-bottom:10px
 }
-.category h2::before{content:'// ';}
 .category p{
-  font-size:16px;color:var(--phosphor);line-height:1.4;margin:12px 0;
-  font-family:'VT323',monospace
+  font-size:15px;color:var(--ink);line-height:1.8;margin:15px 0;
+  font-family:'Crimson Text',serif;font-style:italic;text-align:center
 }
-.category-links{display:grid;grid-template-columns:1fr;gap:8px;margin-top:20px}
+.category-links{display:grid;grid-template-columns:1fr;gap:10px;margin-top:25px}
 .category-links a{
-  display:block;padding:8px 12px;
-  background:rgba(0,255,0,.05);border:1px solid var(--dim-green);color:var(--phosphor);
-  text-decoration:none;font-size:16px;text-transform:uppercase;letter-spacing:.05em;
-  font-family:'VT323',monospace;transition:all .1s;text-align:left
+  display:block;padding:12px 18px;
+  background:rgba(184,134,11,.08);border:1px solid var(--brass);color:var(--ink);
+  text-decoration:none;font-size:13px;letter-spacing:.1em;
+  font-family:'IM Fell English SC',serif;transition:all .2s;text-align:left
 }
-.category-links a::before{content:'> ';}
+.category-links a::before{content:'§ ';}
 .category-links a:hover{
-  background:var(--phosphor);color:var(--bg);border-color:var(--phosphor);
-  box-shadow:0 0 10px var(--glow)
+  background:var(--brass);color:var(--paper);border-color:var(--ink);
+  box-shadow:0 2px 6px rgba(44,24,16,.3);transform:translateX(4px)
 }
 .footer{
-  margin-top:40px;padding:20px;border-top:2px solid var(--phosphor);
-  font-size:14px;color:var(--dim-green);text-align:center;
-  font-family:'VT323',monospace;letter-spacing:.05em
+  margin-top:50px;padding:25px;border-top:3px double var(--brass);
+  font-size:13px;color:var(--victorian);text-align:center;
+  font-family:'IM Fell English',serif;font-style:italic;letter-spacing:.05em
 }
-.terminal{
-  position:fixed;font-size:10px;color:var(--dim-green);font-family:'VT323',monospace;
-  text-shadow:0 0 3px var(--dim-green);z-index:1001;pointer-events:none;
-  text-transform:uppercase
+.manuscript{
+  position:fixed;font-size:11px;color:var(--sepia);font-family:'IM Fell English',serif;
+  font-style:italic;opacity:0.7;z-index:10;pointer-events:none
 }
-.terminal.tl{top:5px;left:5px}
-.terminal.tr{top:5px;right:5px;text-align:right}
-.terminal.bl{bottom:5px;left:5px}
-.terminal.br{bottom:5px;right:5px;text-align:right}
-.punch-card{
-  position:absolute;top:10px;right:10px;width:60px;height:40px;
-  background:var(--card);border:1px solid var(--punch);
-  box-shadow:2px 2px 0 var(--punch);opacity:0.3
-}
-.punch-card::before{
-  content:'';position:absolute;top:5px;left:5px;width:4px;height:4px;
-  background:var(--punch);box-shadow:10px 0 0 var(--punch),20px 0 0 var(--punch),30px 0 0 var(--punch),40px 0 0 var(--punch)
+.manuscript.tl{top:15px;left:15px}
+.manuscript.tr{top:15px;right:15px;text-align:right}
+.manuscript.bl{bottom:15px;left:15px}
+.manuscript.br{bottom:15px;right:15px;text-align:right}
+.brass-ornament{
+  text-align:center;font-size:24px;color:var(--brass);margin:20px 0;opacity:0.6
 }
 
 </style>
 </head>
 <body>
+
+<div class="manuscript tl">Analytical Engine<br>Note G<br>A.A.L., 1843</div>
+<div class="manuscript tr">Difference Engine No. 2<br>Schematic XLII<br>C. Babbage, Esq.</div>
+<div class="manuscript bl">MSS. 1843<br>Folio 27<br>Page 42</div>
+<div class="manuscript br">Width: Law<br>Gas: Theft<br>Return: Sender</div>
+
 
 <div class="terminal tl">SYS:KARSA<br>VER:1971.1<br>CPU:370/168</div>
 <div class="terminal tr">MEM:16MB<br>DISK:3330<br>TAPE:3420</div>
