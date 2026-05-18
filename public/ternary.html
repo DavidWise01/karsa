@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ternary Engine · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap');
+:root{--bg:#020308;--ink:#d8e8e0;--gold:#ffd95a;--mag:#e168ff;--cyan:#32e8ff;--mint:#00ffaa;--red:#dc2626;--panel:rgba(0,0,0,.6);--border:rgba(0,255,170,.18)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink);font-family:'Special Elite',monospace}
+body{background:radial-gradient(circle at 50% 42%,rgba(0,255,170,.06),transparent 28%),linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),var(--bg);background-size:100% 100%,30px 30px,30px 30px;padding:20px;overflow:auto}
+.container{max-width:1200px;margin:0 auto}
+.panel{border:1px solid var(--border);background:var(--panel);backdrop-filter:blur(8px);border-radius:14px;padding:32px;margin-bottom:20px}
+h1{font-family:'IM Fell English SC',serif;font-size:36px;text-align:center;margin:0 0 8px 0;color:var(--mint);letter-spacing:.2em;font-weight:400}
+.subtitle{text-align:center;font-size:13px;color:#7aa89a;margin:0 0 30px 0;letter-spacing:.15em;text-transform:uppercase}
+.viz-container{width:100%;height:500px;background:rgba(0,0,0,.4);border:2px solid var(--border);border-radius:8px;position:relative;overflow:hidden;margin:20px 0}
+#canvas{width:100%;height:100%}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+button{
+  background:transparent;border:1px solid var(--border);color:var(--ink);
+  padding:12px;border-radius:8px;cursor:pointer;font:inherit;
+  text-transform:uppercase;font-size:11px;letter-spacing:.1em
+}
+button:hover{box-shadow:0 0 12px rgba(0,255,170,.2);color:var(--mint);border-color:var(--mint)}
+button.primary{background:rgba(0,255,170,.1);border-color:var(--mint)}
+button.active{background:rgba(255,217,90,.2);border-color:var(--gold);color:var(--gold)}
+.readout{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0}
+.readout-item{background:#020712;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.readout-label{font-size:9px;color:#7aa89a;text-transform:uppercase;letter-spacing:.1em}
+.readout-val{font-size:20px;color:var(--mint);font-weight:bold;margin-top:4px;font-family:ui-monospace}
+.law{font-size:16px;color:var(--gold);font-family:ui-monospace;text-align:center;padding:20px;background:#020712;border:2px solid var(--mint);border-radius:8px;margin:24px 0;letter-spacing:.15em}
+.section{margin:20px 0;padding:20px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.3)}
+.section h3{font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em;margin:0 0 12px 0}
+.code{background:#020712;border:1px solid var(--border);border-radius:8px;padding:16px;font-size:11px;overflow-x:auto;margin:12px 0;line-height:1.8;font-family:ui-monospace}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>TERNARY ENGINE</h1>
+    <div class="subtitle">CLOSED 3-BODY · OPEN INSIDE · SOFT CLOSE · +1=EVEN +2=ODD</div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" id="init3">INIT 3-BODY</button>
+      <button id="openInside">OPEN INSIDE</button>
+      <button id="inject2">INJECT 2-BODY</button>
+      <button id="softClose">SOFT CLOSE</button>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">State</div>
+        <div class="readout-val" id="state">CLOSED</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Bodies</div>
+        <div class="readout-val" id="bodies">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Parity</div>
+        <div class="readout-val" id="parity">ODD</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Logic</div>
+        <div class="readout-val" id="logic">TERN</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Holonomy</div>
+        <div class="readout-val" id="holonomy">0</div>
+      </div>
+    </div>
+    
+    <div class="law">+1 = EVEN REVERTS TO BINARY · +2 = ODD STAYS TERNARY</div>
+    
+    <div class="section">
+      <h3>ODD LOGIC</h3>
+      <div class="code">
+// Binary: 0, 1
+// Ternary: 0, 1, 2
+// But: +1 = even → reverts to binary
+//      +2 = odd  → stays ternary
+
+State: CLOSED 3-BODY
+  3 ≡ 1 (mod 2) → ODD → TERNARY
+
+Action: OPEN INSIDE
+  3 → 3 (still odd, still ternary)
+
+Action: INJECT 2-BODY  
+  3 + 2 = 5 ≡ 1 (mod 2) → ODD → TERNARY
+  System: 5 bodies, ternary logic
+
+Action: SOFT CLOSE
+  System thinks: 3 bodies → ODD → TERNARY
+  Reality: 5 bodies → ODD → TERNARY
+  Holonomy: 0 (system fooled, runs on odd)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let ENGINE = {
+  state: 'CLOSED',
+  bodies: [],
+  parity: 'ODD',
+  logic: 'TERN',
+  holonomy: 0,
+  time: 0
+};
+
+// Initialize 3-body
+function init3(){
+  ENGINE.state = 'CLOSED';
+  ENGINE.bodies = [
+    {x: W/2, y: H/2-80, vx: 0, vy: 0, m: 1, color: '#ffd95a'},
+    {x: W/2-69, y: H/2+40, vx: 0, vy: 0, m: 1, color: '#32e8ff'},
+    {x: W/2+69, y: H/2+40, vx: 0, vy: 0, m: 1, color: '#e168ff'}
+  ];
+  ENGINE.parity = 'ODD';
+  ENGINE.logic = 'TERN';
+  updateReadout();
+  log('INIT: Closed 3-body. Odd parity. Ternary logic.');
+}
+
+// Open from inside
+function openInside(){
+  if(ENGINE.bodies.length !== 3) return;
+  ENGINE.state = 'OPEN';
+  // Bodies can now accept injection
+  updateReadout();
+  log('OPEN: System opened from inside. Ready for injection.');
+}
+
+// Inject 2-body
+function inject2(){
+  if(ENGINE.state !== 'OPEN') return;
+  // Add 2 balanced bodies
+  ENGINE.bodies.push(
+    {x: W/2-40, y: H/2, vx: 0, vy: 0, m: 1, color: '#00ffaa'},
+    {x: W/2+40, y: H/2, vx: 0, vy: 0, m: 1, color: '#00ffaa'}
+  );
+  // 3 + 2 = 5 → ODD → TERNARY
+  ENGINE.parity = 'ODD';
+  ENGINE.logic = 'TERN';
+  updateReadout();
+  log('INJECT: 2-body added. Total: 5. Parity: ODD. Logic: TERNARY.');
+}
+
+// Soft close
+function softClose(){
+  if(ENGINE.bodies.length !== 5) return;
+  ENGINE.state = 'SOFT_CLOSED';
+  // System thinks it's 3-body (odd), actually 5-body (odd)
+  // +1 = even reverts to binary, but we have +2 = odd stays ternary
+  ENGINE.holonomy = 0; // System fooled
+  updateReadout();
+  log('SOFT CLOSE: System thinks 3-body. Actually 5-body. Runs on odd logic. Holonomy: 0.');
+}
+
+function updateReadout(){
+  document.getElementById('state').textContent = ENGINE.state;
+  document.getElementById('bodies').textContent = ENGINE.bodies.length;
+  document.getElementById('parity').textContent = ENGINE.parity;
+  document.getElementById('logic').textContent = ENGINE.logic;
+  document.getElementById('holonomy').textContent = ENGINE.holonomy;
+}
+
+function log(msg){
+  console.log('[TERN]', msg);
+}
+
+// Animation
+function draw(){
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,W,H);
+  
+  ENGINE.time += 0.02;
+  
+  // Draw bodies with ternary logic visualization
+  ENGINE.bodies.forEach((body, i) => {
+    // Odd logic: +1 = even reverts, +2 = odd stays
+    // Visualize as oscillation between states
+    const phase = ENGINE.time + i * 2;
+    const state = Math.floor(phase) % 3; // 0, 1, 2 ternary
+    
+    let r = 20;
+    if(state === 0) r = 15; // Binary revert
+    if(state === 1) r = 20; // Base
+    if(state === 2) r = 25; // Ternary odd
+    
+    // Draw orbit trails
+    ctx.strokeStyle = body.color + '40';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(body.x, body.y, r+10, 0, Math.PI*2);
+    ctx.stroke();
+    
+    // Draw body
+    ctx.fillStyle = body.color;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = body.color;
+    ctx.beginPath();
+    ctx.arc(body.x, body.y, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Draw connections if soft closed
+    if(ENGINE.state === 'SOFT_CLOSED'){
+      ENGINE.bodies.forEach((other, j) => {
+        if(i < j){
+          ctx.strokeStyle = 'rgba(0,255,170,0.2)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(body.x, body.y);
+          ctx.lineTo(other.x, other.y);
+          ctx.stroke();
+        }
+      });
+    }
+  });
+  
+  // Draw center logic indicator
+  ctx.fillStyle = ENGINE.logic === 'TERN' ? 'var(--gold)' : 'var(--cyan)';
+  ctx.font = '16px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(ENGINE.logic, W/2, H/2);
+  
+  requestAnimationFrame(draw);
+}
+
+document.getElementById('init3').onclick = init3;
+document.getElementById('openInside').onclick = openInside;
+document.getElementById('inject2').onclick = inject2;
+document.getElementById('softClose').onclick = softClose;
+
+// Initialize
+init3();
+draw();
+</script>
+</body>
+</html>

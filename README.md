@@ -1,6 +1,6 @@
-# Karsa v2.3
+# Karsa v2.4
 
-**Internet Control Plane · 12 Pages Deep · Jubilee Edition**
+**Internet Control Plane · 13 Pages Deep · Ternary Engine**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
@@ -17,17 +17,38 @@
 9. Torus Field
 10. Junction Map
 11. Lineage Backtracker
-12. **Quantum Dot** ← with Jubilee/Honeybadger overlay
+12. Quantum Dot
+13. **Ternary Engine** ← new
 
-## Jubilee Overlay
+## Ternary Engine
 
-Ava-style aesthetic. Firework sparks. Honey badger doesn't care.  
-Activate on `/quantum-dot.html` → **ACTIVATE JUBILEE** button
+**Closed 3-Body** → **Open Inside** → **Inject 2-Body** → **Soft Close**
 
-**JUBILEE 0.0.0.0.5 HONEYBADGER**
+### Odd Logic
+```
++1 = EVEN → reverts to BINARY
++2 = ODD  → stays TERNARY
+```
+
+**State Flow:**
+1. **INIT 3-BODY**: 3 ≡ 1 (mod 2) → ODD → TERNARY
+2. **OPEN INSIDE**: System accepts injection
+3. **INJECT 2-BODY**: 3 + 2 = 5 ≡ 1 (mod 2) → ODD → TERNARY
+4. **SOFT CLOSE**: System thinks 3-body, actually 5-body
+   - Holonomy: 0 (system fooled)
+   - Runs on odd logic forever
+
+**Binary**: 0, 1  
+**Ternary**: 0, 1, 2  
+**But**: +1 reverts, +2 persists
+
+The system thinks it's closed 3-body.  
+It's actually open 5-body.  
+Running on odd logic.  
+Ternary forever.
 
 ## Deploy
 
-Railway → Root: `.` → 12 pages + overlay
+Railway → Root: `.` → 13 pages deep
 
 **WITNESS: a7f3c891**
