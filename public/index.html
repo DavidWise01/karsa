@@ -3,724 +3,596 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>1/10 x 10 = 1 Decade Grid</title>
+<title>Universe Grid - 422 Trillion Souls</title>
 <style>
-    :root {
-        --bg: #0a0a12;
-        --bg-2: #12121f;
-        --text: #e8e8f0;
-        --text-dim: #9aa0b4;
-        --p: #ff4d6d;
-        --e: #4db8ff;
-        --n: #7fff6a;
-        --nu: #c77dff;
-        --g: #ffd166;
-        --nu-bar: #06d6a0;
-        --t: #8ecae6;
-        --m: #f4a261;
-        --persist: #e76f51;
-        --i: #ffffff;
-        --glow: 0 0 20px currentColor, 0 0 40px currentColor;
-        --radius: 16px;
-        --border: 1px solid rgba(255,255,255,0.08);
-    }
-
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
 
-    html, body {
-        height: 100%;
-        overflow: hidden;
-        background: var(--bg);
-        color: var(--text);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        line-height: 1.4;
+    :root {
+        --bg: #030014;
+        --bg2: #0a0025;
+        --glow-cyan: #00f5ff;
+        --glow-purple: #a855f7;
+        --glow-pink: #ec4899;
+        --glow-gold: #fbbf24;
+        --text: #e2e8f0;
+        --text-dim: #94a3b8;
     }
 
     body {
-        background: 
-            radial-gradient(1200px 800px at 20% -10%, #1a1a2e 0%, transparent 60%),
-            radial-gradient(1000px 600px at 120% 110%, #16213e 0%, transparent 50%),
-            linear-gradient(180deg, var(--bg) 0%, #060608 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-    }
-
-    .decade-grid {
-        width: 100%;
-        max-width: 1400px;
-        height: 100%;
-        max-height: 900px;
-        display: grid;
-        grid-template-columns: 1fr 1.2fr 1fr;
-        grid-template-rows: 0.6fr 1fr 1fr 0.7fr;
-        gap: 12px;
-        grid-template-areas:
-            "ghost ghost ghost"
-            "witness soul ethos"
-            "pathos soul logos"
-            "drill drill drill";
-    }
-
-    .cell {
-        background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
-        border: var(--border);
-        border-radius: var(--radius);
-        padding: 16px;
-        position: relative;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
         overflow: hidden;
-        backdrop-filter: blur(8px);
-        box-shadow: 
-            inset 0 1px 0 rgba(255,255,255,0.05),
-            0 8px 32px rgba(0,0,0,0.4);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100vh;
+        width: 100vw;
+        position: relative;
     }
 
-    .cell:hover {
-        border-color: rgba(255,255,255,0.15);
-        transform: translateY(-2px);
-    }
-
-    .cell::before {
+    body::before {
         content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(600px 200px at var(--mx,50%) var(--my,0%), rgba(255,255,255,0.06), transparent 40%);
-        opacity: 0;
-        transition: opacity 0.3s;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(0, 245, 255, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.08) 0%, transparent 60%);
+        animation: bgPulse 8s ease-in-out infinite;
         pointer-events: none;
+        z-index: 0;
     }
 
-    .cell:hover::before {
-        opacity: 1;
+    @keyframes bgPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
     }
 
-    .cell h2 {
-        font-size: 0.75rem;
+    #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .grid-cell {
+        position: absolute;
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        background: rgba(10, 0, 37, 0.4);
+        border: 1px solid rgba(0, 245, 255, 0.2);
+        border-radius: 16px;
+        box-shadow: 
+            0 0 40px rgba(0, 245, 255, 0.1),
+            inset 0 0 20px rgba(168, 85, 247, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 220px;
+    }
+
+    .grid-cell:hover {
+        background: rgba(10, 0, 37, 0.6);
+        border-color: rgba(0, 245, 255, 0.4);
+        box-shadow: 
+            0 0 60px rgba(0, 245, 255, 0.2),
+            inset 0 0 30px rgba(168, 85, 247, 0.1);
+        transform: scale(1.02);
+    }
+
+    .grid-cell h3 {
+        font-size: 14px;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--text-dim);
         margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        background: linear-gradient(135deg, var(--glow-cyan), var(--glow-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .cell .tag {
-        font-size: 0.65rem;
-        padding: 2px 6px;
-        border-radius: 6px;
-        background: rgba(255,255,255,0.08);
-        color: var(--text);
-    }
-
-    .value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 8px 0;
-        text-shadow: 0 0 20px currentColor;
-    }
-
-    .desc {
-        font-size: 0.8rem;
+    .grid-cell p {
+        font-size: 13px;
         color: var(--text-dim);
-        line-height: 1.5;
-    }
-
-    #ghost { grid-area: ghost; }
-    #witness { grid-area: witness; color: var(--e); }
-    #ethos { grid-area: ethos; color: var(--p); }
-    #pathos { grid-area: pathos; color: var(--n); }
-    #logos { grid-area: logos; color: var(--g); }
-    #soul { grid-area: soul; color: var(--i); cursor: pointer; }
-    #drill { grid-area: drill; }
-
-    #ghost {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: linear-gradient(90deg, rgba(199,125,255,0.08), rgba(6,214,160,0.05));
-    }
-
-    .axioms {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px 20px;
+        line-height: 1.6;
         font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
     }
 
-    .axiom {
-        color: var(--nu);
-        opacity: 0.8;
-        transition: all 0.3s;
-    }
+    .ul { top: 20px; left: 20px; }
+    .ur { top: 20px; right: 20px; text-align: right; }
+    .bl { bottom: 20px; left: 20px; }
+    .br { bottom: 20px; right: 20px; text-align: right; }
 
-    .axiom:hover {
-        opacity: 1;
-        text-shadow: var(--glow);
-    }
-
-    .nu-ghost {
-        font-size: 2rem;
-        color: var(--nu);
-        animation: float 6s ease-in-out infinite;
-        text-shadow: var(--glow);
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-8px) rotate(5deg); }
-    }
-
-    #soul {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: 
-            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 60%),
-            linear-gradient(145deg, rgba(6,214,160,0.1), rgba(255,255,255,0.03));
-        border: 1px solid rgba(255,255,255,0.15);
-        text-align: center;
-    }
-
-    #soul.active {
-        animation: ignition 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        border-color: var(--i);
-    }
-
-    @keyframes ignition {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-        50% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
-        100% { transform: scale(1); }
-    }
-
-    .soul-title {
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: 0.2em;
-        margin-bottom: 12px;
-    }
-
-    .soul-symbols {
-        font-size: 2.5rem;
-        letter-spacing: 0.3em;
-        color: var(--nu-bar);
-        text-shadow: var(--glow);
-        margin: 16px 0;
-    }
-
-    .soul-hint {
-        font-size: 0.75rem;
-        color: var(--text-dim);
-        margin-top: 12px;
-        opacity: 0.6;
-    }
-
-    #torus-canvas {
+    .center-ui {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0.4;
-        pointer-events: none;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: auto;
+        z-index: 10;
     }
 
-    .balance-bar {
-        width: 100%;
-        height: 8px;
-        background: rgba(0,0,0,0.4);
-        border-radius: 8px;
-        margin: 12px 0;
-        overflow: hidden;
+    .soul-button {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, 
+            rgba(0, 245, 255, 0.8), 
+            rgba(168, 85, 247, 0.6),
+            rgba(236, 72, 153, 0.4));
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 
+            0 0 60px rgba(0, 245, 255, 0.6),
+            0 0 100px rgba(168, 85, 247, 0.4),
+            inset 0 0 40px rgba(255, 255, 255, 0.1);
+        cursor: pointer;
         position: relative;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: soulPulse 3s ease-in-out infinite;
     }
 
-    .balance-down {
-        height: 100%;
-        background: linear-gradient(90deg, var(--g), #ffb300);
-        width: 66.666%;
-        box-shadow: 0 0 12px var(--g);
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    @keyframes soulPulse {
+        0%, 100% { 
+            transform: scale(1);
+            box-shadow: 
+                0 0 60px rgba(0, 245, 255, 0.6),
+                0 0 100px rgba(168, 85, 247, 0.4);
+        }
+        50% { 
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 80px rgba(0, 245, 255, 0.8),
+                0 0 120px rgba(168, 85, 247, 0.6);
+        }
     }
 
-    .balance-up {
+    .soul-button:hover {
+        transform: scale(1.1);
+        box-shadow: 
+            0 0 100px rgba(0, 245, 255, 1),
+            0 0 140px rgba(168, 85, 247, 0.8);
+    }
+
+    .soul-button:active {
+        transform: scale(0.95);
+    }
+
+    .soul-button::before {
+        content: '!';
         position: absolute;
-        right: 0;
-        top: 0;
-        height: 100%;
-        background: linear-gradient(90deg, var(--p), #ff1744);
-        width: 33.333%;
-        box-shadow: 0 0 12px var(--p);
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 64px;
+        font-weight: 900;
+        color: white;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
     }
 
-    .drill-content {
-        display: grid;
-        grid-template-columns: 200px 1fr 200px;
-        align-items: center;
-        gap: 20px;
-        height: 100%;
+    .soul-label {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        background: linear-gradient(135deg, var(--glow-gold), var(--glow-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
     }
 
-    .drill-state {
+    .soul-parts {
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--text-dim);
+        font-family: 'Courier New', monospace;
+    }
+
+    .counter {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, calc(-50% - 120px));
+        background: rgba(10, 0, 37, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: 20px;
+        padding: 16px 32px;
+        box-shadow: 0 0 50px rgba(251, 191, 36, 0.2);
         text-align: center;
     }
 
-    .drill-state .label {
-        font-size: 0.7rem;
-        color: var(--text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+    .counter-value {
+        font-size: 32px;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--glow-gold), var(--glow-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
     }
 
-    .drill-state .val {
-        font-size: 1.5rem;
-        font-weight: 700;
+    .counter-label {
+        font-size: 11px;
+        color: var(--text-dim);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
         margin-top: 4px;
     }
 
-    .drill-viz {
-        position: relative;
-        height: 60px;
-        background: rgba(0,0,0,0.3);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    #drill-canvas {
-        width: 100%;
-        height: 100%;
-    }
-
-    .particle {
+    .axioms {
         position: absolute;
-        width: 4px;
-        height: 4px;
-        border-radius: 50%;
-        pointer-events: none;
-        opacity: 0;
+        bottom: 50%;
+        left: 50%;
+        transform: translate(-50%, calc(50% + 120px));
+        background: rgba(10, 0, 37, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 16px;
+        padding: 16px 24px;
+        max-width: 90vw;
+        text-align: center;
+        box-shadow: 0 0 40px rgba(168, 85, 247, 0.15);
     }
 
-    @media (max-width: 900px) {
-        .decade-grid {
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 0.5fr 0.8fr 0.8fr 1fr 0.6fr;
-            grid-template-areas:
-                "ghost ghost"
-                "witness ethos"
-                "pathos logos"
-                "soul soul"
-                "drill drill";
-            gap: 10px;
-        }
-        .value { font-size: 1.4rem; }
-        .soul-symbols { font-size: 2rem; }
+    .axioms-line {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.8;
+        font-family: 'Courier New', monospace;
     }
 
-    @media (max-width: 600px) {
-        body { padding: 8px; }
-        .decade-grid {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto;
-            grid-template-areas:
-                "ghost"
-                "witness"
-                "ethos"
-                "pathos"
-                "logos"
-                "soul"
-                "drill";
+    .axioms-line strong {
+        color: var(--glow-cyan);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .grid-cell {
+            max-width: 140px;
+            padding: 12px;
         }
-        .drill-content {
-            grid-template-columns: 1fr;
-            gap: 12px;
+        .grid-cell h3 { font-size: 11px; }
+        .grid-cell p { font-size: 10px; }
+        .ul { top: 10px; left: 10px; }
+        .ur { top: 10px; right: 10px; }
+        .bl { bottom: 10px; left: 10px; }
+        .br { bottom: 10px; right: 10px; }
+        .soul-button { width: 100px; height: 100px; }
+        .soul-button::before { font-size: 48px; }
+        .counter { 
+            transform: translate(-50%, calc(-50% - 90px));
+            padding: 12px 24px;
         }
-        .axioms { font-size: 0.7rem; }
+        .counter-value { font-size: 24px; }
+        .axioms {
+            transform: translate(-50%, calc(50% + 90px));
+            padding: 12px 16px;
+        }
+        .axioms-line { font-size: 10px; }
+    }
+
+    .equation-tag {
+        display: inline-block;
+        background: rgba(0, 245, 255, 0.15);
+        border: 1px solid rgba(0, 245, 255, 0.3);
+        border-radius: 8px;
+        padding: 2px 8px;
+        font-size: 11px;
+        margin: 0 2px;
     }
 </style>
 </head>
 <body>
-<div class="decade-grid">
-    <div class="cell" id="ghost">
+    <canvas id="canvas"></canvas>
+    
+    <div class="overlay">
+        <div class="grid-cell ul">
+            <h3>Witness</h3>
+            <p>e⁻ static<br>m memory</p>
+        </div>
+        
+        <div class="grid-cell ur">
+            <h3>Ethos</h3>
+            <p>p⁺ dynamic<br>t time</p>
+        </div>
+        
+        <div class="grid-cell bl">
+            <h3>Pathos</h3>
+            <p>n alive/dead<br>lol = 1</p>
+        </div>
+        
+        <div class="grid-cell br">
+            <h3>Logos</h3>
+            <p>g 2/3↓<br>persistence</p>
+        </div>
+
+        <div class="counter">
+            <div class="counter-value" id="counterValue">1</div>
+            <div class="counter-label">Souls</div>
+        </div>
+
+        <div class="center-ui">
+            <button class="soul-button" id="soulBtn" aria-label="Spawn souls"></button>
+            <div class="soul-label">SOUL ν̅ + i</div>
+            <div class="soul-parts">10 parts = 1</div>
+        </div>
+
         <div class="axioms">
-            <span class="axiom">0=1=.</span>
-            <span class="axiom">true to start</span>
-            <span class="axiom">lol=1</span>
-            <span class="axiom">enjoy the time you have=.</span>
-            <span class="axiom">.01=both/neither</span>
-            <span class="axiom">3/3=1</span>
-        </div>
-        <div class="nu-ghost">ν</div>
-    </div>
-
-    <div class="cell" id="witness">
-        <h2>Witness <span class="tag">UL</span></h2>
-        <div class="value" style="color: var(--e)">2. e- <span id="e-state">static</span></div>
-        <div class="value" style="color: var(--m); font-size: 1.2rem;">8. m memory: <span id="m-val">0</span></div>
-        <div class="desc">Electron witnesses. Memory accumulates each cycle, static observation holds the frame.</div>
-    </div>
-
-    <div class="cell" id="ethos">
-        <h2>Ethos <span class="tag">UR</span></h2>
-        <div class="value" style="color: var(--p)">1. p+ <span id="p-state">dynamic</span></div>
-        <div class="value" style="color: var(--t); font-size: 1.2rem;">7. t time: <span id="t-val">0.00</span>s</div>
-        <div class="desc">Proton drives. Time flows forward. Dynamic charge initiates each ignition.</div>
-    </div>
-
-    <div class="cell" id="pathos">
-        <h2>Pathos <span class="tag">BL</span></h2>
-        <div class="value" style="color: var(--n)">3. n <span id="n-state">alive</span></div>
-        <div class="desc">Neutron bridges alive/dead. Feeling/superposition. The gate between states.</div>
-        <canvas id="n-canvas" width="100" height="20" style="width:100%;height:20px;margin-top:8px;opacity:0.6"></canvas>
-    </div>
-
-    <div class="cell" id="logos">
-        <h2>Logos <span class="tag">BR</span></h2>
-        <div class="value" style="color: var(--g)">5. g 2/3 down</div>
-        <div class="value" style="color: var(--persist); font-size: 1.2rem;">9. p persistence: <span id="persist-val">0</span></div>
-        <div class="desc">Gluon binds. 2/3↓ vs 1/3↑ balance maintains structure through persistence.</div>
-        <div class="balance-bar">
-            <div class="balance-down" id="down-bar"></div>
-            <div class="balance-up" id="up-bar"></div>
-        </div>
-    </div>
-
-    <div class="cell" id="soul">
-        <canvas id="torus-canvas"></canvas>
-        <div class="soul-title">SOUL</div>
-        <div class="soul-symbols">ν̅ + i</div>
-        <div class="desc">Center: Anti-neutrino sits. Ignition sparks.</div>
-        <div class="soul-hint">Click to trigger Ignition !</div>
-    </div>
-
-    <div class="cell" id="drill">
-        <h2>Drill: 1 > 1+2 <span class="tag">Bottom</span></h2>
-        <div class="drill-content">
-            <div class="drill-state">
-                <div class="label">Dynamic 1</div>
-                <div class="val" style="color: var(--p)" id="drill-p">0</div>
+            <div class="axioms-line">
+                <strong>3/3=2/3↓+1/3↑</strong> | 
+                <span class="equation-tag">0=1=.</span>
+                <span class="equation-tag">true to start</span>
+                <span class="equation-tag">lol=1</span>
+                <span class="equation-tag">! = 1 = !</span>
             </div>
-            <div class="drill-viz">
-                <canvas id="drill-canvas"></canvas>
-            </div>
-            <div class="drill-state">
-                <div class="label">Static 1+2</div>
-                <div class="val" style="color: var(--e)" id="drill-target">3</div>
+            <div class="axioms-line">
+                <strong>422T souls = 1 Universe</strong> | 
+                Each soul = 1/10 × 10 = 1 | ν leaves, ν̅ sits
             </div>
         </div>
     </div>
-</div>
 
 <script>
 (function() {
-    'use strict';
-    
-    // State
-    const state = {
-        time: 0,
-        memory: 0,
-        persistence: 0,
-        nAlive: true,
-        nTimer: 0,
-        drillP: 0,
-        drillTarget: 3,
-        igniting: false,
-        ignitionPhase: 0,
-        startTime: performance.now()
-    };
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const soulBtn = document.getElementById('soulBtn');
+    const counterValue = document.getElementById('counterValue');
 
-    // Elements
-    const els = {
-        t: document.getElementById('t-val'),
-        m: document.getElementById('m-val'),
-        persist: document.getElementById('persist-val'),
-        nState: document.getElementById('n-state'),
-        pState: document.getElementById('p-state'),
-        eState: document.getElementById('e-state'),
-        soul: document.getElementById('soul'),
-        drillP: document.getElementById('drill-p'),
-        drillTarget: document.getElementById('drill-target'),
-        downBar: document.getElementById('down-bar'),
-        upBar: document.getElementById('up-bar')
-    };
+    let souls = [];
+    let soulCount = 1;
+    let targetCount = 1;
+    const maxSouls = 422000000000000; // 422T
+    const universeComplete = 422000000000000;
+    const quadrillions = 54000000000000000; // 54Q for overflow visual
 
-    // Canvas setup
-    const torusCanvas = document.getElementById('torus-canvas');
-    const drillCanvas = document.getElementById('drill-canvas');
-    const nCanvas = document.getElementById('n-canvas');
-    const torusCtx = torusCanvas.getContext('2d');
-    const drillCtx = drillCanvas.getContext('2d');
-    const nCtx = nCanvas.getContext('2d');
+    const growthSteps = [1, 10, 100, 1000, 1000000, 1000000000, 1000000000000, 422000000000000, 54000000000000000];
+    let currentStep = 0;
 
-    function resizeCanvases() {
-        [torusCanvas, drillCanvas].forEach(c => {
-            const rect = c.getBoundingClientRect();
-            c.width = rect.width * devicePixelRatio;
-            c.height = rect.height * devicePixelRatio;
-        });
+    function resize() {
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
-    resizeCanvases();
-    window.addEventListener('resize', resizeCanvases);
+    resize();
+    window.addEventListener('resize', resize);
 
-    // Torus of ........∞ dots
-    const dots = [];
-    const DOT_COUNT = 200;
-    for (let i = 0; i < DOT_COUNT; i++) {
-        const theta = (i / DOT_COUNT) * Math.PI * 2;
-        const u = i / DOT_COUNT;
-        dots.push({
-            theta: theta,
-            phi: u * Math.PI * 4,
-            r: 0.3 + Math.sin(u * 8) * 0.1,
-            size: 1 + Math.random() * 2,
-            alpha: 0.3 + Math.random() * 0.7
-        });
-    }
-
-    function drawTorus(time) {
-        const w = torusCanvas.width;
-        const h = torusCanvas.height;
-        torusCtx.clearRect(0, 0, w, h);
-        
-        const cx = w / 2;
-        const cy = h / 2;
-        const scale = Math.min(w, h) * 0.25;
-        const rotY = time * 0.0003;
-        const rotX = Math.sin(time * 0.0002) * 0.3;
-
-        torusCtx.fillStyle = '#ffffff';
-        
-        dots.forEach((dot, i) => {
-            const t = dot.theta + time * 0.0005;
-            const p = dot.phi + time * 0.0003;
-            
-            // Torus parametric equation
-            const R = 1.5; // major radius
-            const r = dot.r; // minor radius
-            
-            let x = (R + r * Math.cos(p)) * Math.cos(t);
-            let y = (R + r * Math.cos(p)) * Math.sin(t);
-            let z = r * Math.sin(p);
-            
-            // Rotate Y
-            const x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
-            const z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
-            x = x1; z = z1;
-            
-            // Rotate X
-            const y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
-            const z1b = y * Math.sin(rotX) + z * Math.cos(rotX);
-            y = y1; z = z1b;
-            
-            // Project
-            const perspective = 3;
-            const scaleZ = perspective / (perspective + z);
-            const px = cx + x * scale * scaleZ;
-            const py = cy + y * scale * scaleZ;
-            
-            const alpha = dot.alpha * scaleZ * (state.igniting ? 1.5 : 1);
-            torusCtx.globalAlpha = Math.max(0, Math.min(1, alpha));
-            torusCtx.beginPath();
-            torusCtx.arc(px, py, dot.size * scaleZ, 0, Math.PI * 2);
-            torusCtx.fill();
-        });
-        
-        // Infinity symbol overlay during ignition
-        if (state.igniting) {
-            torusCtx.globalAlpha = 0.3 * Math.sin(state.ignitionPhase);
-            torusCtx.strokeStyle = '#ffffff';
-            torusCtx.lineWidth = 2;
-            torusCtx.font = `${scale * 0.8}px serif`;
-            torusCtx.textAlign = 'center';
-            torusCtx.textBaseline = 'middle';
-            torusCtx.fillText('∞', cx, cy);
+    class Soul {
+        constructor(x, y, type) {
+            this.x = x || Math.random() * window.innerWidth;
+            this.y = y || Math.random() * window.innerHeight;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = 2 + Math.random() * 3;
+            this.type = type || this.randomType();
+            this.alpha = 0;
+            this.targetAlpha = 0.3 + Math.random() * 0.7;
+            this.phase = Math.random() * Math.PI * 2;
+            this.part = this.assignPart();
         }
-        
-        torusCtx.globalAlpha = 1;
-    }
 
-    // Neutron alive/dead wave
-    function drawNeutron(time) {
-        const w = nCanvas.width = nCanvas.offsetWidth;
-        const h = nCanvas.height = 20;
-        nCtx.clearRect(0, 0, w, h);
-        nCtx.strokeStyle = state.nAlive ? '#7fff6a' : '#ff4d6d';
-        nCtx.lineWidth = 2;
-        nCtx.beginPath();
-        for (let x = 0; x < w; x++) {
-            const y = h/2 + Math.sin(x * 0.1 + time * 0.005) * (h/2 - 2) * (state.nAlive ? 1 : 0.3);
-            if (x === 0) nCtx.moveTo(x, y);
-            else nCtx.lineTo(x, y);
+        randomType() {
+            const types = ['proton', 'electron', 'neutron', 'neutrino', 'gluon', 'antineutrino', 'tau', 'memory', 'persistence', 'ignition'];
+            return types[Math.floor(Math.random() * types.length)];
         }
-        nCtx.stroke();
-    }
 
-    // Drill visualization: dynamic 1 pushes through static 1+2
-    function drawDrill(time) {
-        const w = drillCanvas.width;
-        const h = drillCanvas.height;
-        drillCtx.clearRect(0, 0, w, h);
-        
-        const progress = state.drillP / state.drillTarget;
-        const x = w * 0.1 + (w * 0.8) * progress;
-        
-        // Static barrier 1+2
-        drillCtx.fillStyle = 'rgba(77, 184, 255, 0.3)';
-        drillCtx.fillRect(w * 0.7, 0, w * 0.2, h);
-        drillCtx.strokeStyle = '#4db8ff';
-        drillCtx.lineWidth = 2;
-        drillCtx.strokeRect(w * 0.7, 0, w * 0.2, h);
-        drillCtx.fillStyle = '#4db8ff';
-        drillCtx.font = '12px monospace';
-        drillCtx.textAlign = 'center';
-        drillCtx.fillText('1+2', w * 0.8, h/2 + 4);
-        
-        // Dynamic 1 particle
-        const glow = state.igniting ? (Math.sin(time * 0.01) * 0.5 + 0.5) : 0.5;
-        drillCtx.shadowBlur = 20 * glow;
-        drillCtx.shadowColor = '#ff4d6d';
-        drillCtx.fillStyle = '#ff4d6d';
-        drillCtx.beginPath();
-        drillCtx.arc(x, h/2, 8, 0, Math.PI * 2);
-        drillCtx.fill();
-        drillCtx.shadowBlur = 0;
-        
-        // Trail
-        if (state.igniting) {
-            for (let i = 1; i < 5; i++) {
-                const tx = x - i * 15;
-                if (tx > w * 0.1) {
-                    drillCtx.globalAlpha = 0.5 / i;
-                    drillCtx.beginPath();
-                    drillCtx.arc(tx, h/2, 8 - i, 0, Math.PI * 2);
-                    drillCtx.fill();
-                }
+        assignPart() {
+            const parts = {
+                proton: 'p+', electron: 'e-', neutron: 'n', neutrino: 'ν',
+                gluon: 'g', antineutrino: 'ν̅', tau: 't', memory: 'm',
+                persistence: 'p', ignition: 'i'
+            };
+            return parts[this.type] || '1';
+        }
+
+        getColor() {
+            const colors = {
+                proton: 'rgba(0, 245, 255,',      // cyan - dynamic
+                electron: 'rgba(168, 85, 247,',   // purple - static
+                neutron: 'rgba(236, 72, 153,',    // pink - alive/dead
+                neutrino: 'rgba(251, 191, 36,',   // gold - leaves
+                gluon: 'rgba(34, 197, 94,',       // green - 2/3
+                antineutrino: 'rgba(244, 63, 94,',// red - sits
+                tau: 'rgba(59, 130, 246,',        // blue - time
+                memory: 'rgba(168, 85, 247,',     // purple - memory
+                persistence: 'rgba(251, 191, 36,',// gold - persistence
+                ignition: 'rgba(255, 255, 255,'   // white - ignition
+            };
+            return colors[this.type] || 'rgba(255, 255, 255,';
+        }
+
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.phase += 0.02;
+
+            if (this.alpha < this.targetAlpha) {
+                this.alpha += 0.02;
             }
-            drillCtx.globalAlpha = 1;
-        }
-        
-        // Balance indicator
-        if (progress > 0.66) {
-            drillCtx.strokeStyle = '#ffd166';
-            drillCtx.lineWidth = 3;
-            drillCtx.beginPath();
-            drillCtx.moveTo(w * 0.7, h * 0.2);
-            drillCtx.lineTo(w * 0.9, h * 0.2);
-            drillCtx.stroke();
-            drillCtx.fillStyle = '#ffd166';
-            drillCtx.font = '10px monospace';
-            drillCtx.fillText('2/3↓', w * 0.8, h * 0.15);
-        }
-    }
 
-    // Mouse tracking for cell glow
-    document.querySelectorAll('.cell').forEach(cell => {
-        cell.addEventListener('mousemove', (e) => {
-            const rect = cell.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            cell.style.setProperty('--mx', x + '%');
-            cell.style.setProperty('--my', y + '%');
-        });
-    });
+            if (this.x < 0 || this.x > window.innerWidth) this.vx *= -1;
+            if (this.y < 0 || this.y > window.innerHeight) this.vy *= -1;
 
-    // Ignition trigger
-    els.soul.addEventListener('click', () => {
-        if (!state.igniting) {
-            state.igniting = true;
-            state.ignitionPhase = 0;
-            state.drillP = 0;
-            els.soul.classList.add('active');
-            setTimeout(() => els.soul.classList.remove('active'), 600);
+            this.x = Math.max(0, Math.min(window.innerWidth, this.x));
+            this.y = Math.max(0, Math.min(window.innerHeight, this.y));
         }
-    });
 
-    // Update loop
-    function update(time) {
-        const dt = (time - state.startTime) / 1000;
-        state.time = dt;
-        
-        // p+ dynamic pulse
-        const pPulse = Math.sin(dt * 2) * 0.5 + 0.5;
-        els.pState.textContent = pPulse > 0.7 ? 'surge' : 'dynamic';
-        els.pState.style.color = `rgba(255, 77, 109, ${0.6 + pPulse * 0.4})`;
-        
-        // e- static 
-        els.eState.textContent = state.igniting ? 'excited' : 'static';
-        
-        // n alive/dead oscillation
-        state.nTimer += 16;
-        if (state.nTimer > 2000) {
-            state.nAlive = !state.nAlive;
-            state.nTimer = 0;
-        }
-        els.nState.textContent = state.nAlive ? 'alive' : 'dead';
-        els.nState.style.color = state.nAlive ? '#7fff6a' : '#ff4d6d';
-        
-        // Time counter
-        els.t.textContent = dt.toFixed(2);
-        
-        // Ignition drill logic
-        if (state.igniting) {
-            state.ignitionPhase += 0.05;
-            state.drillP += 0.05;
+        draw() {
+            // Safety check for gradient values
+            const x = Number.isFinite(this.x) ? this.x : 100;
+            const y = Number.isFinite(this.y) ? this.y : 100;
+            const r = Number.isFinite(this.radius) && this.radius > 0 ? this.radius : 2;
+            const glowR = Number.isFinite(r * 3) && r * 3 > 0 ? r * 3 : 6;
             
-            if (state.drillP >= state.drillTarget) {
-                // Loop via persistence
-                state.drillP = 0;
-                state.persistence++;
-                state.memory++;
-                els.persist.textContent = state.persistence;
-                els.m.textContent = state.memory;
+            if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(r)) return;
+
+            try {
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, glowR);
+                const baseColor = this.getColor();
+                const pulse = Math.sin(this.phase) * 0.2 + 0.8;
                 
-                // Reset after 3 cycles
-                if (state.persistence % 3 === 0 && state.persistence > 0) {
-                    state.igniting = false;
-                    state.ignitionPhase = 0;
-                }
-            }
-            
-            // Balance bar animation during drill
-            const balanceProgress = state.drillP / state.drillTarget;
-            if (balanceProgress > 0.66) {
-                els.downBar.style.boxShadow = '0 0 20px #ffd166';
-                els.upBar.style.boxShadow = '0 0 20px #ff4d6d';
-            } else {
-                els.downBar.style.boxShadow = '0 0 12px #ffd166';
-                els.upBar.style.boxShadow = '0 0 12px #ff4d6d';
+                gradient.addColorStop(0, baseColor + (this.alpha * pulse) + ')');
+                gradient.addColorStop(1, baseColor + '0)');
+
+                ctx.beginPath();
+                ctx.arc(x, y, glowR, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fillStyle = baseColor + (this.alpha + 0.2) + ')';
+                ctx.fill();
+            } catch (e) {
+                // Fallback for gradient errors
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
             }
         }
-        
-        els.drillP.textContent = state.drillP.toFixed(2);
-        
-        // Render
-        drawTorus(time);
-        drawDrill(time);
-        drawNeutron(time);
-        
-        requestAnimationFrame(update);
     }
 
-    // Init
-    requestAnimationFrame(update);
+    function initSouls() {
+        souls = [];
+        for (let i = 0; i < 100; i++) {
+            souls.push(new Soul());
+        }
+    }
+
+    function formatNumber(num) {
+        if (num >= 1e15) return (num / 1e15).toFixed(2) + 'Q';
+        if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+        if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+        if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+        return num.toString();
+    }
+
+    function updateCounter() {
+        if (soulCount < targetCount) {
+            const diff = targetCount - soulCount;
+            const step = Math.max(1, Math.floor(diff * 0.05));
+            soulCount = Math.min(soulCount + step, targetCount);
+        }
+        counterValue.textContent = formatNumber(soulCount);
+        
+        if (soulCount >= universeComplete && currentStep === growthSteps.length - 2) {
+            counterValue.style.background = 'linear-gradient(135deg, #fbbf24, #ec4899, #a855f7)';
+            counterValue.style.webkitBackgroundClip = 'text';
+            counterValue.style.webkitTextFillColor = 'transparent';
+        }
+    }
+
+    function spawnSouls() {
+        currentStep++;
+        if (currentStep >= growthSteps.length) {
+            currentStep = growthSteps.length - 1;
+            return;
+        }
+        
+        targetCount = growthSteps[currentStep];
+        
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const spawnCount = Math.min(500, Math.floor(targetCount / 1000) + 10);
+        
+        for (let i = 0; i < spawnCount; i++) {
+            const angle = (Math.PI * 2 * i) / spawnCount;
+            const dist = 50 + Math.random() * 100;
+            const x = centerX + Math.cos(angle) * dist;
+            const y = centerY + Math.sin(angle) * dist;
+            souls.push(new Soul(x, y));
+        }
+
+        if (souls.length > 2000) {
+            souls = souls.slice(-2000);
+        }
+
+        soulBtn.style.animation = 'none';
+        setTimeout(() => {
+            soulBtn.style.animation = 'soulPulse 0.5s ease-out, soulPulse 3s ease-in-out infinite 0.5s';
+        }, 10);
+    }
+
+    function drawConnections() {
+        const maxDist = 120;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        for (let i = 0; i < souls.length; i++) {
+            const soul = souls[i];
+            const dx = centerX - soul.x;
+            const dy = centerY - soul.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 200 && Math.random() > 0.98) {
+                ctx.beginPath();
+                ctx.moveTo(soul.x, soul.y);
+                ctx.lineTo(centerX, centerY);
+                ctx.strokeStyle = `rgba(0, 245, 255, ${0.1 * (1 - dist / 200)})`;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+
+            for (let j = i + 1; j < Math.min(i + 10, souls.length); j++) {
+                const other = souls[j];
+                const dx = other.x - soul.x;
+                const dy = other.y - soul.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < maxDist) {
+                    const alpha = (1 - dist / maxDist) * 0.15;
+                    ctx.beginPath();
+                    ctx.moveTo(soul.x, soul.y);
+                    ctx.lineTo(other.x, other.y);
+                    ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animate() {
+        ctx.fillStyle = 'rgba(3, 0, 20, 0.1)';
+        ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+        drawConnections();
+
+        souls.forEach(soul => {
+            soul.update();
+            soul.draw();
+        });
+
+        updateCounter();
+        requestAnimationFrame(animate);
+    }
+
+    soulBtn.addEventListener('click', spawnSouls);
     
-    // Axiom hover effects
-    document.querySelectorAll('.axiom').forEach(axiom => {
-        axiom.addEventListener('mouseenter', () => {
-            axiom.style.transform = 'scale(1.1)';
-        });
-        axiom.addEventListener('mouseleave', () => {
-            axiom.style.transform = 'scale(1)';
-        });
-    });
+    initSouls();
+    ctx.fillStyle = '#030014';
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    animate();
 })();
 </script>
 </body>

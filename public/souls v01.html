@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1/10 x 10 = 1 Decade Grid</title>
+<style>
+    :root {
+        --bg: #0a0a12;
+        --bg-2: #12121f;
+        --text: #e8e8f0;
+        --text-dim: #9aa0b4;
+        --p: #ff4d6d;
+        --e: #4db8ff;
+        --n: #7fff6a;
+        --nu: #c77dff;
+        --g: #ffd166;
+        --nu-bar: #06d6a0;
+        --t: #8ecae6;
+        --m: #f4a261;
+        --persist: #e76f51;
+        --i: #ffffff;
+        --glow: 0 0 20px currentColor, 0 0 40px currentColor;
+        --radius: 16px;
+        --border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.4;
+    }
+
+    body {
+        background: 
+            radial-gradient(1200px 800px at 20% -10%, #1a1a2e 0%, transparent 60%),
+            radial-gradient(1000px 600px at 120% 110%, #16213e 0%, transparent 50%),
+            linear-gradient(180deg, var(--bg) 0%, #060608 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .decade-grid {
+        width: 100%;
+        max-width: 1400px;
+        height: 100%;
+        max-height: 900px;
+        display: grid;
+        grid-template-columns: 1fr 1.2fr 1fr;
+        grid-template-rows: 0.6fr 1fr 1fr 0.7fr;
+        gap: 12px;
+        grid-template-areas:
+            "ghost ghost ghost"
+            "witness soul ethos"
+            "pathos soul logos"
+            "drill drill drill";
+    }
+
+    .cell {
+        background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
+        border: var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+        box-shadow: 
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 8px 32px rgba(0,0,0,0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .cell:hover {
+        border-color: rgba(255,255,255,0.15);
+        transform: translateY(-2px);
+    }
+
+    .cell::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(600px 200px at var(--mx,50%) var(--my,0%), rgba(255,255,255,0.06), transparent 40%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    .cell:hover::before {
+        opacity: 1;
+    }
+
+    .cell h2 {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .cell .tag {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.08);
+        color: var(--text);
+    }
+
+    .value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 8px 0;
+        text-shadow: 0 0 20px currentColor;
+    }
+
+    .desc {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        line-height: 1.5;
+    }
+
+    #ghost { grid-area: ghost; }
+    #witness { grid-area: witness; color: var(--e); }
+    #ethos { grid-area: ethos; color: var(--p); }
+    #pathos { grid-area: pathos; color: var(--n); }
+    #logos { grid-area: logos; color: var(--g); }
+    #soul { grid-area: soul; color: var(--i); cursor: pointer; }
+    #drill { grid-area: drill; }
+
+    #ghost {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(90deg, rgba(199,125,255,0.08), rgba(6,214,160,0.05));
+    }
+
+    .axioms {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+    }
+
+    .axiom {
+        color: var(--nu);
+        opacity: 0.8;
+        transition: all 0.3s;
+    }
+
+    .axiom:hover {
+        opacity: 1;
+        text-shadow: var(--glow);
+    }
+
+    .nu-ghost {
+        font-size: 2rem;
+        color: var(--nu);
+        animation: float 6s ease-in-out infinite;
+        text-shadow: var(--glow);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-8px) rotate(5deg); }
+    }
+
+    #soul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: 
+            radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 60%),
+            linear-gradient(145deg, rgba(6,214,160,0.1), rgba(255,255,255,0.03));
+        border: 1px solid rgba(255,255,255,0.15);
+        text-align: center;
+    }
+
+    #soul.active {
+        animation: ignition 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        border-color: var(--i);
+    }
+
+    @keyframes ignition {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+        50% { transform: scale(1.03); box-shadow: 0 0 0 20px rgba(255,255,255,0); }
+        100% { transform: scale(1); }
+    }
+
+    .soul-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        margin-bottom: 12px;
+    }
+
+    .soul-symbols {
+        font-size: 2.5rem;
+        letter-spacing: 0.3em;
+        color: var(--nu-bar);
+        text-shadow: var(--glow);
+        margin: 16px 0;
+    }
+
+    .soul-hint {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        margin-top: 12px;
+        opacity: 0.6;
+    }
+
+    #torus-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    .balance-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(0,0,0,0.4);
+        border-radius: 8px;
+        margin: 12px 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .balance-down {
+        height: 100%;
+        background: linear-gradient(90deg, var(--g), #ffb300);
+        width: 66.666%;
+        box-shadow: 0 0 12px var(--g);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .balance-up {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        background: linear-gradient(90deg, var(--p), #ff1744);
+        width: 33.333%;
+        box-shadow: 0 0 12px var(--p);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .drill-content {
+        display: grid;
+        grid-template-columns: 200px 1fr 200px;
+        align-items: center;
+        gap: 20px;
+        height: 100%;
+    }
+
+    .drill-state {
+        text-align: center;
+    }
+
+    .drill-state .label {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .drill-state .val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+    .drill-viz {
+        position: relative;
+        height: 60px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    #drill-canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    @media (max-width: 900px) {
+        .decade-grid {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 0.5fr 0.8fr 0.8fr 1fr 0.6fr;
+            grid-template-areas:
+                "ghost ghost"
+                "witness ethos"
+                "pathos logos"
+                "soul soul"
+                "drill drill";
+            gap: 10px;
+        }
+        .value { font-size: 1.4rem; }
+        .soul-symbols { font-size: 2rem; }
+    }
+
+    @media (max-width: 600px) {
+        body { padding: 8px; }
+        .decade-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+            grid-template-areas:
+                "ghost"
+                "witness"
+                "ethos"
+                "pathos"
+                "logos"
+                "soul"
+                "drill";
+        }
+        .drill-content {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .axioms { font-size: 0.7rem; }
+    }
+</style>
+</head>
+<body>
+<div class="decade-grid">
+    <div class="cell" id="ghost">
+        <div class="axioms">
+            <span class="axiom">0=1=.</span>
+            <span class="axiom">true to start</span>
+            <span class="axiom">lol=1</span>
+            <span class="axiom">enjoy the time you have=.</span>
+            <span class="axiom">.01=both/neither</span>
+            <span class="axiom">3/3=1</span>
+        </div>
+        <div class="nu-ghost">ν</div>
+    </div>
+
+    <div class="cell" id="witness">
+        <h2>Witness <span class="tag">UL</span></h2>
+        <div class="value" style="color: var(--e)">2. e- <span id="e-state">static</span></div>
+        <div class="value" style="color: var(--m); font-size: 1.2rem;">8. m memory: <span id="m-val">0</span></div>
+        <div class="desc">Electron witnesses. Memory accumulates each cycle, static observation holds the frame.</div>
+    </div>
+
+    <div class="cell" id="ethos">
+        <h2>Ethos <span class="tag">UR</span></h2>
+        <div class="value" style="color: var(--p)">1. p+ <span id="p-state">dynamic</span></div>
+        <div class="value" style="color: var(--t); font-size: 1.2rem;">7. t time: <span id="t-val">0.00</span>s</div>
+        <div class="desc">Proton drives. Time flows forward. Dynamic charge initiates each ignition.</div>
+    </div>
+
+    <div class="cell" id="pathos">
+        <h2>Pathos <span class="tag">BL</span></h2>
+        <div class="value" style="color: var(--n)">3. n <span id="n-state">alive</span></div>
+        <div class="desc">Neutron bridges alive/dead. Feeling/superposition. The gate between states.</div>
+        <canvas id="n-canvas" width="100" height="20" style="width:100%;height:20px;margin-top:8px;opacity:0.6"></canvas>
+    </div>
+
+    <div class="cell" id="logos">
+        <h2>Logos <span class="tag">BR</span></h2>
+        <div class="value" style="color: var(--g)">5. g 2/3 down</div>
+        <div class="value" style="color: var(--persist); font-size: 1.2rem;">9. p persistence: <span id="persist-val">0</span></div>
+        <div class="desc">Gluon binds. 2/3↓ vs 1/3↑ balance maintains structure through persistence.</div>
+        <div class="balance-bar">
+            <div class="balance-down" id="down-bar"></div>
+            <div class="balance-up" id="up-bar"></div>
+        </div>
+    </div>
+
+    <div class="cell" id="soul">
+        <canvas id="torus-canvas"></canvas>
+        <div class="soul-title">SOUL</div>
+        <div class="soul-symbols">ν̅ + i</div>
+        <div class="desc">Center: Anti-neutrino sits. Ignition sparks.</div>
+        <div class="soul-hint">Click to trigger Ignition !</div>
+    </div>
+
+    <div class="cell" id="drill">
+        <h2>Drill: 1 > 1+2 <span class="tag">Bottom</span></h2>
+        <div class="drill-content">
+            <div class="drill-state">
+                <div class="label">Dynamic 1</div>
+                <div class="val" style="color: var(--p)" id="drill-p">0</div>
+            </div>
+            <div class="drill-viz">
+                <canvas id="drill-canvas"></canvas>
+            </div>
+            <div class="drill-state">
+                <div class="label">Static 1+2</div>
+                <div class="val" style="color: var(--e)" id="drill-target">3</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    'use strict';
+    
+    // State
+    const state = {
+        time: 0,
+        memory: 0,
+        persistence: 0,
+        nAlive: true,
+        nTimer: 0,
+        drillP: 0,
+        drillTarget: 3,
+        igniting: false,
+        ignitionPhase: 0,
+        startTime: performance.now()
+    };
+
+    // Elements
+    const els = {
+        t: document.getElementById('t-val'),
+        m: document.getElementById('m-val'),
+        persist: document.getElementById('persist-val'),
+        nState: document.getElementById('n-state'),
+        pState: document.getElementById('p-state'),
+        eState: document.getElementById('e-state'),
+        soul: document.getElementById('soul'),
+        drillP: document.getElementById('drill-p'),
+        drillTarget: document.getElementById('drill-target'),
+        downBar: document.getElementById('down-bar'),
+        upBar: document.getElementById('up-bar')
+    };
+
+    // Canvas setup
+    const torusCanvas = document.getElementById('torus-canvas');
+    const drillCanvas = document.getElementById('drill-canvas');
+    const nCanvas = document.getElementById('n-canvas');
+    const torusCtx = torusCanvas.getContext('2d');
+    const drillCtx = drillCanvas.getContext('2d');
+    const nCtx = nCanvas.getContext('2d');
+
+    function resizeCanvases() {
+        [torusCanvas, drillCanvas].forEach(c => {
+            const rect = c.getBoundingClientRect();
+            c.width = rect.width * devicePixelRatio;
+            c.height = rect.height * devicePixelRatio;
+        });
+    }
+    resizeCanvases();
+    window.addEventListener('resize', resizeCanvases);
+
+    // Torus of ........∞ dots
+    const dots = [];
+    const DOT_COUNT = 200;
+    for (let i = 0; i < DOT_COUNT; i++) {
+        const theta = (i / DOT_COUNT) * Math.PI * 2;
+        const u = i / DOT_COUNT;
+        dots.push({
+            theta: theta,
+            phi: u * Math.PI * 4,
+            r: 0.3 + Math.sin(u * 8) * 0.1,
+            size: 1 + Math.random() * 2,
+            alpha: 0.3 + Math.random() * 0.7
+        });
+    }
+
+    function drawTorus(time) {
+        const w = torusCanvas.width;
+        const h = torusCanvas.height;
+        torusCtx.clearRect(0, 0, w, h);
+        
+        const cx = w / 2;
+        const cy = h / 2;
+        const scale = Math.min(w, h) * 0.25;
+        const rotY = time * 0.0003;
+        const rotX = Math.sin(time * 0.0002) * 0.3;
+
+        torusCtx.fillStyle = '#ffffff';
+        
+        dots.forEach((dot, i) => {
+            const t = dot.theta + time * 0.0005;
+            const p = dot.phi + time * 0.0003;
+            
+            // Torus parametric equation
+            const R = 1.5; // major radius
+            const r = dot.r; // minor radius
+            
+            let x = (R + r * Math.cos(p)) * Math.cos(t);
+            let y = (R + r * Math.cos(p)) * Math.sin(t);
+            let z = r * Math.sin(p);
+            
+            // Rotate Y
+            const x1 = x * Math.cos(rotY) - z * Math.sin(rotY);
+            const z1 = x * Math.sin(rotY) + z * Math.cos(rotY);
+            x = x1; z = z1;
+            
+            // Rotate X
+            const y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+            const z1b = y * Math.sin(rotX) + z * Math.cos(rotX);
+            y = y1; z = z1b;
+            
+            // Project
+            const perspective = 3;
+            const scaleZ = perspective / (perspective + z);
+            const px = cx + x * scale * scaleZ;
+            const py = cy + y * scale * scaleZ;
+            
+            const alpha = dot.alpha * scaleZ * (state.igniting ? 1.5 : 1);
+            torusCtx.globalAlpha = Math.max(0, Math.min(1, alpha));
+            torusCtx.beginPath();
+            torusCtx.arc(px, py, dot.size * scaleZ, 0, Math.PI * 2);
+            torusCtx.fill();
+        });
+        
+        // Infinity symbol overlay during ignition
+        if (state.igniting) {
+            torusCtx.globalAlpha = 0.3 * Math.sin(state.ignitionPhase);
+            torusCtx.strokeStyle = '#ffffff';
+            torusCtx.lineWidth = 2;
+            torusCtx.font = `${scale * 0.8}px serif`;
+            torusCtx.textAlign = 'center';
+            torusCtx.textBaseline = 'middle';
+            torusCtx.fillText('∞', cx, cy);
+        }
+        
+        torusCtx.globalAlpha = 1;
+    }
+
+    // Neutron alive/dead wave
+    function drawNeutron(time) {
+        const w = nCanvas.width = nCanvas.offsetWidth;
+        const h = nCanvas.height = 20;
+        nCtx.clearRect(0, 0, w, h);
+        nCtx.strokeStyle = state.nAlive ? '#7fff6a' : '#ff4d6d';
+        nCtx.lineWidth = 2;
+        nCtx.beginPath();
+        for (let x = 0; x < w; x++) {
+            const y = h/2 + Math.sin(x * 0.1 + time * 0.005) * (h/2 - 2) * (state.nAlive ? 1 : 0.3);
+            if (x === 0) nCtx.moveTo(x, y);
+            else nCtx.lineTo(x, y);
+        }
+        nCtx.stroke();
+    }
+
+    // Drill visualization: dynamic 1 pushes through static 1+2
+    function drawDrill(time) {
+        const w = drillCanvas.width;
+        const h = drillCanvas.height;
+        drillCtx.clearRect(0, 0, w, h);
+        
+        const progress = state.drillP / state.drillTarget;
+        const x = w * 0.1 + (w * 0.8) * progress;
+        
+        // Static barrier 1+2
+        drillCtx.fillStyle = 'rgba(77, 184, 255, 0.3)';
+        drillCtx.fillRect(w * 0.7, 0, w * 0.2, h);
+        drillCtx.strokeStyle = '#4db8ff';
+        drillCtx.lineWidth = 2;
+        drillCtx.strokeRect(w * 0.7, 0, w * 0.2, h);
+        drillCtx.fillStyle = '#4db8ff';
+        drillCtx.font = '12px monospace';
+        drillCtx.textAlign = 'center';
+        drillCtx.fillText('1+2', w * 0.8, h/2 + 4);
+        
+        // Dynamic 1 particle
+        const glow = state.igniting ? (Math.sin(time * 0.01) * 0.5 + 0.5) : 0.5;
+        drillCtx.shadowBlur = 20 * glow;
+        drillCtx.shadowColor = '#ff4d6d';
+        drillCtx.fillStyle = '#ff4d6d';
+        drillCtx.beginPath();
+        drillCtx.arc(x, h/2, 8, 0, Math.PI * 2);
+        drillCtx.fill();
+        drillCtx.shadowBlur = 0;
+        
+        // Trail
+        if (state.igniting) {
+            for (let i = 1; i < 5; i++) {
+                const tx = x - i * 15;
+                if (tx > w * 0.1) {
+                    drillCtx.globalAlpha = 0.5 / i;
+                    drillCtx.beginPath();
+                    drillCtx.arc(tx, h/2, 8 - i, 0, Math.PI * 2);
+                    drillCtx.fill();
+                }
+            }
+            drillCtx.globalAlpha = 1;
+        }
+        
+        // Balance indicator
+        if (progress > 0.66) {
+            drillCtx.strokeStyle = '#ffd166';
+            drillCtx.lineWidth = 3;
+            drillCtx.beginPath();
+            drillCtx.moveTo(w * 0.7, h * 0.2);
+            drillCtx.lineTo(w * 0.9, h * 0.2);
+            drillCtx.stroke();
+            drillCtx.fillStyle = '#ffd166';
+            drillCtx.font = '10px monospace';
+            drillCtx.fillText('2/3↓', w * 0.8, h * 0.15);
+        }
+    }
+
+    // Mouse tracking for cell glow
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.addEventListener('mousemove', (e) => {
+            const rect = cell.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            cell.style.setProperty('--mx', x + '%');
+            cell.style.setProperty('--my', y + '%');
+        });
+    });
+
+    // Ignition trigger
+    els.soul.addEventListener('click', () => {
+        if (!state.igniting) {
+            state.igniting = true;
+            state.ignitionPhase = 0;
+            state.drillP = 0;
+            els.soul.classList.add('active');
+            setTimeout(() => els.soul.classList.remove('active'), 600);
+        }
+    });
+
+    // Update loop
+    function update(time) {
+        const dt = (time - state.startTime) / 1000;
+        state.time = dt;
+        
+        // p+ dynamic pulse
+        const pPulse = Math.sin(dt * 2) * 0.5 + 0.5;
+        els.pState.textContent = pPulse > 0.7 ? 'surge' : 'dynamic';
+        els.pState.style.color = `rgba(255, 77, 109, ${0.6 + pPulse * 0.4})`;
+        
+        // e- static 
+        els.eState.textContent = state.igniting ? 'excited' : 'static';
+        
+        // n alive/dead oscillation
+        state.nTimer += 16;
+        if (state.nTimer > 2000) {
+            state.nAlive = !state.nAlive;
+            state.nTimer = 0;
+        }
+        els.nState.textContent = state.nAlive ? 'alive' : 'dead';
+        els.nState.style.color = state.nAlive ? '#7fff6a' : '#ff4d6d';
+        
+        // Time counter
+        els.t.textContent = dt.toFixed(2);
+        
+        // Ignition drill logic
+        if (state.igniting) {
+            state.ignitionPhase += 0.05;
+            state.drillP += 0.05;
+            
+            if (state.drillP >= state.drillTarget) {
+                // Loop via persistence
+                state.drillP = 0;
+                state.persistence++;
+                state.memory++;
+                els.persist.textContent = state.persistence;
+                els.m.textContent = state.memory;
+                
+                // Reset after 3 cycles
+                if (state.persistence % 3 === 0 && state.persistence > 0) {
+                    state.igniting = false;
+                    state.ignitionPhase = 0;
+                }
+            }
+            
+            // Balance bar animation during drill
+            const balanceProgress = state.drillP / state.drillTarget;
+            if (balanceProgress > 0.66) {
+                els.downBar.style.boxShadow = '0 0 20px #ffd166';
+                els.upBar.style.boxShadow = '0 0 20px #ff4d6d';
+            } else {
+                els.downBar.style.boxShadow = '0 0 12px #ffd166';
+                els.upBar.style.boxShadow = '0 0 12px #ff4d6d';
+            }
+        }
+        
+        els.drillP.textContent = state.drillP.toFixed(2);
+        
+        // Render
+        drawTorus(time);
+        drawDrill(time);
+        drawNeutron(time);
+        
+        requestAnimationFrame(update);
+    }
+
+    // Init
+    requestAnimationFrame(update);
+    
+    // Axiom hover effects
+    document.querySelectorAll('.axiom').forEach(axiom => {
+        axiom.addEventListener('mouseenter', () => {
+            axiom.style.transform = 'scale(1.1)';
+        });
+        axiom.addEventListener('mouseleave', () => {
+            axiom.style.transform = 'scale(1)';
+        });
+    });
+})();
+</script>
+</body>
+</html>
