@@ -1,6 +1,6 @@
-# Karsa v2.6
+# Karsa v2.8
 
-**Internet Control Plane · 15 Pages Deep · DNA ×3**
+**Internet Control Plane · 17 Pages Deep · Kandi Engine**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
@@ -20,41 +20,41 @@
 12. Quantum Dot
 13. Ternary Engine
 14. Mobius ×3
-15. **DNA ×3** ← new
+15. DNA ×3
+16. Dipole
+17. **Kandi Engine** ← new
 
-## DNA ×3
+## Kandi Engine
 
-**Three helical meshes. 60 nodes total.**
+**42-Bead Dipole Bracelets · 3-Strand Helix · PLUR**
 
 ```
-Strand A: 20 nodes @ 0°   phase
-Strand B: 20 nodes @ 120° phase  
-Strand C: 20 nodes @ 240° phase
+42 beads = 3 strands × 14 nodes
+14 = 7 + 7 = there + back
+7 = 5 + 2 = go/come + shadow caps
 
-Total: 60 nodes
-Each node = 1 vector
-Each vector = 1 step on Mobius strip
+42 = 6 × 7
+6 = 2 × 3 = two poles × three strands
+7 = 5 + 2 = go/come + caps
+
+42 = 0 = 1 = 1
 ```
 
-**Tubules connect strands:**
-```
-A[i] ↔ B[i] ↔ C[i] ↔ A[i+1]
-```
+**Patterns:**
+- **DIPOLE 42**: Pole+ (gold) / Pole- (cyan)
+- **HELIX ×3**: 3 strands × 20 nodes = 60
+- **CUBI 10:1**: 10 around 1 × 3 strands
+- **MOBIUS**: 10 steps × 3 strips
+- **RAINBOW**: 7-color spectrum
+- **PSYCHO**: Black/Gold/White
+- **GLADIATOR**: Purple/Gold/Black
+- **VICTORIAN**: Gold/Victorian/Cream
 
-**120° twist per node:**
-```
-20 nodes × 120° = 2400° = 6.666... turns
-6.666... × 3 strands = 20 turns total
-```
-
-**20 turns = 10 around 1 × 2 (shadow)**  
-**10 around 1 = CUBI**
-
-**Triple helix = Triple cubi**  
-**Connected = One system**
+**Export**: Pattern codes, PNG download  
+**PLUR**: Peace Love Unity Respect
 
 ## Deploy
 
-Railway → Root: `.` → 15 pages deep
+Railway → Root: `.` → 17 pages deep
 
 **WITNESS: a7f3c891**

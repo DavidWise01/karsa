@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kandi Engine · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap');
+:root{--bg:#0a0014;--ink:#e8dcc8;--gold:#c9a961;--purple:#8b2f8b;--victorian:#5a3a5a;--mint:#00ffaa;--cyan:#32e8ff;--mag:#e168ff;--psycho:#1a1a1a;--gladiator:#6a0dad;--panel:rgba(10,0,20,.85);--border:rgba(201,169,97,.25)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink)}
+body{
+  background:
+    radial-gradient(circle at 20% 50%,rgba(106,13,173,.15),transparent 40%),
+    radial-gradient(circle at 80% 50%,rgba(90,58,90,.15),transparent 40%),
+    var(--bg);
+  font-family:'Courier Prime',monospace;padding:20px;overflow:auto
+}
+.container{max-width:1400px;margin:0 auto}
+.panel{border:3px double var(--gold);background:var(--panel);backdrop-filter:blur(12px);border-radius:8px;padding:40px;margin-bottom:20px;box-shadow:0 0 40px rgba(106,13,173,.3)}
+h1{font-family:'IM Fell English SC',serif;font-size:48px;text-align:center;margin:0 0 8px 0;color:var(--gold);letter-spacing:.3em;font-weight:400;text-shadow:0 0 20px rgba(201,169,97,.5)}
+.subtitle{font-family:'Playfair Display',serif;font-style:italic;text-align:center;font-size:16px;color:var(--purple);margin:0 0 30px 0;letter-spacing:.2em;text-transform:uppercase}
+.viz-container{width:100%;height:500px;background:rgba(0,0,0,.6);border:2px solid var(--victorian);border-radius:8px;position:relative;overflow:hidden;margin:20px 0;display:flex;align-items:center;justify-content:center}
+#canvas{max-width:100%;max-height:100%}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0}
+button{
+  background:linear-gradient(135deg,var(--gladiator),var(--victorian));border:1px solid var(--gold);color:var(--ink);
+  padding:12px;border-radius:4px;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+  text-transform:uppercase;font-size:13px;letter-spacing:.15em;transition:all .2s
+}
+button:hover{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho);box-shadow:0 0 20px rgba(201,169,97,.4)}
+button.primary{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho)}
+.palette{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:20px 0}
+.color-swatch{
+  width:100%;aspect-ratio:1;border:2px solid var(--gold);border-radius:50%;cursor:pointer;
+  transition:all .2s;box-shadow:0 0 10px rgba(0,0,0,.5)
+}
+.color-swatch:hover{transform:scale(1.2);box-shadow:0 0 20px currentColor}
+.color-swatch.active{border-width:4px;box-shadow:0 0 30px currentColor}
+.readout{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0}
+.readout-item{background:var(--psycho);border:1px solid var(--gold);border-radius:4px;padding:12px;text-align:center}
+.readout-label{font-size:9px;color:var(--purple);text-transform:uppercase;letter-spacing:.1em;font-family:'Courier Prime',monospace}
+.readout-val{font-size:24px;color:var(--gold);font-weight:bold;margin-top:4px;font-family:'IM Fell English SC',serif}
+.law{font-size:18px;color:var(--gold);font-family:'Courier Prime',monospace;text-align:center;padding:20px;background:var(--psycho);border:2px solid var(--victorian);border-radius:4px;margin:24px 0;letter-spacing:.15em;text-transform:uppercase}
+.patterns{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.pattern-btn{
+  background:var(--psycho);border:1px solid var(--victorian);color:var(--ink);
+  padding:10px;border-radius:4px;cursor:pointer;font-size:10px;text-transform:uppercase;
+  font-family:'Courier Prime',monospace;letter-spacing:.1em
+}
+.pattern-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pattern-btn.active{background:var(--gold);color:var(--psycho)}
+.export-bar{display:flex;gap:12px;margin:20px 0}
+.export-bar input{
+  flex:1;background:var(--psycho);border:1px solid var(--gold);color:var(--ink);
+  padding:10px;border-radius:4px;font-family:'Courier Prime',monospace
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>KANDI ENGINE</h1>
+    <div class="subtitle">42-Bead Dipole Bracelets · 3-Strand Helix · PLUR</div>
+    
+    <div class="viz-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button class="primary" id="generate">GENERATE</button>
+      <button id="randomize">RANDOMIZE</button>
+      <button id="dipole">DIPOLE 42</button>
+      <button id="helix">HELIX ×3</button>
+      <button id="clear">CLEAR</button>
+    </div>
+    
+    <div class="palette" id="palette"></div>
+    
+    <div class="patterns">
+      <button class="pattern-btn" data-pattern="dipole">42 DIPOLE</button>
+      <button class="pattern-btn" data-pattern="helix3">HELIX ×3</button>
+      <button class="pattern-btn" data-pattern="cubi">CUBI 10:1</button>
+      <button class="pattern-btn" data-pattern="mobius">MOBIUS</button>
+      <button class="pattern-btn" data-pattern="rainbow">RAINBOW</button>
+      <button class="pattern-btn" data-pattern="psycho">PSYCHO</button>
+      <button class="pattern-btn" data-pattern="gladiator">GLADIATOR</button>
+      <button class="pattern-btn" data-pattern="victorian">VICTORIAN</button>
+    </div>
+    
+    <div class="readout">
+      <div class="readout-item">
+        <div class="readout-label">Beads</div>
+        <div class="readout-val" id="beads">42</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Strands</div>
+        <div class="readout-val" id="strands">3</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Per Strand</div>
+        <div class="readout-val" id="perStrand">14</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Pattern</div>
+        <div class="readout-val" id="pattern">DIPOLE</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">Holonomy</div>
+        <div class="readout-val" id="holonomy">0</div>
+      </div>
+      <div class="readout-item">
+        <div class="readout-label">PLUR</div>
+        <div class="readout-val" id="plur">∞</div>
+      </div>
+    </div>
+    
+    <div class="law">42 = 0 = 1 = 1 · PEACE LOVE UNITY RESPECT</div>
+    
+    <div class="export-bar">
+      <input type="text" id="exportCode" placeholder="Pattern code..." readonly>
+      <button id="copy">COPY</button>
+      <button id="download">DOWNLOAD PNG</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = canvas.width = 800;
+  H = canvas.height = 400;
+}
+resize();
+
+const COLORS = [
+  '#ffd95a', '#32e8ff', '#e168ff', '#00ffaa', '#ff6b6b',
+  '#6a0dad', '#c9a961', '#5a3a5a', '#ffffff', '#000000',
+  '#ff1493', '#00ffff', '#ffff00', '#ff00ff', '#00ff00',
+  '#ff4500', '#1e90ff', '#ffd700', '#ff69b4', '#adff2f'
+];
+
+let ENGINE = {
+  beads: 42,
+  strands: 3,
+  perStrand: 14,
+  pattern: 'DIPOLE',
+  holonomy: 0,
+  colors: [],
+  selectedColor: 0
+};
+
+// Initialize palette
+function initPalette(){
+  const palette = document.getElementById('palette');
+  COLORS.forEach((color, i) => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch';
+    swatch.style.background = color;
+    swatch.onclick = () => selectColor(i);
+    if(i === 0) swatch.classList.add('active');
+    palette.appendChild(swatch);
+  });
+}
+
+function selectColor(i){
+  ENGINE.selectedColor = i;
+  document.querySelectorAll('.color-swatch').forEach((s, idx) => {
+    s.classList.toggle('active', idx === i);
+  });
+}
+
+// Generate patterns
+function generateDipole(){
+  ENGINE.beads = 42;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 14;
+  ENGINE.pattern = 'DIPOLE';
+  ENGINE.colors = [];
+  
+  // 42 = 6 × 7 = 2 poles × 3 strands × 7 beats
+  // Pattern: Pole+ (0.0.0.5), Pole- (5.0.0.0)
+  for(let s = 0; s < 3; s++){
+    for(let i = 0; i < 14; i++){
+      if(i < 7){
+        // Pole + : Gold
+        ENGINE.colors.push(0);
+      }else{
+        // Pole - : Cyan
+        ENGINE.colors.push(1);
+      }
+    }
+  }
+  updateReadout();
+  draw();
+}
+
+function generateHelix3(){
+  ENGINE.beads = 60;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 20;
+  ENGINE.pattern = 'HELIX ×3';
+  ENGINE.colors = [];
+  
+  // 3 strands × 20 nodes = 60
+  for(let s = 0; s < 3; s++){
+    for(let i = 0; i < 20; i++){
+      // Each strand gets its color
+      ENGINE.colors.push(s);
+    }
+  }
+  updateReadout();
+  draw();
+}
+
+function generateCubi(){
+  ENGINE.beads = 30;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 10;
+  ENGINE.pattern = 'CUBI';
+  ENGINE.colors = [];
+  
+  // 10 around 1 × 3 strands
+  for(let s = 0; s < 3; s++){
+    for(let i = 0; i < 10; i++){
+      // Alternate 0.0.0 and 0.0.0.5
+      ENGINE.colors.push(i % 2 === 0 ? 0 : 2);
+    }
+  }
+  updateReadout();
+  draw();
+}
+
+function generateMobius(){
+  ENGINE.beads = 30;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 10;
+  ENGINE.pattern = 'MOBIUS';
+  ENGINE.colors = [];
+  
+  // 10 steps per strip × 3 strips
+  for(let s = 0; s < 3; s++){
+    for(let i = 0; i < 10; i++){
+      // Gradient along strip
+      ENGINE.colors.push((s + i) % COLORS.length);
+    }
+  }
+  updateReadout();
+  draw();
+}
+
+function generateRainbow(){
+  ENGINE.beads = 42;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 14;
+  ENGINE.pattern = 'RAINBOW';
+  ENGINE.colors = [];
+  
+  for(let i = 0; i < 42; i++){
+    ENGINE.colors.push(i % 7);
+  }
+  updateReadout();
+  draw();
+}
+
+function generatePsycho(){
+  ENGINE.beads = 42;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 14;
+  ENGINE.pattern = 'PSYCHO';
+  ENGINE.colors = [];
+  
+  // Black, gold, white
+  const psycho = [9, 0, 8];
+  for(let i = 0; i < 42; i++){
+    ENGINE.colors.push(psycho[i % 3]);
+  }
+  updateReadout();
+  draw();
+}
+
+function generateGladiator(){
+  ENGINE.beads = 42;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 14;
+  ENGINE.pattern = 'GLADIATOR';
+  ENGINE.colors = [];
+  
+  // Purple, gold, black
+  const glad = [5, 0, 9];
+  for(let i = 0; i < 42; i++){
+    ENGINE.colors.push(glad[i % 3]);
+  }
+  updateReadout();
+  draw();
+}
+
+function generateVictorian(){
+  ENGINE.beads = 42;
+  ENGINE.strands = 3;
+  ENGINE.perStrand = 14;
+  ENGINE.pattern = 'VICTORIAN';
+  ENGINE.colors = [];
+  
+  // Gold, victorian, cream
+  const vict = [0, 7, 6];
+  for(let i = 0; i < 42; i++){
+    ENGINE.colors.push(vict[i % 3]);
+  }
+  updateReadout();
+  draw();
+}
+
+function randomize(){
+  ENGINE.colors = [];
+  for(let i = 0; i < ENGINE.beads; i++){
+    ENGINE.colors.push(Math.floor(Math.random() * COLORS.length));
+  }
+  ENGINE.pattern = 'RANDOM';
+  updateReadout();
+  draw();
+}
+
+function clear(){
+  ENGINE.colors = new Array(ENGINE.beads).fill(9); // Black
+  ENGINE.pattern = 'CLEAR';
+  updateReadout();
+  draw();
+}
+
+function updateReadout(){
+  document.getElementById('beads').textContent = ENGINE.beads;
+  document.getElementById('strands').textContent = ENGINE.strands;
+  document.getElementById('perStrand').textContent = ENGINE.perStrand;
+  document.getElementById('pattern').textContent = ENGINE.pattern;
+  document.getElementById('holonomy').textContent = ENGINE.holonomy;
+  
+  // Export code
+  const code = ENGINE.colors.map(c => c.toString(16)).join('');
+  document.getElementById('exportCode').value = code;
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  
+  const centerX = W/2;
+  const centerY = H/2;
+  const radius = 150;
+  const beadSize = 12;
+  
+  // Draw bracelet as 3 intertwined strands
+  for(let s = 0; s < ENGINE.strands; s++){
+    const strandAngle = (s / ENGINE.strands) * Math.PI * 2;
+    
+    for(let i = 0; i < ENGINE.perStrand; i++){
+      const idx = s * ENGINE.perStrand + i;
+      if(idx >= ENGINE.colors.length) continue;
+      
+      const t = i / ENGINE.perStrand;
+      const angle = t * Math.PI * 2 + strandAngle;
+      const r = radius + Math.sin(t * Math.PI * 4) * 20;
+      
+      const x = centerX + Math.cos(angle) * r;
+      const y = centerY + Math.sin(angle) * r * 0.6; // Ellipse
+      
+      const color = COLORS[ENGINE.colors[idx]];
+      
+      // Draw bead
+      ctx.fillStyle = color;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = color;
+      ctx.beginPath();
+      ctx.arc(x, y, beadSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Draw string
+      if(i > 0){
+        const prevIdx = s * ENGINE.perStrand + i - 1;
+        const prevT = (i-1) / ENGINE.perStrand;
+        const prevAngle = prevT * Math.PI * 2 + strandAngle;
+        const prevR = radius + Math.sin(prevT * Math.PI * 4) * 20;
+        const prevX = centerX + Math.cos(prevAngle) * prevR;
+        const prevY = centerY + Math.sin(prevAngle) * prevR * 0.6;
+        
+        ctx.strokeStyle = 'rgba(201,169,97,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+    }
+  }
+  
+  // Draw center text
+  ctx.fillStyle = '#c9a961';
+  ctx.font = 'bold 24px "IM Fell English SC"';
+  ctx.textAlign = 'center';
+  ctx.fillText('42 = 0 = 1 = 1', centerX, centerY);
+  ctx.font = '14px "Playfair Display"';
+  ctx.fillText('PLUR', centerX, centerY + 25);
+}
+
+// Event listeners
+document.getElementById('generate').onclick = generateDipole;
+document.getElementById('randomize').onclick = randomize;
+document.getElementById('dipole').onclick = generateDipole;
+document.getElementById('helix').onclick = generateHelix3;
+document.getElementById('clear').onclick = clear;
+
+document.querySelectorAll('.pattern-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const pattern = btn.dataset.pattern;
+    if(pattern === 'dipole') generateDipole();
+    else if(pattern === 'helix3') generateHelix3();
+    else if(pattern === 'cubi') generateCubi();
+    else if(pattern === 'mobius') generateMobius();
+    else if(pattern === 'rainbow') generateRainbow();
+    else if(pattern === 'psycho') generatePsycho();
+    else if(pattern === 'gladiator') generateGladiator();
+    else if(pattern === 'victorian') generateVictorian();
+  };
+});
+
+document.getElementById('copy').onclick = () => {
+  document.getElementById('exportCode').select();
+  document.execCommand('copy');
+};
+
+document.getElementById('download').onclick = () => {
+  const link = document.createElement('a');
+  link.download = 'kandi-dipole-42.png';
+  link.href = canvas.toDataURL();
+  link.click();
+};
+
+// Initialize
+initPalette();
+generateDipole();
+</script>
+</body>
+</html>
