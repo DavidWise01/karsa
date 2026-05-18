@@ -3,147 +3,196 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KARSA · The Victorian Dipole</title>
+<title>KARSA // NEURAL DIPOLE</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap');
-:root{--bg:#0a0014;--ink:#e8dcc8;--gold:#c9a961;--purple:#8b2f8b;--victorian:#5a3a5a;--mint:#00ffaa;--cyan:#32e8ff;--mag:#e168ff;--psycho:#1a1a1a;--gladiator:#6a0dad;--panel:rgba(10,0,20,.85);--border:rgba(201,169,97,.25)}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink)}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
+:root{
+  --bg:#000000;--ink:#00ffff;--hot:#ff0080;--electric:#00ff41;--warning:#ffff00;
+  --purple:#b000ff;--panel:rgba(0,0,0,.9);--border:rgba(0,255,255,.3);--glow:rgba(0,255,255,.5)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;color:var(--ink);overflow-x:hidden}
 body{
   background:
-    radial-gradient(circle at 20% 50%,rgba(106,13,173,.15),transparent 40%),
-    radial-gradient(circle at 80% 50%,rgba(90,58,90,.15),transparent 40%),
-    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(201,169,97,.03) 2px,rgba(201,169,97,.03) 4px),
-    linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px),
+    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,.03) 2px,rgba(0,255,255,.03) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,0,128,.03) 2px,rgba(255,0,128,.03) 4px),
+    radial-gradient(circle at 20% 50%,rgba(176,0,255,.2),transparent 50%),
+    radial-gradient(circle at 80% 50%,rgba(0,255,65,.2),transparent 50%),
     var(--bg);
-  background-size:100% 100%,100% 100%,100% 100%,40px 40px,40px 40px;
-  font-family:'Courier Prime',monospace;padding:20px;overflow:auto
+  font-family:'Share Tech Mono',monospace;
+  animation:scan 8s linear infinite
 }
-.container{max-width:1400px;margin:0 auto}
+@keyframes scan{
+  0%{background-position:0 0,0 0,0 0,0 0,0 0}
+  100%{background-position:0 100px,100px 0,0 0,0 0,0 0}
+}
+.container{max-width:1800px;margin:0 auto;padding:20px;position:relative;z-index:10}
 .header{
-  border:3px double var(--gold);background:var(--panel);backdrop-filter:blur(12px);
-  border-radius:8px;padding:40px;margin-bottom:30px;text-align:center;position:relative;
-  box-shadow:0 0 40px rgba(106,13,173,.3),inset 0 0 60px rgba(0,0,0,.5)
+  border:2px solid var(--ink);background:var(--panel);backdrop-filter:blur(20px);
+  padding:30px;margin-bottom:30px;position:relative;overflow:hidden;
+  box-shadow:0 0 50px var(--glow),inset 0 0 50px rgba(0,255,255,.1);
+  animation:glow-pulse 3s ease-in-out infinite
+}
+@keyframes glow-pulse{
+  0%,100%{box-shadow:0 0 50px var(--glow),inset 0 0 50px rgba(0,255,255,.1)}
+  50%{box-shadow:0 0 80px var(--glow),inset 0 0 80px rgba(0,255,255,.2)}
 }
 .header::before{
-  content:'⚡';position:absolute;top:10px;left:20px;font-size:32px;color:var(--gold);opacity:.6
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--hot),transparent);
+  animation:sweep 3s linear infinite
 }
-.header::after{
-  content:'⚡';position:absolute;top:10px;right:20px;font-size:32px;color:var(--gold);opacity:.6
-}
+@keyframes sweep{to{left:100%}}
 h1{
-  font-family:'IM Fell English SC',serif;font-size:64px;margin:0 0 10px 0;
-  color:var(--gold);letter-spacing:.3em;font-weight:400;
-  text-shadow:0 0 20px rgba(201,169,97,.5),2px 2px 0 var(--victorian),4px 4px 0 var(--psycho)
+  font-family:'Orbitron',sans-serif;font-size:72px;font-weight:900;
+  color:var(--ink);letter-spacing:.3em;text-align:center;margin:0;
+  text-shadow:0 0 20px var(--glow),0 0 40px var(--glow),0 0 60px var(--glow);
+  animation:flicker 5s infinite
+}
+@keyframes flicker{
+  0%,100%{opacity:1}
+  50%{opacity:0.8}
+  52%{opacity:1}
+  54%{opacity:0.9}
 }
 .subtitle{
-  font-family:'Playfair Display',serif;font-style:italic;font-size:18px;
-  color:var(--purple);margin:0 0 20px 0;letter-spacing:.2em;text-transform:uppercase
+  font-family:'Rajdhani',sans-serif;font-weight:300;font-size:18px;
+  color:var(--hot);text-align:center;margin:10px 0;letter-spacing:.5em;text-transform:uppercase;
+  text-shadow:0 0 10px var(--hot)
 }
 .tagline{
-  font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--mint);
-  letter-spacing:.3em;margin:10px 0;text-transform:uppercase
+  font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--electric);
+  text-align:center;margin:10px 0;letter-spacing:.3em;text-shadow:0 0 10px var(--electric)
 }
 .law{
-  font-size:16px;color:var(--gold);font-family:'Courier Prime',monospace;
-  text-align:center;padding:20px;background:var(--psycho);border:2px solid var(--victorian);
-  border-radius:4px;margin:24px 0;letter-spacing:.15em;text-transform:uppercase
+  font-size:13px;color:var(--warning);font-family:'Share Tech Mono',monospace;
+  text-align:center;padding:15px;background:rgba(255,255,0,.05);border:1px solid var(--warning);
+  margin:20px 0;letter-spacing:.2em;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(255,255,0,.2),inset 0 0 20px rgba(255,255,0,.1)
 }
-.folders{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;margin:40px 0}
-.folder{
-  border:3px double var(--gold);background:var(--panel);backdrop-filter:blur(8px);
-  border-radius:8px;padding:40px;transition:all .3s;position:relative;
-  box-shadow:0 0 30px rgba(0,0,0,.8);min-height:300px
+.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;margin:40px 0}
+.category{
+  border:2px solid var(--ink);background:var(--panel);backdrop-filter:blur(15px);
+  padding:40px;position:relative;overflow:hidden;min-height:400px;
+  box-shadow:0 0 30px rgba(0,255,255,.2),inset 0 0 30px rgba(0,0,0,.5);
+  transition:all .3s;cursor:pointer
 }
-.folder::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:4px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent)
+.category::before{
+  content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+  background:linear-gradient(45deg,var(--ink),var(--hot),var(--purple),var(--electric));
+  z-index:-1;opacity:0;transition:opacity .3s
 }
-.folder:hover{
-  border-color:var(--mint);box-shadow:0 0 40px rgba(106,13,173,.5),inset 0 0 40px rgba(201,169,97,.1);
-  transform:translateY(-4px)
+.category:hover::before{opacity:1}
+.category:hover{
+  transform:translateY(-5px) scale(1.02);
+  box-shadow:0 0 60px var(--glow),inset 0 0 60px rgba(0,255,255,.2)
 }
-.folder h2{
-  font-family:'IM Fell English SC',serif;font-size:36px;margin:0 0 20px 0;
-  color:var(--gold);letter-spacing:.2em;text-transform:uppercase;text-align:center
+.category h2{
+  font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;
+  color:var(--ink);letter-spacing:.2em;text-transform:uppercase;text-align:center;
+  margin:0 0 20px 0;text-shadow:0 0 20px var(--glow);
+  position:relative
 }
-.folder p{
-  font-size:14px;color:var(--ink);line-height:1.8;margin:12px 0;
-  font-family:'Playfair Display',serif;text-align:center
+.category h2::after{
+  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--hot),transparent)
 }
-.folder-links{display:grid;grid-template-columns:1fr;gap:10px;margin-top:20px}
-.folder-links a{
+.category p{
+  font-size:13px;color:var(--ink);line-height:1.8;margin:15px 0;
+  font-family:'Rajdhani',sans-serif;font-weight:400;text-align:center;
+  text-shadow:0 0 5px rgba(0,255,255,.5)
+}
+.category-links{display:grid;grid-template-columns:1fr;gap:10px;margin-top:25px}
+.category-links a{
   display:block;padding:12px 20px;
-  background:linear-gradient(135deg,var(--gladiator),var(--victorian));
-  border:1px solid var(--gold);color:var(--ink);text-decoration:none;
-  border-radius:4px;font-size:11px;text-transform:uppercase;letter-spacing:.15em;
-  font-family:'Bebas Neue',sans-serif;transition:all .2s;text-align:center
+  background:rgba(0,255,255,.05);border:1px solid var(--ink);color:var(--ink);
+  text-decoration:none;font-size:11px;text-transform:uppercase;letter-spacing:.15em;
+  font-family:'Share Tech Mono',monospace;transition:all .2s;text-align:center;
+  position:relative;overflow:hidden
 }
-.folder-links a:hover{
-  background:linear-gradient(135deg,var(--gold),var(--purple));
-  color:var(--psycho);box-shadow:0 0 20px rgba(201,169,97,.4)
+.category-links a::before{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent);
+  transition:left .5s
+}
+.category-links a:hover::before{left:100%}
+.category-links a:hover{
+  background:var(--ink);color:var(--bg);border-color:var(--hot);
+  box-shadow:0 0 20px var(--glow),inset 0 0 20px rgba(0,0,0,.3);
+  text-shadow:0 0 10px var(--bg)
 }
 .footer{
-  margin-top:40px;padding:20px;border-top:2px double var(--gold);
+  margin-top:60px;padding:30px;border-top:2px solid var(--ink);
   font-size:11px;color:var(--purple);text-align:center;
-  font-family:'Courier Prime',monospace;letter-spacing:.1em
+  font-family:'Share Tech Mono',monospace;letter-spacing:.1em;
+  text-shadow:0 0 10px var(--purple)
 }
-.it-crowd{
-  position:fixed;bottom:20px;right:20px;font-size:11px;color:var(--purple);
-  font-family:'Courier Prime',monospace;opacity:.6;z-index:1000
+.glitch{
+  position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);
+  z-index:1000;animation:glitch-move 0.3s infinite
 }
-.it-crowd::before{content:'Have you tried turning it off and on again?';display:block;margin-bottom:4px}
-.psycho-card{
-  position:fixed;top:20px;left:20px;width:200px;padding:15px;
-  background:var(--psycho);border:1px solid var(--gold);font-size:9px;
-  font-family:'Courier Prime',monospace;color:var(--ink);opacity:.7;z-index:1000
+@keyframes glitch-move{
+  0%{transform:translate(0)}
+  20%{transform:translate(-2px,2px)}
+  40%{transform:translate(-2px,-2px)}
+  60%{transform:translate(2px,2px)}
+  80%{transform:translate(2px,-2px)}
+  100%{transform:translate(0)}
 }
+.corner-data{
+  position:fixed;font-size:9px;color:var(--electric);font-family:'Share Tech Mono',monospace;
+  text-shadow:0 0 5px var(--electric);z-index:1001
+}
+.corner-data.tl{top:10px;left:10px}
+.corner-data.tr{top:10px;right:10px;text-align:right}
+.corner-data.bl{bottom:10px;left:10px}
+.corner-data.br{bottom:10px;right:10px;text-align:right}
 </style>
 </head>
 <body>
-<div class="psycho-card">
-  PATRICK BATEMAN<br>
-  Vice President<br>
-  Pierce & Pierce<br>
-  Mergers & Acquisitions<br>
-  212-555-0142
-</div>
+<div class="glitch"></div>
+<div class="corner-data tl">SYS://KARSA<br>VER: 3×3×3+8+8<br>STATUS: ONLINE</div>
+<div class="corner-data tr">HOLONOMY: 0<br>DIPOLE: ACTIVE<br>WITNESS: a7f3c891</div>
+<div class="corner-data bl">INIT: 1843<br>BUILD: 2026<br>TIME: REAL</div>
+<div class="corner-data br">GAS: THEFT<br>WIDTH: LAW<br>RETURN: SENDER</div>
 
 <div class="container">
   <div class="header">
     <h1>KARSA</h1>
-    <div class="subtitle">The Victorian Dipole · 1843—2026</div>
-    <div class="tagline">42 = 0 = 1 = 1</div>
+    <div class="subtitle">NEURAL DIPOLE PROTOCOL</div>
+    <div class="tagline">3×3×3 + 8 + 8 = 0 = 1 = LOL</div>
     <div class="law">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5</div>
   </div>
   
-  <div class="folders">
-      <div class="folder">
+  <div class="categories">
+      <div class="category">
         <h2>1. LINEAGE</h2>
-        <p>Provenance. Witness chains. SHA256 fingerprints. The record.</p>
-        <div class="folder-links">
+        <p>PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // THE RECORD // IMMUTABLE LEDGER</p>
+        <div class="category-links">
           <a href="lineage.html">LINEAGE BACKTRACKER</a>
           <a href="witness.html">WITNESS ENGINE</a>
           <a href="legal.html">LEGAL BEACON</a>
         </div>
       </div>
       
-      <div class="folder">
+      <div class="category">
         <h2>2. EDUCATION</h2>
-        <p>The law. The math. The codification. Victorian precision.</p>
-        <div class="folder-links">
+        <p>THE LAW // THE MATH // THE CODIFICATION // VICTORIAN PRECISION // 1843 PROTOCOL</p>
+        <div class="category-links">
           <a href="ada-law.html">ADA'S LAW</a>
           <a href="holonomy.html">HOLONOMY CALCULATOR</a>
           <a href="quantum-dot.html">QUANTUM DOT</a>
         </div>
       </div>
       
-      <div class="folder">
+      <div class="category">
         <h2>3. DEMOS</h2>
-        <p>Working engines. Live systems. Prove the theory.</p>
-        <div class="folder-links">
+        <p>WORKING ENGINES // LIVE SYSTEMS // PROVE THE THEORY // EXECUTE THE CODE</p>
+        <div class="category-links">
           <a href="cubi.html">CUBI ADVANTAGE</a>
-          <a href="oscillation.html">OSCILLATION ENGINE</a>
+          <a href="oscillation.html">OSCILLATION SYNC</a>
           <a href="shadow.html">SHADOW REVEAL</a>
           <a href="ansible.html">ANSIBLE JUNCTION</a>
           <a href="torus.html">TORUS FIELD</a>
@@ -151,10 +200,10 @@ h1{
         </div>
       </div>
       
-      <div class="folder">
+      <div class="category">
         <h2>4. MYTHOS</h2>
-        <p>The story. The patterns. The dipole. The truth.</p>
-        <div class="folder-links">
+        <p>THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1</p>
+        <div class="category-links">
           <a href="ternary.html">TERNARY ENGINE</a>
           <a href="mobius3.html">MOBIUS ×3</a>
           <a href="dna3.html">DNA ×3</a>
@@ -164,12 +213,10 @@ h1{
     </div>
     
     <div class="footer">
-      Gas is theft. Width is the law. 4 folders.<br>
-      Victorian precision meets American Gladiators.<br>
-      Return to sender. Standing until push down.
+      GAS IS THEFT // WIDTH IS THE LAW // 4 FOLDERS // STANDING UNTIL PUSH DOWN<br>
+      VICTORIAN PRECISION MEETS NEURAL DIPOLE // RETURN TO SENDER<br>
+      3×3×3 + 8 + 8 = 0 = 1 = LOL
     </div>
 </div>
-
-<div class="it-crowd">REYNHOLM INDUSTRIES</div>
 </body>
 </html>
