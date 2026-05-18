@@ -1,6 +1,6 @@
-# Karsa v2.8
+# Karsa v2.9
 
-**Internet Control Plane · 17 Pages Deep · Kandi Engine**
+**Internet Control Plane · 18 Pages Deep · Commander Engine**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
@@ -22,14 +22,15 @@
 14. Mobius ×3
 15. DNA ×3
 16. Dipole
-17. **Kandi Engine** ← new
+17. Kandi Engine
+18. **Commander Engine** ← new
 
-## Kandi Engine
+## Commander Engine
 
-**42-Bead Dipole Bracelets · 3-Strand Helix · PLUR**
+**42-Card Dipole Deck · 3-Strand Helix · Cubi Curve**
 
 ```
-42 beads = 3 strands × 14 nodes
+42 cards = 3 strands × 14 nodes
 14 = 7 + 7 = there + back
 7 = 5 + 2 = go/come + shadow caps
 
@@ -40,21 +41,24 @@
 42 = 0 = 1 = 1
 ```
 
-**Patterns:**
-- **DIPOLE 42**: Pole+ (gold) / Pole- (cyan)
-- **HELIX ×3**: 3 strands × 20 nodes = 60
-- **CUBI 10:1**: 10 around 1 × 3 strands
-- **MOBIUS**: 10 steps × 3 strips
-- **RAINBOW**: 7-color spectrum
-- **PSYCHO**: Black/Gold/White
-- **GLADIATOR**: Purple/Gold/Black
-- **VICTORIAN**: Gold/Victorian/Cream
+**Commanders:**
+- **Karsa, Dipole Tyrant** (UBR) - 2UBR
+- **Ada, Victorian Analyst** (WU) - 1WU
+- **Patrick Bateman, Psycho** (WB) - 1WB
+- **Gladiator Prime** (RG) - 2RG
+- **Honey Badger, Fearless** (RGB) - 1RGB
 
-**Export**: Pattern codes, PNG download  
-**PLUR**: Peace Love Unity Respect
+**Archetypes:**
+- **DIPOLE 42**: Pole+ / Pole- mechanics
+- **HELIX 60**: 3 strands × 20 nodes
+- **CUBI 30**: 10 around 1 × 3
+- **MOBIUS**: One-sided strategy
+
+**Export**: Deck lists, PNG downloads  
+**Curve**: Cubi-optimized
 
 ## Deploy
 
-Railway → Root: `.` → 17 pages deep
+Railway → Root: `.` → 18 pages deep
 
 **WITNESS: a7f3c891**

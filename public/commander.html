@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commander Engine · Karsa</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Bebas+Neue&display=swap');
+:root{--bg:#0a0014;--ink:#e8dcc8;--gold:#c9a961;--purple:#8b2f8b;--victorian:#5a3a5a;--mint:#00ffaa;--cyan:#32e8ff;--mag:#e168ff;--psycho:#1a1a1a;--gladiator:#6a0dad;--panel:rgba(10,0,20,.85);--border:rgba(201,169,97,.25)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--ink)}
+body{
+  background:
+    radial-gradient(circle at 20% 50%,rgba(106,13,173,.15),transparent 40%),
+    radial-gradient(circle at 80% 50%,rgba(90,58,90,.15),transparent 40%),
+    var(--bg);
+  font-family:'Courier Prime',monospace;padding:20px;overflow:auto
+}
+.container{max-width:1600px;margin:0 auto}
+.panel{border:3px double var(--gold);background:var(--panel);backdrop-filter:blur(12px);border-radius:8px;padding:40px;margin-bottom:20px;box-shadow:0 0 40px rgba(106,13,173,.3)}
+h1{font-family:'IM Fell English SC',serif;font-size:48px;text-align:center;margin:0 0 8px 0;color:var(--gold);letter-spacing:.3em;font-weight:400;text-shadow:0 0 20px rgba(201,169,97,.5)}
+.subtitle{font-family:'Playfair Display',serif;font-style:italic;text-align:center;font-size:16px;color:var(--purple);margin:0 0 30px 0;letter-spacing:.2em;text-transform:uppercase}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:20px 0}
+button{
+  background:linear-gradient(135deg,var(--gladiator),var(--victorian));border:1px solid var(--gold);color:var(--ink);
+  padding:12px;border-radius:4px;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+  text-transform:uppercase;font-size:13px;letter-spacing:.15em;transition:all .2s
+}
+button:hover{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho);box-shadow:0 0 20px rgba(201,169,97,.4)}
+button.primary{background:linear-gradient(135deg,var(--gold),var(--purple));color:var(--psycho)}
+.deck-grid{display:grid;grid-template-columns:300px 1fr;gap:20px;margin:20px 0}
+.sidebar{background:var(--psycho);border:2px solid var(--gold);border-radius:8px;padding:20px}
+.sidebar h3{font-family:'IM Fell English SC',serif;font-size:16px;color:var(--gold);margin:0 0 12px 0;letter-spacing:.1em;text-transform:uppercase}
+.commander-select{
+  width:100%;background:var(--bg);border:1px solid var(--victorian);color:var(--ink);
+  padding:10px;border-radius:4px;font-family:'Courier Prime',monospace;margin-bottom:12px
+}
+.color-pips{display:flex;gap:8px;margin:12px 0}
+.pip{
+  width:30px;height:30px;border-radius:50%;border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold
+}
+.pip.active{background:var(--gold);color:var(--psycho)}
+.readout{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.readout-item{background:var(--bg);border:1px solid var(--victorian);border-radius:4px;padding:8px;text-align:center}
+.readout-label{font-size:8px;color:var(--purple);text-transform:uppercase;letter-spacing:.1em}
+.readout-val{font-size:18px;color:var(--gold);font-weight:bold;margin-top:2px;font-family:'IM Fell English SC',serif}
+.main-area{background:var(--psycho);border:2px solid var(--gold);border-radius:8px;padding:20px;min-height:600px}
+.deck-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card-slot{
+  background:var(--bg);border:1px solid var(--victorian);border-radius:4px;padding:12px;
+  font-size:11px;cursor:pointer;transition:all .2s;position:relative
+}
+.card-slot:hover{border-color:var(--gold);box-shadow:0 0 15px rgba(201,169,97,.3)}
+.card-slot.selected{border-color:var(--mint);background:rgba(0,255,170,.1)}
+.card-name{color:var(--gold);font-weight:bold;margin-bottom:4px;font-family:'Playfair Display',serif}
+.card-type{color:var(--purple);font-size:9px;text-transform:uppercase;letter-spacing:.1em}
+.card-mana{position:absolute;top:8px;right:8px;color:var(--cyan);font-weight:bold}
+.law{font-size:18px;color:var(--gold);font-family:'Courier Prime',monospace;text-align:center;padding:20px;background:var(--psycho);border:2px solid var(--victorian);border-radius:4px;margin:24px 0;letter-spacing:.15em;text-transform:uppercase}
+.archetypes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.arch-btn{
+  background:var(--bg);border:1px solid var(--victorian);color:var(--ink);
+  padding:10px;border-radius:4px;cursor:pointer;font-size:10px;text-transform:uppercase;
+  font-family:'Courier Prime',monospace;letter-spacing:.1em
+}
+.arch-btn:hover{border-color:var(--gold);color:var(--gold)}
+.arch-btn.active{background:var(--gold);color:var(--psycho)}
+.export-bar{display:flex;gap:12px;margin:20px 0}
+.export-bar input, .export-bar textarea{
+  flex:1;background:var(--psycho);border:1px solid var(--gold);color:var(--ink);
+  padding:10px;border-radius:4px;font-family:'Courier Prime',monospace
+}
+.export-bar textarea{resize:vertical;min-height:100px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h1>COMMANDER ENGINE</h1>
+    <div class="subtitle">42-Card Dipole Deck · 3-Strand Helix · Cubi Curve</div>
+    
+    <div class="controls">
+      <button class="primary" id="generate">GENERATE</button>
+      <button id="dipole42">DIPOLE 42</button>
+      <button id="helix60">HELIX 60</button>
+      <button id="cubi30">CUBI 30</button>
+      <button id="randomize">RANDOMIZE</button>
+    </div>
+    
+    <div class="deck-grid">
+      <div class="sidebar">
+        <h3>COMMANDER</h3>
+        <select class="commander-select" id="commanderSelect">
+          <option value="karsa">Karsa, Dipole Tyrant</option>
+          <option value="ada">Ada, Victorian Analyst</option>
+          <option value="bateman">Patrick Bateman, Psycho</option>
+          <option value="gladiator">Gladiator Prime</option>
+          <option value="honeybadger">Honey Badger, Fearless</option>
+        </select>
+        
+        <div class="color-pips" id="colorPips">
+          <div class="pip" data-color="W">W</div>
+          <div class="pip" data-color="U">U</div>
+          <div class="pip" data-color="B">B</div>
+          <div class="pip" data-color="R">R</div>
+          <div class="pip" data-color="G">G</div>
+        </div>
+        
+        <div class="readout">
+          <div class="readout-item">
+            <div class="readout-label">Cards</div>
+            <div class="readout-val" id="cardCount">42</div>
+          </div>
+          <div class="readout-item">
+            <div class="readout-label">Lands</div>
+            <div class="readout-val" id="landCount">14</div>
+          </div>
+          <div class="readout-item">
+            <div class="readout-label">Spells</div>
+            <div class="readout-val" id="spellCount">28</div>
+          </div>
+          <div class="readout-item">
+            <div class="readout-label">Curve</div>
+            <div class="readout-val" id="curve">CUBI</div>
+          </div>
+        </div>
+        
+        <h3>ARCHETYPES</h3>
+        <div class="archetypes">
+          <button class="arch-btn active" data-arch="dipole">DIPOLE</button>
+          <button class="arch-btn" data-arch="helix">HELIX</button>
+          <button class="arch-btn" data-arch="cubi">CUBI</button>
+          <button class="arch-btn" data-arch="mobius">MOBIUS</button>
+        </div>
+      </div>
+      
+      <div class="main-area">
+        <div class="deck-list" id="deckList"></div>
+      </div>
+    </div>
+    
+    <div class="law">42 = 0 = 1 = 1 · BUILD THE DIPOLE</div>
+    
+    <div class="export-bar">
+      <textarea id="deckList" placeholder="Deck list..." readonly></textarea>
+      <button id="copy">COPY</button>
+      <button id="download">DOWNLOAD</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMMANDERS = {
+  karsa: {name: 'Karsa, Dipole Tyrant', colors: ['U','B','R'], cost: '2UBR'},
+  ada: {name: 'Ada, Victorian Analyst', colors: ['W','U'], cost: '1WU'},
+  bateman: {name: 'Patrick Bateman, Psycho', colors: ['W','B'], cost: '1WB'},
+  gladiator: {name: 'Gladiator Prime', colors: ['R','G'], cost: '2RG'},
+  honeybadger: {name: 'Honey Badger, Fearless', colors: ['R','G','B'], cost: '1RGB'}
+};
+
+const CARD_POOL = {
+  dipole: [
+    {name: 'Dipole Charge', type: 'Sorcery', mana: '1U', text: '42 = 0 = 1 = 1'},
+    {name: 'Victorian Twist', type: 'Instant', mana: '2W', text: '1843 precision'},
+    {name: 'Gladiator Arena', type: 'Land', mana: '', text: 'T: Add R or G'},
+    {name: 'Psycho Business Card', type: 'Artifact', mana: '1', text: 'Bateman approved'},
+    {name: 'IT Crowd Reboot', type: 'Sorcery', mana: '2U', text: 'Turn it off and on'},
+    {name: 'Honey Badger Charge', type: 'Creature', mana: '1RG', text: 'Fearless'},
+    {name: 'Ada's Algorithm', type: 'Enchantment', mana: 'WU', text: 'Victorian logic'},
+    {name: 'Cubi Advantage', type: 'Instant', mana: '1U', text: '/r/ without boundary'},
+    {name: 'Holonomy Zero', type: 'Sorcery', mana: '3', text: 'Net zero'},
+    {name: 'Shadow Reveal', type: 'Instant', mana: 'B', text: '/s/8 operator'},
+    {name: 'Oscillation Engine', type: 'Artifact', mana: '4', text: '12×2×3×1'},
+    {name: 'Torus Field', type: 'Land', mana: '', text: 'Double-torus'},
+    {name: 'Quantum Dot', type: 'Artifact', mana: '0', text: '0.0.0.0.5'},
+    {name: 'Mobius Strip', type: 'Artifact', mana: '2', text: 'One-sided'},
+    {name: 'Kandi Bracelet', type: 'Artifact', mana: '1', text: 'PLUR'},
+    {name: 'Witness Engine', type: 'Artifact', mana: '3', text: '/w/ operator'},
+    {name: 'Ansible Junction', type: 'Land', mana: '', text: 'Instant exchange'},
+    {name: 'Lineage Backtracker', type: 'Sorcery', mana: '1B', text: 'SHA256'},
+    {name: 'Ternary Engine', type: 'Artifact', mana: '3', text: 'Soft close'},
+    {name: 'DNA ×3', type: 'Enchantment', mana: '2G', text: 'Triple helix'},
+    {name: 'Return to Sender', type: 'Instant', mana: 'W', text: 'Standing'}
+  ],
+  helix: [
+    {name: 'Spiral Genesis', type: 'Sorcery', mana: 'XG', text: 'Create X 1/1'},
+    {name: 'Triple Helix', type: 'Enchantment', mana: '3G', text: '120° twist'},
+    {name: 'Tubule Network', type: 'Artifact', mana: '2', text: 'Connect strands'},
+    {name: 'Node Cluster', type: 'Creature', mana: '2G', text: '20 nodes'},
+    {name: 'Vector Pulse', type: 'Instant', mana: 'G', text: 'Propagate'},
+    {name: 'Strand Fusion', type: 'Sorcery', mana: '4G', text: 'Merge meshes'},
+    {name: 'Helix Coil', type: 'Enchantment', mana: '1G', text: 'Tighten'},
+    {name: 'Base Pair', type: 'Instant', mana: 'G', text: 'A-T, C-G, A-B-C'},
+    {name: 'Chromatin Fold', type: 'Sorcery', mana: '3G', text: 'Compress'},
+    {name: 'Telomere Cap', type: 'Artifact', mana: '0', text: 'Protect ends'}
+  ],
+  cubi: [
+    {name: 'Cubi Advantage', type: 'Instant', mana: 'U', text: '1×1×1'},
+    {name: '10 Around 1', type: 'Sorcery', mana: '1U', text: 'Ratio'},
+    {name: 'Surface Tension', type: 'Enchantment', mana: '2U', text: 'Infinite surface'},
+    {name: 'Volume Lock', type: 'Instant', mana: 'U', text: 'Finite volume'},
+    {name: 'Edge Case', type: 'Instant', mana: '1U', text: 'Boundary'},
+    {name: 'Vertex Storm', type: 'Sorcery', mana: '3UU', text: '8 vertices'},
+    {name: 'Face Dance', type: 'Instant', mana: '2U', text: '6 faces'},
+    {name: 'Cube Root', type: 'Sorcery', mana: 'X', text: '∛X'},
+    {name: 'Tesseract Gate', type: 'Artifact', mana: '4', text: '4D'},
+    {name: 'Hypercube', type: 'Enchantment', mana: '5', text: 'N-D'}
+  ]
+};
+
+let ENGINE = {
+  commander: 'karsa',
+  colors: ['U','B','R'],
+  cards: [],
+  archetype: 'dipole',
+  count: 42
+};
+
+function updateColors(){
+  const cmd = COMMANDERS[ENGINE.commander];
+  ENGINE.colors = cmd.colors;
+  
+  document.querySelectorAll('.pip').forEach(pip => {
+    const color = pip.dataset.color;
+    pip.classList.toggle('active', ENGINE.colors.includes(color));
+  });
+}
+
+function generateDipole(){
+  ENGINE.cards = [];
+  ENGINE.count = 42;
+  ENGINE.archetype = 'dipole';
+  
+  // 14 lands
+  const lands = ['Command Tower','Exotic Orchard','City of Brass','Mana Confluence','Reflecting Pool','Forbidden Orchard','Gemstone Mine','Tarnished Citadel','Undiscovered Paradise','Grand Coliseum','Rupture Spire','Transguild Promenade','Vivid Crag','Vivid Creek'];
+  for(let i = 0; i < 14; i++){
+    ENGINE.cards.push({name: lands[i % lands.length], type: 'Land', mana: '', category: 'land'});
+  }
+  
+  // 28 spells from dipole pool
+  const pool = CARD_POOL.dipole;
+  for(let i = 0; i < 28; i++){
+    ENGINE.cards.push({...pool[i % pool.length], category: 'spell'});
+  }
+  
+  updateDisplay();
+}
+
+function generateHelix(){
+  ENGINE.cards = [];
+  ENGINE.count = 60;
+  ENGINE.archetype = 'helix';
+  
+  // 20 lands
+  for(let i = 0; i < 20; i++){
+    ENGINE.cards.push({name: 'Forest', type: 'Land', mana: '', category: 'land'});
+  }
+  
+  // 40 spells
+  const pool = CARD_POOL.helix;
+  for(let i = 0; i < 40; i++){
+    ENGINE.cards.push({...pool[i % pool.length], category: 'spell'});
+  }
+  
+  updateDisplay();
+}
+
+function generateCubi(){
+  ENGINE.cards = [];
+  ENGINE.count = 30;
+  ENGINE.archetype = 'cubi';
+  
+  // 10 lands
+  for(let i = 0; i < 10; i++){
+    ENGINE.cards.push({name: 'Island', type: 'Land', mana: '', category: 'land'});
+  }
+  
+  // 20 spells
+  const pool = CARD_POOL.cubi;
+  for(let i = 0; i < 20; i++){
+    ENGINE.cards.push({...pool[i % pool.length], category: 'spell'});
+  }
+  
+  updateDisplay();
+}
+
+function randomize(){
+  const pools = [CARD_POOL.dipole, CARD_POOL.helix, CARD_POOL.cubi];
+  ENGINE.cards = [];
+  
+  for(let i = 0; i < ENGINE.count; i++){
+    const pool = pools[Math.floor(Math.random() * pools.length)];
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    ENGINE.cards.push({...card, category: card.type === 'Land' ? 'land' : 'spell'});
+  }
+  
+  ENGINE.archetype = 'random';
+  updateDisplay();
+}
+
+function updateDisplay(){
+  // Update counts
+  const lands = ENGINE.cards.filter(c => c.category === 'land').length;
+  const spells = ENGINE.cards.filter(c => c.category === 'spell').length;
+  
+  document.getElementById('cardCount').textContent = ENGINE.cards.length;
+  document.getElementById('landCount').textContent = lands;
+  document.getElementById('spellCount').textContent = spells;
+  document.getElementById('curve').textContent = ENGINE.archetype.toUpperCase();
+  
+  // Update deck list
+  const deckList = document.getElementById('deckList');
+  deckList.innerHTML = '';
+  
+  ENGINE.cards.forEach((card, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.innerHTML = `
+      <div class="card-name">${card.name}</div>
+      <div class="card-type">${card.type}</div>
+      <div class="card-mana">${card.mana}</div>
+    `;
+    slot.onclick = () => selectCard(i);
+    deckList.appendChild(slot);
+  });
+  
+  // Update export
+  const deckText = ENGINE.cards.map(c => `1 ${c.name}`).join('
+');
+  document.getElementById('deckList').value = deckText;
+}
+
+function selectCard(i){
+  document.querySelectorAll('.card-slot').forEach((slot, idx) => {
+    slot.classList.toggle('selected', idx === i);
+  });
+}
+
+// Event listeners
+document.getElementById('commanderSelect').onchange = (e) => {
+  ENGINE.commander = e.target.value;
+  updateColors();
+};
+
+document.getElementById('generate').onclick = generateDipole;
+document.getElementById('dipole42').onclick = generateDipole;
+document.getElementById('helix60').onclick = generateHelix;
+document.getElementById('cubi30').onclick = generateCubi;
+document.getElementById('randomize').onclick = randomize;
+
+document.querySelectorAll('.arch-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.arch-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const arch = btn.dataset.arch;
+    if(arch === 'dipole') generateDipole();
+    else if(arch === 'helix') generateHelix();
+    else if(arch === 'cubi') generateCubi();
+    else if(arch === 'mobius') generateDipole(); // Same as dipole
+  };
+});
+
+document.getElementById('copy').onclick = () => {
+  document.getElementById('deckList').select();
+  document.execCommand('copy');
+};
+
+document.getElementById('download').onclick = () => {
+  const text = document.getElementById('deckList').value;
+  const blob = new Blob([text], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'karsa-commander-deck.txt';
+  a.click();
+};
+
+// Initialize
+updateColors();
+generateDipole();
+</script>
+</body>
+</html>
