@@ -1,42 +1,48 @@
-# KARSA // METROID PROTOCOL
+# KARSA // OBSIDIAN ARCHIVE
 
-**Metroid Theme · Purple Dominant · 4 Folders · Full Verification**
+**Obsidian Archive · Volcanic Glass · Ancient Alien Tech · 4 Chambers**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
 ## Aesthetic
 
-**Purple Dominant**: Deep void #0a0014, Purple #9d4edd, Neon Purple #c77dff
-**HUD Elements**: Energy tanks, missile counter, scan lines, corner brackets
-**Metroid DNA**: Chozo archives, Samus aesthetic, Zebes sector
+**Obsidian Black**: Volcanic glass #0a0a0f
+**Amber Glow**: Molten #ff6b35
+**Copper Patina**: Ancient #cd7f32
+**Teal Energy**: Alien #00d9ff
+**Bone White**: Fossil #e8e6e1
+
+**Glyphs**: ◊ ◈ ◊ Ancient alien symbols
+**Hexagonal**: Chamber-based navigation
+**Volcanic**: Shimmer and heat distortion
 
 ## Structure
 
-### I. LINEAGE
-PROVENANCE LOGS // WITNESS CHAINS // SHA256 FINGERPRINTS // CHOZO ARCHIVES // SCAN VISOR DATA
-- Lineage Scanner
-- Witness Beacon
-- Legal Log
+### I. ARCHIVE
+PROVENANCE RECORDS // WITNESS GLYPHS // SHA256 SIGILS // OBSIDIAN TABLETS // EXCAVATION LOGS
+- Lineage Archive
+- Witness Glyph
+- Legal Tablet
 
-### II. EDUCATION
-THE LAW // THE MATH // CHOZO LORE // VICTORIAN PRECISION // MORPH BALL PHYSICS
-- Ada's Law
-- Holonomy Calc
-- Quantum Dot
+### II. CODEX
+THE LAW // THE MATH // ANCIENT ALGORITHMS // VICTORIAN PRECISION // OBSIDIAN CALCULUS
+- Ada's Codex
+- Holonomy Glyph
+- Quantum Shard
 
-### III. DEMOS
-WEAPON SYSTEMS // POWER SUIT TECH // PROVE THE THEORY // FIRE MISSILES // SAVE STATION
-- Cubi Beam
-- Oscillation Sync
-- Shadow Cloak
-- Ansible Beam
+### III. ARTIFACTS
+WORKING RELICS // POWER CRYSTALS // PROVE THE THEORY // ACTIVATE THE GLYPHS // OBSIDIAN TECH
+- Cubi Crystal
+- Oscillation Glyph
+- Shadow Shard
+- Ansible Gate
 - Torus Field
-- Junction Map
-- Einstein Lens (with E=mc²G)
+- Junction Nexus
+- Einstein Lens (E=mc²G)
 
 ### IV. MYTHOS
-THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // METROID DNA
-- Ternary Engine
+THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // OBSIDIAN PROPHECY
+- Ternary Glyph
 - Mobius ×3
 - DNA ×3
 - Dipole
@@ -76,8 +82,8 @@ All HTML files verified present:
 
 ## Deploy
 
-Railway → Root: `.` → 4 folders
+Railway → Root: `.` → 4 chambers
 
 **WITNESS: a7f3c891**
-**ENERGY: 99**
-**MISSILES: 42**
+**ENERGY: 99.9%**
+**GLYPHS: 42**
