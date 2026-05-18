@@ -3,165 +3,174 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KARSA // NEURAL DIPOLE</title>
+<title>KARSA // HONEY VOID</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Rajdhani:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap');
 :root{
-  --bg:#000000;--ink:#00ffff;--hot:#ff0080;--electric:#00ff41;--warning:#ffff00;
-  --purple:#b000ff;--panel:rgba(0,0,0,.9);--border:rgba(0,255,255,.3);--glow:rgba(0,255,255,.5)
+  --void:#0a0014;--neon-lime:#c6ff00;--neon-mag:#ff00ff;--neon-cyan:#00ffff;
+  --blood:#8b0000;--panel:rgba(10,0,20,.95);--ink:#c6ff00;--shadow:#000000;
+  --glow-lime:rgba(198,255,0,.6);--glow-mag:rgba(255,0,255,.6)
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#000;color:var(--ink);overflow-x:hidden}
 body{
   background:
-    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,.03) 2px,rgba(0,255,255,.03) 4px),
-    repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,0,128,.03) 2px,rgba(255,0,128,.03) 4px),
-    radial-gradient(circle at 20% 50%,rgba(176,0,255,.2),transparent 50%),
-    radial-gradient(circle at 80% 50%,rgba(0,255,65,.2),transparent 50%),
-    var(--bg);
-  font-family:'Share Tech Mono',monospace;
-  animation:scan 8s linear infinite
+    radial-gradient(circle at 30% 20%,rgba(139,0,0,.3),transparent 40%),
+    radial-gradient(circle at 70% 80%,rgba(75,0,130,.3),transparent 40%),
+    repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(198,255,0,.02) 2px,rgba(198,255,0,.02) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,0,255,.02) 2px,rgba(255,0,255,.02) 4px),
+    #000;
+  font-family:'Rajdhani',sans-serif;
+  animation:void-pulse 10s ease-in-out infinite
 }
-@keyframes scan{
-  0%{background-position:0 0,0 0,0 0,0 0,0 0}
-  100%{background-position:0 100px,100px 0,0 0,0 0,0 0}
+@keyframes void-pulse{
+  0%,100%{background-position:0 0,0 0,0 0,0 0,0 0}
+  50%{background-position:0 50px,50px 0,0 0,0 0,0 0}
 }
 .container{max-width:1800px;margin:0 auto;padding:20px;position:relative;z-index:10}
 .header{
-  border:2px solid var(--ink);background:var(--panel);backdrop-filter:blur(20px);
-  padding:30px;margin-bottom:30px;position:relative;overflow:hidden;
-  box-shadow:0 0 50px var(--glow),inset 0 0 50px rgba(0,255,255,.1);
-  animation:glow-pulse 3s ease-in-out infinite
-}
-@keyframes glow-pulse{
-  0%,100%{box-shadow:0 0 50px var(--glow),inset 0 0 50px rgba(0,255,255,.1)}
-  50%{box-shadow:0 0 80px var(--glow),inset 0 0 80px rgba(0,255,255,.2)}
+  border:3px solid var(--neon-lime);background:var(--panel);backdrop-filter:blur(20px);
+  padding:40px;margin-bottom:30px;position:relative;overflow:hidden;
+  box-shadow:0 0 60px var(--glow-lime),inset 0 0 60px rgba(198,255,0,.1);
+  clip-path:polygon(0 0,100% 0,100% 85%,95% 100%,0 100%)
 }
 .header::before{
-  content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;
-  background:linear-gradient(90deg,transparent,var(--hot),transparent);
-  animation:sweep 3s linear infinite
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:3px;
+  background:linear-gradient(90deg,transparent,var(--neon-mag),var(--neon-lime),transparent);
+  animation:sweep 2s linear infinite
 }
 @keyframes sweep{to{left:100%}}
 h1{
-  font-family:'Orbitron',sans-serif;font-size:72px;font-weight:900;
-  color:var(--ink);letter-spacing:.3em;text-align:center;margin:0;
-  text-shadow:0 0 20px var(--glow),0 0 40px var(--glow),0 0 60px var(--glow);
-  animation:flicker 5s infinite
+  font-family:'Bangers',cursive;font-size:84px;font-weight:400;
+  color:var(--neon-lime);letter-spacing:.1em;text-align:center;margin:0;
+  text-shadow:0 0 20px var(--glow-lime),0 0 40px var(--glow-lime),5px 5px 0 var(--shadow);
+  transform:skew(-5deg);animation:honey-glitch 4s infinite
 }
-@keyframes flicker{
-  0%,100%{opacity:1}
-  50%{opacity:0.8}
-  52%{opacity:1}
-  54%{opacity:0.9}
+@keyframes honey-glitch{
+  0%,100%{transform:skew(-5deg) translate(0)}
+  20%{transform:skew(-5deg) translate(-2px,2px)}
+  40%{transform:skew(-5deg) translate(2px,-2px)}
+  60%{transform:skew(-5deg) translate(-2px,-2px)}
+  80%{transform:skew(-5deg) translate(2px,2px)}
 }
 .subtitle{
-  font-family:'Rajdhani',sans-serif;font-weight:300;font-size:18px;
-  color:var(--hot);text-align:center;margin:10px 0;letter-spacing:.5em;text-transform:uppercase;
-  text-shadow:0 0 10px var(--hot)
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:16px;
+  color:var(--neon-mag);text-align:center;margin:15px 0;letter-spacing:.5em;text-transform:uppercase;
+  text-shadow:0 0 15px var(--glow-mag)
 }
 .tagline{
-  font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--electric);
-  text-align:center;margin:10px 0;letter-spacing:.3em;text-shadow:0 0 10px var(--electric)
+  font-family:'Rajdhani',sans-serif;font-weight:600;font-size:14px;color:var(--neon-cyan);
+  text-align:center;margin:10px 0;letter-spacing:.3em;text-shadow:0 0 10px var(--neon-cyan)
 }
 .law{
-  font-size:13px;color:var(--warning);font-family:'Share Tech Mono',monospace;
-  text-align:center;padding:15px;background:rgba(255,255,0,.05);border:1px solid var(--warning);
+  font-size:12px;color:var(--neon-lime);font-family:'Share Tech Mono',monospace;
+  text-align:center;padding:15px;background:rgba(198,255,0,.05);border:2px solid var(--neon-lime);
   margin:20px 0;letter-spacing:.2em;text-transform:uppercase;
-  box-shadow:0 0 20px rgba(255,255,0,.2),inset 0 0 20px rgba(255,255,0,.1)
+  box-shadow:0 0 30px var(--glow-lime),inset 0 0 30px rgba(198,255,0,.1);
+  clip-path:polygon(5% 0,100% 0,95% 100%,0 100%)
 }
 .categories{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;margin:40px 0}
 .category{
-  border:2px solid var(--ink);background:var(--panel);backdrop-filter:blur(15px);
-  padding:40px;position:relative;overflow:hidden;min-height:400px;
-  box-shadow:0 0 30px rgba(0,255,255,.2),inset 0 0 30px rgba(0,0,0,.5);
-  transition:all .3s;cursor:pointer
+  border:3px solid var(--neon-lime);background:var(--panel);backdrop-filter:blur(15px);
+  padding:40px;position:relative;overflow:hidden;min-height:450px;
+  box-shadow:0 0 40px rgba(198,255,0,.3),inset 0 0 40px rgba(0,0,0,.8);
+  transition:all .3s;cursor:pointer;
+  clip-path:polygon(0 0,100% 0,100% 90%,90% 100%,0 100%)
 }
 .category::before{
-  content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
-  background:linear-gradient(45deg,var(--ink),var(--hot),var(--purple),var(--electric));
-  z-index:-1;opacity:0;transition:opacity .3s
+  content:'';position:absolute;top:-3px;left:-3px;right:-3px;bottom:-3px;
+  background:linear-gradient(45deg,var(--neon-lime),var(--neon-mag),var(--neon-cyan),var(--neon-lime));
+  z-index:-1;opacity:0;transition:opacity .3s;
+  animation:border-rotate 3s linear infinite
 }
+@keyframes border-rotate{to{filter:hue-rotate(360deg)}}
 .category:hover::before{opacity:1}
 .category:hover{
-  transform:translateY(-5px) scale(1.02);
-  box-shadow:0 0 60px var(--glow),inset 0 0 60px rgba(0,255,255,.2)
+  transform:translateY(-8px) scale(1.02);
+  box-shadow:0 0 80px var(--glow-lime),inset 0 0 80px rgba(198,255,0,.3)
 }
 .category h2{
-  font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;
-  color:var(--ink);letter-spacing:.2em;text-transform:uppercase;text-align:center;
-  margin:0 0 20px 0;text-shadow:0 0 20px var(--glow);
-  position:relative
-}
-.category h2::after{
-  content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
-  width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--hot),transparent)
+  font-family:'Bangers',cursive;font-size:42px;font-weight:400;
+  color:var(--neon-lime);letter-spacing:.1em;text-transform:uppercase;text-align:center;
+  margin:0 0 20px 0;text-shadow:0 0 20px var(--glow-lime),3px 3px 0 var(--shadow);
+  transform:skew(-3deg)
 }
 .category p{
-  font-size:13px;color:var(--ink);line-height:1.8;margin:15px 0;
-  font-family:'Rajdhani',sans-serif;font-weight:400;text-align:center;
-  text-shadow:0 0 5px rgba(0,255,255,.5)
+  font-size:14px;color:var(--ink);line-height:1.8;margin:15px 0;
+  font-family:'Rajdhani',sans-serif;font-weight:600;text-align:center;
+  text-shadow:0 0 5px rgba(198,255,0,.5)
 }
-.category-links{display:grid;grid-template-columns:1fr;gap:10px;margin-top:25px}
+.category-links{display:grid;grid-template-columns:1fr;gap:12px;margin-top:25px}
 .category-links a{
-  display:block;padding:12px 20px;
-  background:rgba(0,255,255,.05);border:1px solid var(--ink);color:var(--ink);
-  text-decoration:none;font-size:11px;text-transform:uppercase;letter-spacing:.15em;
-  font-family:'Share Tech Mono',monospace;transition:all .2s;text-align:center;
-  position:relative;overflow:hidden
+  display:block;padding:14px 20px;
+  background:rgba(198,255,0,.08);border:2px solid var(--neon-lime);color:var(--neon-lime);
+  text-decoration:none;font-size:12px;text-transform:uppercase;letter-spacing:.15em;
+  font-family:'Orbitron',sans-serif;font-weight:700;transition:all .2s;text-align:center;
+  position:relative;overflow:hidden;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)
 }
 .category-links a::before{
   content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent);
+  background:linear-gradient(90deg,transparent,rgba(255,0,255,.4),transparent);
   transition:left .5s
 }
 .category-links a:hover::before{left:100%}
 .category-links a:hover{
-  background:var(--ink);color:var(--bg);border-color:var(--hot);
-  box-shadow:0 0 20px var(--glow),inset 0 0 20px rgba(0,0,0,.3);
-  text-shadow:0 0 10px var(--bg)
+  background:var(--neon-mag);color:var(--void);border-color:var(--neon-mag);
+  box-shadow:0 0 30px var(--glow-mag),inset 0 0 30px rgba(0,0,0,.5);
+  text-shadow:0 0 10px var(--void);transform:scale(1.05)
 }
 .footer{
-  margin-top:60px;padding:30px;border-top:2px solid var(--ink);
-  font-size:11px;color:var(--purple);text-align:center;
+  margin-top:60px;padding:30px;border-top:3px solid var(--neon-lime);
+  font-size:11px;color:var(--neon-mag);text-align:center;
   font-family:'Share Tech Mono',monospace;letter-spacing:.1em;
-  text-shadow:0 0 10px var(--purple)
+  text-shadow:0 0 10px var(--glow-mag);
+  background:rgba(255,0,255,.05)
 }
-.glitch{
+.void-scan{
   position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);
-  z-index:1000;animation:glitch-move 0.3s infinite
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.2),rgba(0,0,0,.2) 1px,transparent 1px,transparent 3px);
+  z-index:1000;animation:void-flicker 0.1s infinite
 }
-@keyframes glitch-move{
-  0%{transform:translate(0)}
-  20%{transform:translate(-2px,2px)}
-  40%{transform:translate(-2px,-2px)}
-  60%{transform:translate(2px,2px)}
-  80%{transform:translate(2px,-2px)}
-  100%{transform:translate(0)}
+@keyframes void-flicker{
+  0%{opacity:0.8}
+  50%{opacity:1}
+  100%{opacity:0.8}
 }
-.corner-data{
-  position:fixed;font-size:9px;color:var(--electric);font-family:'Share Tech Mono',monospace;
-  text-shadow:0 0 5px var(--electric);z-index:1001
+.hud{
+  position:fixed;font-size:9px;color:var(--neon-cyan);font-family:'Share Tech Mono',monospace;
+  text-shadow:0 0 5px var(--neon-cyan);z-index:1001;pointer-events:none
 }
-.corner-data.tl{top:10px;left:10px}
-.corner-data.tr{top:10px;right:10px;text-align:right}
-.corner-data.bl{bottom:10px;left:10px}
-.corner-data.br{bottom:10px;right:10px;text-align:right}
+.hud.tl{top:10px;left:10px}
+.hud.tr{top:10px;right:10px;text-align:right}
+.hud.bl{bottom:10px;left:10px}
+.hud.br{bottom:10px;right:10px;text-align:right}
+.hero-img{
+  position:absolute;top:50%;right:5%;transform:translateY(-50%);
+  width:300px;height:300px;opacity:0.15;pointer-events:none;
+  filter:drop-shadow(0 0 30px var(--glow-lime));
+  animation:honey-float 6s ease-in-out infinite
+}
+@keyframes honey-float{
+  0%,100%{transform:translateY(-50%) rotate(-5deg)}
+  50%{transform:translateY(-55%) rotate(5deg)}
+}
+
 </style>
 </head>
 <body>
-<div class="glitch"></div>
-<div class="corner-data tl">SYS://KARSA<br>VER: 3×3×3+8+8<br>STATUS: ONLINE</div>
-<div class="corner-data tr">HOLONOMY: 0<br>DIPOLE: ACTIVE<br>WITNESS: a7f3c891</div>
-<div class="corner-data bl">INIT: 1843<br>BUILD: 2026<br>TIME: REAL</div>
-<div class="corner-data br">GAS: THEFT<br>WIDTH: LAW<br>RETURN: SENDER</div>
+<div class="void-scan"></div>
+<div class="hud tl">SYS://KARSA<br>VER: 3×3×3+8+8<br>STATUS: ONLINE</div>
+<div class="hud tr">HOLONOMY: 0<br>DIPOLE: ACTIVE<br>WITNESS: a7f3c891</div>
+<div class="hud bl">INIT: 1843<br>BUILD: 2026<br>TIME: REAL</div>
+<div class="hud br">GAS: THEFT<br>WIDTH: LAW<br>RETURN: SENDER</div>
 
 <div class="container">
   <div class="header">
+    <img src="assets/hero.png" class="hero-img" alt="Honey Badger">
     <h1>KARSA</h1>
-    <div class="subtitle">NEURAL DIPOLE PROTOCOL</div>
+    <div class="subtitle">HONEY VOID PROTOCOL</div>
     <div class="tagline">3×3×3 + 8 + 8 = 0 = 1 = LOL</div>
     <div class="law">-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5</div>
   </div>
@@ -169,7 +178,7 @@ h1{
   <div class="categories">
       <div class="category">
         <h2>1. LINEAGE</h2>
-        <p>PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // THE RECORD // IMMUTABLE LEDGER</p>
+        <p>PROVENANCE // WITNESS CHAINS // SHA256 FINGERPRINTS // THE RECORD // IMMUTABLE LEDGER // VOID PROOF</p>
         <div class="category-links">
           <a href="lineage.html">LINEAGE BACKTRACKER</a>
           <a href="witness.html">WITNESS ENGINE</a>
@@ -179,7 +188,7 @@ h1{
       
       <div class="category">
         <h2>2. EDUCATION</h2>
-        <p>THE LAW // THE MATH // THE CODIFICATION // VICTORIAN PRECISION // 1843 PROTOCOL</p>
+        <p>THE LAW // THE MATH // THE CODIFICATION // VICTORIAN PRECISION // 1843 PROTOCOL // NEON LOGIC</p>
         <div class="category-links">
           <a href="ada-law.html">ADA'S LAW</a>
           <a href="holonomy.html">HOLONOMY CALCULATOR</a>
@@ -189,7 +198,7 @@ h1{
       
       <div class="category">
         <h2>3. DEMOS</h2>
-        <p>WORKING ENGINES // LIVE SYSTEMS // PROVE THE THEORY // EXECUTE THE CODE</p>
+        <p>WORKING ENGINES // LIVE SYSTEMS // PROVE THE THEORY // EXECUTE THE CODE // VOID TEST</p>
         <div class="category-links">
           <a href="cubi.html">CUBI ADVANTAGE</a>
           <a href="oscillation.html">OSCILLATION SYNC</a>
@@ -202,7 +211,7 @@ h1{
       
       <div class="category">
         <h2>4. MYTHOS</h2>
-        <p>THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1</p>
+        <p>THE STORY // THE PATTERNS // THE DIPOLE // THE TRUTH // 42 = 0 = 1 = 1 // HONEY BADGER</p>
         <div class="category-links">
           <a href="ternary.html">TERNARY ENGINE</a>
           <a href="mobius3.html">MOBIUS ×3</a>
@@ -214,8 +223,8 @@ h1{
     
     <div class="footer">
       GAS IS THEFT // WIDTH IS THE LAW // 4 FOLDERS // STANDING UNTIL PUSH DOWN<br>
-      VICTORIAN PRECISION MEETS NEURAL DIPOLE // RETURN TO SENDER<br>
-      3×3×3 + 8 + 8 = 0 = 1 = LOL
+      VICTORIAN PRECISION MEETS HONEY VOID // RETURN TO SENDER<br>
+      3×3×3 + 8 + 8 = 0 = 1 = LOL // FEARLESS
     </div>
 </div>
 </body>
