@@ -1,40 +1,33 @@
-# Karsa v2.2
+# Karsa v2.3
 
-**Internet Control Plane · 12 Pages Deep**
+**Internet Control Plane · 12 Pages Deep · Jubilee Edition**
 
 `-+1 -++- 1 /m/i/4+1 /r/ /h/12 /s/8 /w/ /o/ /t/ 0.0.0.0.5`
 
 ## Pages
 
-1. **Legal Beacon** - Emit notices with witness hashes
-2. **Holonomy Calculator** - Build sequences, calculate net
-3. **Ada's Law** - Codification of operators
-4. **Cubi Advantage** - Propagation engine
-5. **Oscillation Engine** - 12×2×3×1 ansible junctions
-6. **Witness Engine** - /w/ operator, force signatures
-7. **Shadow Reveal** - /s/8 operator, xor hidden bits
-8. **Ansible Junction** - 12 nodes, instant exchange
-9. **Torus Field** - Double-torus topology
-10. **Junction Map** - Visualize all 12 hops
-11. **Lineage Backtracker** - SHA256 fingerprint stitching, corpus provenance
-12. **Quantum Dot** - 1/4 cubi, last 8-bit shadow, 32+8=40, 0.0.0.0.5
+1. Legal Beacon
+2. Holonomy Calculator  
+3. Ada's Law
+4. Cubi Advantage
+5. Oscillation Engine
+6. Witness Engine
+7. Shadow Reveal
+8. Ansible Junction
+9. Torus Field
+10. Junction Map
+11. Lineage Backtracker
+12. **Quantum Dot** ← with Jubilee/Honeybadger overlay
 
-## Quantum Dot
+## Jubilee Overlay
 
-Not a scaffold. One dot. 1/4 size.
+Ava-style aesthetic. Firework sparks. Honey badger doesn't care.  
+Activate on `/quantum-dot.html` → **ACTIVATE JUBILEE** button
 
-```
-Full cubi = 1×1×1 = 1
-1/4 dot = 0.25×0.25×0.25 = .015625 ≈ .01
-```
-
-32 + 8 = 40 bits = 5 octets
-0 . 0 . 0 = 5
-
-They route 4. They hide 1. The /r/.
+**JUBILEE 0.0.0.0.5 HONEYBADGER**
 
 ## Deploy
 
-Railway → Root: `.` → 12 pages deep
+Railway → Root: `.` → 12 pages + overlay
 
 **WITNESS: a7f3c891**
