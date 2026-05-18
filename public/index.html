@@ -1,201 +1,1166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KARSA // QUADRANT ENGINE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holographic Workshop | Matter Transmitter</title>
 <style>
-
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-:root{
-  --obsidian:#0a0a0f;--amber:#ff6b35;--copper:#cd7f32;--teal:#00d9ff;
-  --bone:#e8e6e1;--panel:rgba(10,10,15,.95);--ink:#e8e6e1;
-  --witness:#ff6b35;--ethos:#00d9ff;--pathos:#cd7f32;--logos:#e8e6e1
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#000;color:var(--ink);overflow:hidden}
-body{
-  background:
-    radial-gradient(circle at 25% 25%,rgba(255,107,53,.12),transparent 40%),
-    radial-gradient(circle at 75% 75%,rgba(0,217,255,.08),transparent 40%),
-    linear-gradient(180deg,#000 0%,#0a0a0f 50%,#000 100%),
-    #000;
-  font-family:'Space Grotesk',sans-serif;
-}
-.quadrant-grid{
-  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
-  width:100vw;height:100vh;gap:2px;background:#000
-}
-.quadrant{
-  position:relative;background:var(--panel);backdrop-filter:blur(20px);
-  border:1px solid var(--copper);padding:30px;overflow:auto;
-  box-shadow:inset 0 0 60px rgba(0,0,0,.8);
-  transition:all .3s
-}
-.quadrant:hover{
-  box-shadow:inset 0 0 80px rgba(255,107,53,.15),0 0 40px rgba(255,107,53,.3);
-  z-index:10
-}
-.quadrant-header{
-  font-family:'Cinzel',serif;font-size:24px;font-weight:600;
-  text-align:center;margin-bottom:20px;padding-bottom:15px;
-  border-bottom:2px solid;letter-spacing:.2em;text-transform:uppercase
-}
-.quadrant-content{
-  font-family:'JetBrains Mono',monospace;font-size:11px;
-  line-height:1.8
-}
-.witness{border-color:var(--witness)}
-.witness .quadrant-header{color:var(--witness);border-color:var(--witness);text-shadow:0 0 15px var(--witness)}
-.ethos{border-color:var(--ethos)}
-.ethos .quadrant-header{color:var(--ethos);border-color:var(--ethos);text-shadow:0 0 15px var(--ethos)}
-.pathos{border-color:var(--pathos)}
-.pathos .quadrant-header{color:var(--pathos);border-color:var(--pathos);text-shadow:0 0 15px var(--pathos)}
-.logos{border-color:var(--logos)}
-.logos .quadrant-header{color:var(--logos);border-color:var(--logos);text-shadow:0 0 15px var(--logos)}
-.glyph{font-size:48px;text-align:center;margin:20px 0;opacity:0.3}
-.lineage-chain{
-  font-size:10px;margin:15px 0;padding:15px;
-  background:rgba(255,107,53,.05);border-left:3px solid var(--witness)
-}
-.lineage-item{
-  margin:8px 0;padding-left:20px;position:relative
-}
-.lineage-item::before{
-  content:'◊';position:absolute;left:0;color:var(--amber)
-}
-.tool-list{
-  list-style:none;margin:20px 0
-}
-.tool-list li{
-  margin:10px 0;padding:12px;
-  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);
-  transition:all .2s;cursor:pointer;
-  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)
-}
-.tool-list li:hover{
-  background:rgba(255,107,53,.15);border-color:var(--amber);
-  transform:translateX(5px)
-}
-.tool-list a{
-  color:var(--ink);text-decoration:none;display:block;
-  font-size:11px;letter-spacing:.1em;text-transform:uppercase
-}
-.attribution{
-  position:absolute;bottom:15px;left:15px;right:15px;
-  font-size:9px;color:var(--copper);text-align:center;
-  padding-top:15px;border-top:1px solid rgba(205,127,50,.3)
-}
-.law-display{
-  text-align:center;font-family:'JetBrains Mono',monospace;
-  font-size:10px;color:var(--amber);margin:15px 0;
-  letter-spacing:.2em
+:root {
+  --bg: #02040a;
+  --bg-blue: #0a192f;
+  --accent: #00d4ff;
+  --accent2: #7b2dff;
+  --red: #ff3d5a;
+  --white: #e6f1ff;
+  --purple: #b24bff;
+  --text: #cbd5e1;
+  --text-bright: #f1f5f9;
+  --border: rgba(0, 212, 255, 0.2);
+  --glow: 0 0 20px rgba(0, 212, 255, 0.3);
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 0D Planck Quantum Foam Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(123, 45, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(10, 25, 47, 1) 0%, var(--bg) 100%);
+  animation: quantumShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes quantumShift {
+  0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+  100% { transform: scale(1.05) rotate(1deg); filter: hue-rotate(10deg); }
+}
+
+/* 8D Octonion Lattice SVG Background */
+.octonion-lattice {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Header & Navigation */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(2, 4, 10, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-shadow: var(--glow);
+  cursor: pointer;
+}
+
+.nav-main {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--accent);
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+  width: 100%;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  max-width: 1400px;
+  margin: 5rem auto 0;
+  padding: 1rem 2rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.crumb {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.crumb:hover {
+  color: var(--accent);
+}
+
+.crumb-separator {
+  color: var(--accent);
+  opacity: 0.5;
+}
+
+/* Main Content */
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+}
+
+section {
+  display: none;
+  animation: fadeIn 0.6s ease;
+}
+
+section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  color: var(--text-bright);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  text-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+h3 {
+  font-size: 1.5rem;
+  color: var(--text-bright);
+  margin: 2rem 0 1rem;
+}
+
+p {
+  line-height: 1.8;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 4rem 0;
+  position: relative;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.hero-description {
+  max-width: 700px;
+  margin: 2rem auto;
+  font-size: 1.1rem;
+}
+
+/* Gyroscopes - A, L, C */
+.gyro-container {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 3rem 0;
+  flex-wrap: wrap;
+}
+
+.gyroscope {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: gyroRotate 8s linear infinite;
+}
+
+.gyroscope.gyro-a { animation-duration: 6s; }
+.gyroscope.gyro-l { animation-duration: 8s; animation-direction: reverse; }
+.gyroscope.gyro-c { animation-duration: 10s; }
+
+@keyframes gyroRotate {
+  from { transform: rotateY(0deg) rotateX(15deg); }
+  to { transform: rotateY(360deg) rotateX(15deg); }
+}
+
+.gyro-ring {
+  position: absolute;
+  border: 3px solid;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.gyro-ring.outer {
+  width: 120px;
+  height: 120px;
+  animation: ringPulse 2s ease-in-out infinite;
+}
+
+.gyro-ring.middle {
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%, -50%) rotateX(60deg);
+  animation: ringPulse 2s ease-in-out infinite 0.3s;
+}
+
+.gyro-ring.inner {
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%) rotateY(60deg);
+  animation: ringPulse 2s ease-in-out infinite 0.6s;
+}
+
+.gyro-a .gyro-ring { border-color: var(--red); box-shadow: 0 0 15px var(--red); }
+.gyro-l .gyro-ring { border-color: var(--white); box-shadow: 0 0 15px var(--white); }
+.gyro-c .gyro-ring { border-color: var(--purple); box-shadow: 0 0 15px var(--purple); }
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.gyro-label {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.gyro-a .gyro-label { color: var(--red); }
+.gyro-l .gyro-label { color: var(--white); }
+.gyro-c .gyro-label { color: var(--purple); }
+
+/* Buttons & Interactive Operators */
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.9rem 2rem;
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  z-index: -1;
+}
+
+.btn:hover {
+  color: var(--bg);
+  box-shadow: var(--glow);
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-operator {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+.btn-operator::before {
+  background: var(--accent2);
+}
+
+.btn-operator.active {
+  background: var(--accent2);
+  color: var(--bg);
+  box-shadow: 0 0 25px rgba(123, 45, 255, 0.5);
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.card {
+  background: rgba(10, 25, 47, 0.4);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transition: left 0.6s ease;
+}
+
+.card:hover::before {
+  left: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15);
+}
+
+.card-title {
+  color: var(--accent);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* Operator Console */
+.console {
+  background: rgba(2, 4, 10, 0.9);
+  border: 2px solid var(--accent);
+  padding: 2rem;
+  margin: 2rem 0;
+  font-family: 'Courier New', monospace;
+  box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.1), var(--glow);
+}
+
+.console-display {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  min-height: 200px;
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.console-line {
+  margin: 0.5rem 0;
+  opacity: 0;
+  animation: lineAppear 0.3s ease forwards;
+}
+
+@keyframes lineAppear {
+  to { opacity: 1; }
+}
+
+.console-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-bright);
+  padding: 0.8rem;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.console-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+/* Fold Animation */
+.fold-container {
+  perspective: 1000px;
+  margin: 2rem 0;
+}
+
+.fold-element {
+  background: linear-gradient(135deg, var(--bg-blue), var(--accent2));
+  padding: 3rem;
+  border: 2px solid var(--accent);
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-style: preserve-3d;
+}
+
+.fold-element.folded {
+  transform: rotateX(90deg) scale(0.1);
+  opacity: 0;
+}
+
+.fold-element.unfolded {
+  transform: rotateX(0deg) scale(1);
+  opacity: 1;
+}
+
+/* Traversal Visualization */
+.traverse-field {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: rgba(10, 25, 47, 0.3);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin: 2rem 0;
+}
+
+.traverse-node {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent);
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.traverse-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform-origin: left center;
+  opacity: 0.6;
+}
+
+/* Mobile Menu */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.menu-toggle span {
+  width: 25px;
+  height: 2px;
+  background: var(--accent);
+  transition: var(--transition);
+}
+
+/* Research Subnav */
+.research-nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+  padding: 1rem;
+  background: rgba(10, 25, 47, 0.4);
+  border: 1px solid var(--border);
+}
+
+.research-nav-item {
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+
+.research-nav-item:hover, .research-nav-item.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* Footer */
+footer {
+  margin-top: 6rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+  opacity: 0.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-main {
+    position: fixed;
+    top: 70px;
+    right: -100%;
+    flex-direction: column;
+    background: rgba(2, 4, 10, 0.98);
+    padding: 2rem;
+    width: 250px;
+    height: calc(100vh - 70px);
+    transition: right 0.4s ease;
+    border-left: 1px solid var(--border);
+  }
+
+  .nav-main.open {
+    right: 0;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .gyro-container {
+    gap: 2rem;
+  }
+
+  .gyroscope {
+    width: 80px;
+    height: 80px;
+  }
+
+  .gyro-ring.outer {
+    width: 80px;
+    height: 80px;
+  }
+
+  .gyro-ring.middle {
+    width: 55px;
+    height: 55px;
+  }
+
+  .gyro-ring.inner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Spec Table */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  background: rgba(10, 25, 47, 0.4);
+}
+
+.spec-table th,
+.spec-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.spec-table th {
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.spec-table tr:hover {
+  background: rgba(0, 212, 255, 0.05);
+}
+
+/* Blueprint Grid Overlay */
+.blueprint-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
 </style>
 </head>
 <body>
-<div class="quadrant-grid">
-  <!-- TOP LEFT: WITNESS & ATTRIBUTION LAYER - YOUR COMPUTE -->
-  <div class="quadrant witness">
-    <div class="quadrant-header">WITNESS</div>
-    <div class="glyph">◊</div>
-    <div class="quadrant-content">
-      <div class="lineage-chain">
-        <div style="text-align:center;margin-bottom:15px;color:var(--amber);font-size:12px">ATTRIBUTION LAYER</div>
-        <div class="lineage-item">EDIHUANU BASE 60</div>
-        <div class="lineage-item">ADA LOVELACE 1843</div>
-        <div class="lineage-item">LINEAGE CHAIN</div>
-        <div class="lineage-item">EVE // JAN 1</div>
-        <div class="lineage-item">WITNESS: a7f3c891</div>
-      </div>
-      <div class="law-display">1 = π × 3 = 0 = 1 = LOL</div>
-      <div class="law-display">-+1 -++- 1 /m/i/4+1</div>
-      <div style="margin-top:20px;padding:15px;background:rgba(255,107,53,.08);border:1px solid var(--witness)">
-        <div style="text-align:center;font-size:10px;margin-bottom:10px">COMPUTE ALLOCATION</div>
-        <div style="font-size:9px;line-height:1.6">
-          THIS QUADRANT IS RESERVED<br>
-          OWNER: EVE<br>
-          FUNCTION: WITNESS + ATTRIBUTION<br>
-          STATUS: ACTIVE
-        </div>
-      </div>
-    </div>
-    <div class="attribution">GAS IS THEFT // WIDTH IS THE LAW // RTS</div>
+
+<!-- 8D Octonion Lattice SVG -->
+<svg class="octonion-lattice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="lattice" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="50" cy="50" r="1" fill="#00d4ff"/>
+      <line x1="0" y1="50" x2="100" y2="50" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
+      <line x1="50" y1="0" x2="50" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
+      <line x1="0" y1="0" x2="100" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.2"/>
+      <line x1="100" y1="0" x2="0" y2="100" stroke="#00d4ff" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#lattice)"/>
+</svg>
+
+<div class="blueprint-grid"></div>
+
+<header>
+  <div class="nav-container">
+    <div class="logo" data-nav="home">HOLOWORKSHOP</div>
+    <nav class="nav-main" id="navMain">
+      <a class="nav-link active" data-nav="home">Home</a>
+      <a class="nav-link" data-nav="workshop">Workshop</a>
+      <a class="nav-link" data-nav="contact">Contact</a>
+    </nav>
+    <button class="menu-toggle" id="menuToggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
   </div>
-  
-  <!-- TOP RIGHT: ETHOS - CREDIBILITY/CHARACTER -->
-  <div class="quadrant ethos">
-    <div class="quadrant-header">ETHOS</div>
-    <div class="glyph">◈</div>
-    <div class="quadrant-content">
-      <div style="text-align:center;margin-bottom:15px;color:var(--teal);font-size:12px">CREDIBILITY LAYER</div>
-      <div style="padding:15px;background:rgba(0,217,255,.05);border-left:3px solid var(--ethos);margin:15px 0">
-        <div style="font-size:10px;line-height:1.8">
-          CHARACTER: VICTORIAN PRECISION<br>
-          AUTHORITY: CHOZO ARCHIVES<br>
-          TRUST: OBSIDIAN GLASS<br>
-          PROOF: SHA256 WITNESS
-        </div>
-      </div>
-      <ul class="tool-list">
-        <li><a href="lineage.html">→ LINEAGE VERIFIER</a></li>
-        <li><a href="witness.html">→ WITNESS BEACON</a></li>
-        <li><a href="legal.html">→ LEGAL TABLET</a></li>
-      </ul>
-    </div>
-    <div class="attribution">CHARACTER // AUTHORITY // TRUST</div>
-  </div>
-  
-  <!-- BOTTOM LEFT: PATHOS - EMOTION/EXPERIENCE -->
-  <div class="quadrant pathos">
-    <div class="quadrant-header">PATHOS</div>
-    <div class="glyph">◊</div>
-    <div class="quadrant-content">
-      <div style="text-align:center;margin-bottom:15px;color:var(--copper);font-size:12px">EXPERIENCE LAYER</div>
-      <div style="padding:15px;background:rgba(205,127,50,.05);border-left:3px solid var(--pathos);margin:15px 0">
-        <div style="font-size:10px;line-height:1.8">
-          FEELING: VOLCANIC HEAT<br>
-          EXPERIENCE: OBSIDIAN FLOW<br>
-          RESONANCE: π × 3 = 0<br>
-          IMPACT: FEARLESS
-        </div>
-      </div>
-      <ul class="tool-list">
-        <li><a href="cubi.html">→ CUBI CRYSTAL</a></li>
-        <li><a href="oscillation.html">→ OSCILLATION GLYPH</a></li>
-        <li><a href="shadow.html">→ SHADOW SHARD</a></li>
-        <li><a href="torus.html">→ TORUS FIELD</a></li>
-        <li><a href="einstein.html">→ EINSTEIN LENS</a></li>
-      </ul>
-    </div>
-    <div class="attribution">EMOTION // EXPERIENCE // RESONANCE</div>
-  </div>
-  
-  <!-- BOTTOM RIGHT: LOGOS - LOGIC/REASON -->
-  <div class="quadrant logos">
-    <div class="quadrant-header">LOGOS</div>
-    <div class="glyph">◈</div>
-    <div class="quadrant-content">
-      <div style="text-align:center;margin-bottom:15px;color:var(--bone);font-size:12px">LOGIC LAYER</div>
-      <div style="padding:15px;background:rgba(232,230,225,.05);border-left:3px solid var(--logos);margin:15px 0">
-        <div style="font-size:10px;line-height:1.8">
-          LOGIC: 1 = π × 3 = 0 = 1<br>
-          REASON: WIDTH IS THE LAW<br>
-          PROOF: 42 = 0 = 1 = 1<br>
-          METHOD: NOTE G
-        </div>
-      </div>
-      <ul class="tool-list">
-        <li><a href="ada-law.html">→ ADA'S CODEX</a></li>
-        <li><a href="holonomy.html">→ HOLONOMY GLYPH</a></li>
-        <li><a href="quantum-dot.html">→ QUANTUM SHARD</a></li>
-        <li><a href="ternary.html">→ TERNARY GLYPH</a></li>
-        <li><a href="dipole.html">→ DIPOLE</a></li>
-      </ul>
-    </div>
-    <div class="attribution">LOGIC // REASON // PROOF</div>
-  </div>
+</header>
+
+<div class="breadcrumbs" id="breadcrumbs">
+  <span class="crumb" data-nav="home">Home</span>
 </div>
+
+<main>
+  <!-- HOME -->
+  <section id="home" class="active">
+    <div class="hero">
+      <div class="hero-subtitle">11D HOLOGRAPHIC PROTOCOL</div>
+      <h1>Matter Transmitter<br>Research Division</h1>
+      <p class="hero-description">
+        Exploring the fundamental architecture of spacetime through octonionic operators, 
+        toroidal field dynamics, and quantum foam manipulation. Access authorized for cleared operators only.
+      </p>
+      
+      <div class="gyro-container">
+        <div class="gyroscope gyro-a">
+          <div class="gyro-ring outer"></div>
+          <div class="gyro-ring middle"></div>
+          <div class="gyro-ring inner"></div>
+          <div class="gyro-label">A</div>
+        </div>
+        <div class="gyroscope gyro-l">
+          <div class="gyro-ring outer"></div>
+          <div class="gyro-ring middle"></div>
+          <div class="gyro-ring inner"></div>
+          <div class="gyro-label">L</div>
+        </div>
+        <div class="gyroscope gyro-c">
+          <div class="gyro-ring outer"></div>
+          <div class="gyro-ring middle"></div>
+          <div class="gyro-label">C</div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" data-nav="workshop">Enter Workshop</button>
+        <button class="btn btn-operator" data-nav="operator">Operator Console</button>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Planck Scale Engineering</div>
+        <p>Manipulation at 10^-35m. Quantum foam stabilization through STITCH binding protocols. Zero-point field access authorized.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Octonion Algebra</div>
+        <p>8D non-associative lattice structures. Gyroscopic field rotations enable dimensional traversal via Δ operators.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Toroid Dynamics</div>
+        <p>Closed timelike curves contained within nested hyperspheres. FOLD collapse sequences prevent paradox formation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKSHOP -->
+  <section id="workshop">
+    <h2>Workshop</h2>
+    <p>Primary research and development facility for matter transmission protocols. All field operations require STITCH bind verification.</p>
+    
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Transmitter Specs</div>
+        <p>Access detailed technical specifications for the Mark VII Matter Transmitter array.</p>
+        <button class="btn" data-nav="specs" style="margin-top: 1rem;">View Specs</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Operator Console</div>
+        <p>Initialize Δ traverse sequences, configure STITCH bind mode, execute FOLD collapse operations.</p>
+        <button class="btn" data-nav="operator" style="margin-top: 1rem;">Launch Console</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Research Division</div>
+        <p>Five active research threads: Axiom, Toroid, Lattice, Fold, and 11D fundamental theory.</p>
+        <button class="btn" data-nav="research" style="margin-top: 1rem;">Access Files</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRANSMITTER SPECS -->
+  <section id="specs">
+    <h2>Transmitter Specifications</h2>
+    <p>Mark VII Matter Transmitter Array - Dimensional Phase Displacement System</p>
+    
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Specification</th>
+          <th>Tolerance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Operational Dimensions</td>
+          <td>11D M-Theory Calabi-Yau Manifold</td>
+          <td>±0.001 Planck</td>
+        </tr>
+        <tr>
+          <td>Foam Frequency</td>
+          <td>10^43 Hz</td>
+          <td>±10^38 Hz</td>
+        </tr>
+        <tr>
+          <td>Gyroscope Matrix</td>
+          <td>A/L/C Octonion Rotation</td>
+          <td>Non-associative</td>
+        </tr>
+        <tr>
+          <td>STITCH Bind Rate</td>
+          <td>2.4 × 10^9 bindings/sec</td>
+          <td>±5%</td>
+        </tr>
+        <tr>
+          <td>FOLD Collapse Time</td>
+          <td>6.2 × 10^-44 seconds</td>
+          <td>Planck Time</td>
+        </tr>
+        <tr>
+          <td>Δ Traverse Range</td>
+          <td>1.6 × 10^26 meters</td>
+          <td>Observable Universe</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Field Coils</h3>
+    <p>Triple-nested gyroscope array maintains spacetime curvature integrity during matter phase transitions. Red coil (A) handles antimatter polarity, White (L) manages lepton field coupling, Purple (C) governs chromodynamic binding.</p>
+  </section>
+
+  <!-- OPERATOR CONSOLE -->
+  <section id="operator">
+    <h2>Operator Console</h2>
+    <p>Initialize transmission protocols. Warning: Ensure STITCH bind mode is active before Δ traverse execution.</p>
+    
+    <div class="btn-group">
+      <button class="btn btn-operator" id="stitchBtn">STITCH Bind Mode</button>
+      <button class="btn btn-operator" id="deltaBtn">Δ Traverse</button>
+      <button class="btn btn-operator" id="foldBtn">FOLD Collapse</button>
+    </div>
+
+    <div class="console">
+      <div class="console-display" id="consoleDisplay">
+        <div class="console-line">HOLOGRAPHIC WORKSHOP OS v11.7.3</div>
+        <div class="console-line">Quantum foam stabilizer... ONLINE</div>
+        <div class="console-line">Octonion lattice... CALIBRATED</div>
+        <div class="console-line">Awaiting operator command...</div>
+      </div>
+      <input type="text" class="console-input" id="consoleInput" placeholder="Enter command: help, status, init, clear">
+    </div>
+
+    <div class="fold-container">
+      <div class="fold-element unfolded" id="foldElement">
+        <h3>SPACETIME MANIFOLD</h3>
+        <p>Click FOLD Collapse to demonstrate dimensional compression</p>
+      </div>
+    </div>
+
+    <div class="traverse-field" id="traverseField"></div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research">
+    <h2>Research Division</h2>
+    <p>Classified research archives. Select thread below for detailed analysis.</p>
+    
+    <div class="research-nav">
+      <div class="research-nav-item active" data-research="axiom">Axiom</div>
+      <div class="research-nav-item" data-research="toroid">Toroid</div>
+      <div class="research-nav-item" data-research="lattice">Lattice</div>
+      <div class="research-nav-item" data-research="fold">Fold</div>
+      <div class="research-nav-item" data-research="11d">11D</div>
+    </div>
+
+    <div id="researchContent">
+      <div class="research-section" data-content="axiom">
+        <h3>Axiom: Foundational Principles</h3>
+        <p>The Axiom framework establishes non-associative algebra as the mathematical foundation for dimensional traversal. Unlike traditional vector spaces, octonion algebra permits rotation in 8D without gimbal lock through gyroscopic field coupling.</p>
+        <p>Key Postulates: 1) Conservation of information across FOLD events, 2) Quantum foam permits localized Planck-scale manipulation, 3) STITCH operators maintain causal consistency during Δ traverse.</p>
+      </div>
+      <div class="research-section" data-content="toroid" style="display:none">
+        <h3>Toroid: Field Containment</h3>
+        <p>Toroidal field geometry enables closed timelike curves without paradox generation. Nested hyperspheres at 10^11m, 10^18m, and 10^26m scales correspond to galactic, cluster, and cosmic horizons.</p>
+        <p>Experimental data confirms zero energy loss across toroid boundaries when STITCH bind mode maintains 99.99997% phase coherence.</p>
+      </div>
+      <div class="research-section" data-content="lattice" style="display:none">
+        <h3>Lattice: Octonion Structure</h3>
+        <p>8D lattice employs Fano plane geometry for multiplication table generation. Each node connects to seven others through quantum entanglement channels, enabling holographic information storage.</p>
+        <p>Gyroscope A/L/C arrangement maps to octonion units e1, e2, e3 respectively. Rotations preserve norm but break associativity—critical for avoiding universe-scale computation barriers.</p>
+      </div>
+      <div class="research-section" data-content="fold" style="display:none">
+        <h3>Fold: Collapse Mechanics</h3>
+        <p>FOLD operations compress 11D M-theory manifolds into 4D observational spacetime. Process occurs at Planck time scales with energy requirements scaling as E = ħc^5/G per collapse event.</p>
+        <p>Safety protocol: STITCH bind must precede FOLD by minimum 10^-36 seconds to prevent vacuum decay scenarios. Emergency abort slaved to quantum foam decoherence detectors.</p>
+      </div>
+      <div class="research-section" data-content="11d" style="display:none">
+        <h3>11D: M-Theory Implementation</h3>
+        <p>Complete theory requires eleven dimensions: 3 spatial + 1 time + 7 compactified Calabi-Yau dimensions at 10^-35m. Matter transmitter accesses compactified dimensions through octonion bridge.</p>
+        <p>Breakthrough: Δ traverse operator identified as discrete symmetry breaking in SU(3)×SU(2)×U(1) gauge group, permitting localized dimensional tunneling without exotic matter requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h2>Contact Protocol</h2>
+    <p>All communications encrypted via quantum key distribution. Clearance Level 7 required for transmission array access requests.</p>
+    
+    <div class="card">
+      <div class="card-title">Secure Channel</div>
+      <p>Direct communications to Workshop Command:</p>
+      <p style="color: var(--accent); font-family: monospace; margin: 1rem 0;">ETA-ALC@holoworkshop.11d</p>
+      <p>Response time: 6.2 × 10^-44 seconds standard. Paradox resolution may delay replies indefinitely.</p>
+    </div>
+
+    <div class="card" style="margin-top: 2rem;">
+      <div class="card-title">Emergency Protocols</div>
+      <p>In case of uncontrolled FOLD cascade: Execute STITCH bind override immediately. Contact nearest temporal enforcement division. Do not attempt to observe your own transmission.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>HOLOGRAPHIC WORKSHOP // MATTER TRANSMITTER DIVISION // EST. 10^-43 SECONDS AFTER BIG BANG</p>
+  <p>WARNING: Unauthorized operation of Δ traverse systems violates Causality Preservation Act 11.3.7</p>
+</footer>
+
+<script>
+// Navigation System - 5 levels deep
+const navMap = {
+  'home': [],
+  'workshop': ['home'],
+  'specs': ['home', 'workshop'],
+  'operator': ['home', 'workshop', 'specs'],
+  'research': ['home', 'workshop', 'specs', 'operator'],
+  'contact': ['home']
+};
+
+let currentPage = 'home';
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('[data-nav]');
+
+// Section switching with breadcrumb updates
+function navigateTo(page) {
+  if (!navMap.hasOwnProperty(page)) return;
+  
+  sections.forEach(s => s.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  navLinks.forEach(l => {
+    if (l.getAttribute('data-nav') === page || navMap[page].includes(l.getAttribute('data-nav'))) {
+      l.classList.add('active');
+    }
+  });
+  
+  updateBreadcrumbs(page);
+  currentPage = page;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  document.getElementById('navMain').classList.remove('open');
+}
+
+function updateBreadcrumbs(page) {
+  const crumbs = [page, ...navMap[page]].reverse();
+  const bc = document.getElementById('breadcrumbs');
+  bc.innerHTML = crumbs.map((c, i) => {
+    const name = c.charAt(0).toUpperCase() + c.slice(1);
+    return `<span class="crumb" data-nav="${c}">${name}</span>${i < crumbs.length - 1 ? '<span class="crumb-separator">›</span>' : ''}`;
+  }).join('');
+  
+  bc.querySelectorAll('.crumb').forEach(c => {
+    c.addEventListener('click', () => navigateTo(c.getAttribute('data-nav')));
+  });
+}
+
+navLinks.forEach(link => {
+  link.addEventListener('click', () => navigateTo(link.getAttribute('data-nav')));
+});
+
+// Mobile Menu
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('navMain').classList.toggle('open');
+});
+
+// Research Subpages: Axiom, Toroid, Lattice, Fold, 11D
+document.querySelectorAll('.research-nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.research-nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    
+    const target = item.getAttribute('data-research');
+    document.querySelectorAll('.research-section').forEach(s => {
+      s.style.display = s.getAttribute('data-content') === target ? 'block' : 'none';
+    });
+  });
+});
+
+// Operator Console Functionality
+let stitchActive = false;
+const consoleDisplay = document.getElementById('consoleDisplay');
+const consoleInput = document.getElementById('consoleInput');
+const foldElement = document.getElementById('foldElement');
+
+function addConsoleLine(text, delay = 0) {
+  setTimeout(() => {
+    const line = document.createElement('div');
+    line.className = 'console-line';
+    line.textContent = `> ${text}`;
+    consoleDisplay.appendChild(line);
+    consoleDisplay.scrollTop = consoleDisplay.scrollHeight;
+  }, delay);
+}
+
+// STITCH Bind Mode
+document.getElementById('stitchBtn').addEventListener('click', function() {
+  stitchActive = !stitchActive;
+  this.classList.toggle('active');
+  addConsoleLine(stitchActive ? 'STITCH BIND MODE: ACTIVE' : 'STITCH BIND MODE: DISABLED');
+  addConsoleLine(stitchActive ? 'Quantum foam coherence: 99.99997%' : 'Warning: Foam destabilized', 300);
+});
+
+// Δ Traverse Button
+document.getElementById('deltaBtn').addEventListener('click', () => {
+  if (!stitchActive) {
+    addConsoleLine('ERROR: STITCH bind required before Δ traverse');
+    addConsoleLine('Causality violation prevention: LOCKED', 200);
+    return;
+  }
+  
+  addConsoleLine('Δ TRAVERSE SEQUENCE INITIATED');
+  addConsoleLine('Calculating 11D manifold coordinates...', 400);
+  addConsoleLine('Octonion rotation: A=0.73, L=0.91, C=0.44 rad', 800);
+  addConsoleLine('Firing transdimensional pulse...', 1200);
+  addConsoleLine('TRAVERSE COMPLETE: Position locked', 1600);
+  
+  createTraverseVisualization();
+});
+
+// FOLD Collapse Animation
+document.getElementById('foldBtn').addEventListener('click', function() {
+  addConsoleLine('FOLD COLLAPSE SEQUENCE: INITIATED');
+  addConsoleLine('Compressing 11D to 4D observational frame...', 300);
+  
+  foldElement.classList.remove('unfolded');
+  foldElement.classList.add('folded');
+  
+  setTimeout(() => {
+    addConsoleLine('FOLD COMPLETE: Spacetime manifold compressed', 0);
+    addConsoleLine('Energy expended: 1.21 × 10^19 GeV', 200);
+    
+    setTimeout(() => {
+      foldElement.classList.remove('folded');
+      foldElement.classList.add('unfolded');
+      addConsoleLine('Manifold restored to baseline', 300);
+    }, 1500);
+  }, 800);
+});
+
+// Console Input
+consoleInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    const cmd = consoleInput.value.trim().toLowerCase();
+    addConsoleLine(`Command: ${cmd}`);
+    
+    switch(cmd) {
+      case 'help':
+        addConsoleLine('Commands: status, init, clear, help');
+        break;
+      case 'status':
+        addConsoleLine(`STITCH: ${stitchActive ? 'ACTIVE' : 'INACTIVE'}`);
+        addConsoleLine('Gyroscopes: A/L/C NOMINAL');
+        addConsoleLine('Foam Stability: 0.97 Planck');
+        break;
+      case 'init':
+        addConsoleLine('Initialization sequence complete');
+        addConsoleLine('All systems: OPERATIONAL');
+        break;
+      case 'clear':
+        consoleDisplay.innerHTML = '<div class="console-line">Console cleared</div>';
+        break;
+      default:
+        addConsoleLine(`Unknown command: ${cmd}`);
+    }
+    
+    consoleInput.value = '';
+  }
+});
+
+// Traverse Field Visualization
+function createTraverseVisualization() {
+  const field = document.getElementById('traverseField');
+  field.innerHTML = '';
+  
+  const nodes = [];
+  for (let i = 0; i < 8; i++) {
+    const node = document.createElement('div');
+    node.className = 'traverse-node';
+    node.style.left = Math.random() * 90 + 5 + '%';
+    node.style.top = Math.random() * 90 + 5 + '%';
+    field.appendChild(node);
+    nodes.push(node);
+  }
+  
+  // Create connections
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      if (Math.random() > 0.6) {
+        const line = document.createElement('div');
+        line.className = 'traverse-line';
+        const n1 = nodes[i].getBoundingClientRect();
+        const n2 = nodes[j].getBoundingClientRect();
+        const f = field.getBoundingClientRect();
+        
+        const x1 = n1.left - f.left + 6;
+        const y1 = n1.top - f.top + 6;
+        const x2 = n2.left - f.left + 6;
+        const y2 = n2.top - f.top + 6;
+        
+        const length = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+        const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
+        
+        line.style.width = length + 'px';
+        line.style.left = x1 + 'px';
+        line.style.top = y1 + 'px';
+        line.style.transform = `rotate(${angle}deg)`;
+        field.appendChild(line);
+      }
+    }
+  }
+}
+
+// Initialize
+updateBreadcrumbs('home');
+</script>
+
 </body>
 </html>
