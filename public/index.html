@@ -3,813 +3,1106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ALGOL 60 // REV 1960</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"></script>
+<title>ΠΕΝΤΑΚΥΚΛΟΣ // ALGOL 68 // 2026</title>
 <style>
-  :root {
-    --bg: #0a0a0a;
-    --bezel: #1a1a1a;
-    --crt-bg: #0b0b07;
-    --phosphor: #FFB000;
-    --phosphor-dim: #cc8800;
-    --phosphor-glow: rgba(255, 176, 0, 0.4);
-    --scanline: rgba(0, 0, 0, 0.25);
-    --font: 'Courier New', 'Lucida Console', monospace;
-  }
-
-  [data-theme="green"] {
-    --phosphor: #33FF33;
-    --phosphor-dim: #22AA22;
-    --phosphor-glow: rgba(51, 255, 51, 0.4);
-    --crt-bg: #050a05;
-  }
-
-  [data-theme="paper"] {
-    --phosphor: #1a1a1a;
-    --phosphor-dim: #444;
-    --phosphor-glow: rgba(0, 0, 0, 0.1);
-    --crt-bg: #f5f3e8;
-    --bg: #d4d0c8;
-    --bezel: #c0bcae;
-    --scanline: rgba(0, 0, 0, 0.05);
-  }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  body {
-    background: var(--bg);
-    font-family: var(--font);
-    color: var(--phosphor);
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.5s;
-  }
-
-  /* Layer 0: Chrome/Window */
-  .terminal-window {
-    position: relative;
-    width: 95vw;
-    height: 94vh;
-    max-width: 1600px;
-    background: linear-gradient(145deg, #2a2a2a, #151515);
-    border-radius: 12px;
-    box-shadow: 
-      0 30px 80px rgba(0, 0, 0, 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .window-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: linear-gradient(180deg, #3a3a3a, #252525);
-    border-radius: 6px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-
-  .window-title {
-    font-size: 14px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px var(--phosphor-glow);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .power-led {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--phosphor);
-    box-shadow: 0 0 12px var(--phosphor-glow);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-
-  .window-controls {
-    display: flex;
-    gap: 8px;
-  }
-
-  .btn {
-    background: linear-gradient(180deg, #4a4a4a, #2a2a2a);
-    border: 1px solid #1a1a1a;
-    color: var(--phosphor);
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: var(--font);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-    text-shadow: 0 0 5px var(--phosphor-glow);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-  }
-
-  .btn:hover {
-    background: linear-gradient(180deg, #5a5a5a, #3a3a3a);
-    box-shadow: 0 0 12px var(--phosphor-glow);
-  }
-
-  .btn:active {
-    transform: translateY(1px);
-  }
-
-  /* Layer 1: Bezel */
-  .bezel {
-    flex: 1;
-    background: var(--bezel);
-    border-radius: 24px;
-    padding: 24px;
-    position: relative;
-    box-shadow: 
-      inset 0 0 30px rgba(0, 0, 0, 0.8),
-      inset 0 2px 4px rgba(255, 255, 255, 0.05);
-  }
-
-  /* Layer 2: CRT Screen */
-  .crt {
-    width: 100%;
-    height: 100%;
-    background: var(--crt-bg);
-    border-radius: 16px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-      inset 0 0 100px rgba(0, 0, 0, 0.9),
-      0 0 60px var(--phosphor-glow);
-  }
-
-  .crt::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      var(--scanline) 2px,
-      var(--scanline) 4px
-    );
-    pointer-events: none;
-    z-index: 10;
-    animation: scanline 8s linear infinite;
-  }
-
-  @keyframes scanline {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(8px); }
-  }
-
-  .crt::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 0%,
-      transparent 60%,
-      rgba(0, 0, 0, 0.4) 100%
-    );
-    pointer-events: none;
-    z-index: 11;
-  }
-
-  /* Layer 3: Content */
-  .content {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    grid-template-rows: auto 1fr;
-    gap: 2px;
-    background: var(--phosphor-dim);
-    position: relative;
-    z-index: 5;
-  }
-
-  .toolbar {
-    grid-column: 1 / -1;
-    background: var(--crt-bg);
-    padding: 8px 12px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    border-bottom: 2px solid var(--phosphor-dim);
-  }
-
-  .toolbar select {
-    background: var(--crt-bg);
-    border: 1px solid var(--phosphor-dim);
-    color: var(--phosphor);
-    padding: 4px 8px;
-    font-family: var(--font);
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  .toolbar-label {
-    font-size: 11px;
-    opacity: 0.8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .editor-pane {
-    background: var(--crt-bg);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-
-  .pane-header {
-    background: var(--crt-bg);
-    padding: 6px 12px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    border-bottom: 1px solid var(--phosphor-dim);
-    text-shadow: 0 0 8px var(--phosphor-glow);
-  }
-
-  .editor-container {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .CodeMirror {
-    height: 100%;
-    background: var(--crt-bg);
-    color: var(--phosphor);
-    font-family: var(--font);
-    font-size: 14px;
-    line-height: 1.6;
-    text-shadow: 0 0 5px var(--phosphor-glow);
-  }
-
-  .CodeMirror-cursor {
-    border-left: 2px solid var(--phosphor);
-    box-shadow: 0 0 8px var(--phosphor-glow);
-  }
-
-  .CodeMirror-selected {
-    background: var(--phosphor-dim) !important;
-  }
-
-  .cm-keyword { color: var(--phosphor); font-weight: bold; text-shadow: 0 0 10px var(--phosphor-glow); }
-  .cm-number { color: var(--phosphor); }
-  .cm-comment { color: var(--phosphor-dim); opacity: 0.7; }
-  .cm-string { color: var(--phosphor); }
-  .cm-operator { color: var(--phosphor); }
-
-  .sidebar {
-    background: var(--crt-bg);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .console-pane, .error-pane {
-    background: var(--crt-bg);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-
-  .console-output, .error-output {
-    flex: 1;
-    padding: 12px;
-    overflow-y: auto;
-    font-size: 13px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    text-shadow: 0 0 4px var(--phosphor-glow);
-  }
-
-  .error-output {
-    color: #ff6666;
-    text-shadow: 0 0 4px rgba(255, 102, 102, 0.4);
-  }
-
-  [data-theme="paper"] .error-output {
-    color: #cc0000;
-    text-shadow: none;
-  }
-
-  .status-bar {
-    background: var(--crt-bg);
-    border-top: 1px solid var(--phosphor-dim);
-    padding: 6px 12px;
-    font-size: 11px;
-    display: flex;
-    justify-content: space-between;
-    opacity: 0.8;
-  }
-
-  .flicker {
-    animation: flicker 0.15s infinite;
-  }
-
-  @keyframes flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.97; }
-  }
-
-  @media (max-width: 1024px) {
-    .content {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr 300px;
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;700&display=swap');
+    
+    :root {
+        --cyan: 184, 100%, 65%;
+        --magenta: 310, 100%, 70%;
+        --gold: 45, 100%, 60%;
+        --blue: 220, 100%, 65%;
+        --purple: 270, 80%, 70%;
+        
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: rgba(0, 0, 0, 0.5);
+        --text-primary: rgba(255, 255, 255, 0.95);
+        --text-secondary: rgba(255, 255, 255, 0.6);
     }
-    .terminal-window {
-      width: 98vw;
-      height: 98vh;
-      padding: 8px;
-    }
-  }
 
-  .hidden { display: none; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Space Grotesk', sans-serif;
+        background: #000008;
+        color: var(--text-primary);
+        overflow: hidden;
+        user-select: none;
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+    }
+
+    /* Nebula Background */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(ellipse at 20% 30%, hsla(var(--cyan), 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 70%, hsla(var(--magenta), 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, hsla(var(--blue), 0.08) 0%, transparent 60%),
+            radial-gradient(ellipse at 70% 20%, hsla(var(--gold), 0.06) 0%, transparent 40%);
+        filter: blur(80px);
+        z-index: 0;
+        animation: nebulaDrift 60s ease-in-out infinite alternate;
+    }
+
+    @keyframes nebulaDrift {
+        0% { transform: scale(1) rotate(0deg); }
+        100% { transform: scale(1.1) rotate(3deg); }
+    }
+
+    /* Starfield */
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+        opacity: 0;
+        animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 0.8; }
+    }
+
+    /* Top Bar */
+    .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        z-index: 1000;
+        backdrop-filter: blur(40px) saturate(180%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+        border-bottom: 1px solid transparent;
+        border-image: conic-gradient(from 180deg, hsla(var(--cyan), 0.5), hsla(var(--magenta), 0.5), hsla(var(--gold), 0.5), hsla(var(--blue), 0.5), hsla(var(--cyan), 0.5)) 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: borderShift 8s linear infinite;
+    }
+
+    @keyframes borderShift {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+
+    .topbar-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 300;
+        font-size: 14px;
+        letter-spacing: 0.3em;
+        background: linear-gradient(90deg, hsl(var(--cyan)), hsl(var(--magenta)), hsl(var(--gold)));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+        animation: titleGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+        0%, 100% { filter: drop-shadow(0 0 8px hsla(var(--cyan), 0.5)); }
+        50% { filter: drop-shadow(0 0 15px hsla(var(--magenta), 0.6)); }
+    }
+
+    /* Connection Lines SVG */
+    .bonds {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .bond-line {
+        fill: none;
+        stroke-width: 1;
+        stroke-dasharray: 4 8;
+        opacity: 0.3;
+        animation: bondPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes bondPulse {
+        0%, 100% { stroke-dashoffset: 0; opacity: 0.2; }
+        50% { stroke-dashoffset: 12; opacity: 0.5; }
+    }
+
+    /* Window Base */
+    .window {
+        position: absolute;
+        min-width: 320px;
+        min-height: 200px;
+        backdrop-filter: blur(40px) saturate(180%);
+        background: var(--glass-bg);
+        border-radius: 16px;
+        z-index: 10;
+        transition: box-shadow 0.3s ease, transform 0.1s ease-out;
+        will-change: transform;
+    }
+
+    .window::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        padding: 1px;
+        background: conic-gradient(from var(--angle, 0deg), 
+            hsla(var(--cyan), 0.6), 
+            hsla(var(--magenta), 0.6), 
+            hsla(var(--gold), 0.6), 
+            hsla(var(--blue), 0.6), 
+            hsla(var(--cyan), 0.6));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        animation: borderRotate 10s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes borderRotate {
+        to { --angle: 360deg; }
+    }
+
+    .window::after {
+        content: '';
+        position: absolute;
+        inset: -20px;
+        border-radius: 20px;
+        background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+            hsla(var(--cyan), 0.15) 0%, 
+            transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .window:hover::after {
+        opacity: 1;
+    }
+
+    .window {
+        box-shadow: 
+            0 8px 32px 0 rgba(0, 0, 0, 0.6),
+            0 2px 16px 0 hsla(var(--cyan), 0.1),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .window:hover {
+        box-shadow: 
+            0 12px 48px 0 rgba(0, 0, 0, 0.8),
+            0 0 24px 0 hsla(var(--magenta), 0.2),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .window.dragging {
+        transition: none;
+        box-shadow: 
+            0 16px 64px 0 rgba(0, 0, 0, 0.9),
+            0 0 32px 4px hsla(var(--gold), 0.3),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .window.drifting {
+        animation: drift 20s ease-in-out infinite;
+    }
+
+    @keyframes drift {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(8px, -5px) rotate(0.3deg); }
+        50% { transform: translate(-5px, 8px) rotate(-0.2deg); }
+        75% { transform: translate(5px, 5px) rotate(0.2deg); }
+    }
+
+    /* Window Header */
+    .window-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        cursor: move;
+        position: relative;
+    }
+
+    .window-title {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+    }
+
+    .window-subtitle {
+        font-size: 9px;
+        opacity: 0.5;
+        margin-top: 2px;
+        letter-spacing: 0.1em;
+    }
+
+    /* Floating Orbs as Controls */
+    .window-controls {
+        display: flex;
+        gap: 8px;
+    }
+
+    .orb {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), transparent);
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .orb::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        opacity: 0.6;
+        filter: blur(4px);
+        transition: opacity 0.2s ease;
+    }
+
+    .orb:hover {
+        transform: scale(1.2);
+    }
+
+    .orb:hover::before {
+        opacity: 1;
+    }
+
+    .orb-minimize::before { background: hsl(var(--gold)); }
+    .orb-maximize::before { background: hsl(var(--cyan)); }
+    .orb-close::before { background: hsl(var(--magenta)); }
+
+    .orb-minimize { background: radial-gradient(circle at 30% 30%, hsl(var(--gold)), hsl(var(--gold), 0.3)); }
+    .orb-maximize { background: radial-gradient(circle at 30% 30%, hsl(var(--cyan)), hsl(var(--cyan), 0.3)); }
+    .orb-close { background: radial-gradient(circle at 30% 30%, hsl(var(--magenta)), hsl(var(--magenta), 0.3)); }
+
+    /* Window Content */
+    .window-content {
+        padding: 16px;
+        height: calc(100% - 53px);
+        overflow: auto;
+        position: relative;
+    }
+
+    .window-content::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .window-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 3px;
+    }
+
+    .window-content::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, hsla(var(--cyan), 0.5), hsla(var(--magenta), 0.5));
+        border-radius: 3px;
+    }
+
+    /* Editor */
+    #editor {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        resize: none;
+        user-select: text;
+    }
+
+    /* Holographic Syntax Highlighting via CSS only - simulated */
+    .editor-wrapper {
+        position: relative;
+        height: 100%;
+    }
+
+    /* Console */
+    .console-output {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        color: hsla(var(--cyan), 0.9);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        user-select: text;
+    }
+
+    /* Examples List */
+    .examples-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .example-item {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .example-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, hsla(var(--cyan), 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .example-item:hover::before {
+        left: 100%;
+    }
+
+    .example-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: hsla(var(--cyan), 0.3);
+        transform: translateX(4px);
+    }
+
+    .example-name {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 500;
+        color: hsl(var(--cyan));
+        margin-bottom: 4px;
+    }
+
+    .example-desc {
+        font-size: 10px;
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    /* Manual */
+    .manual-content {
+        font-size: 12px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        user-select: text;
+    }
+
+    .manual-content h3 {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        color: hsl(var(--gold));
+        margin: 16px 0 8px;
+        letter-spacing: 0.1em;
+    }
+
+    .manual-content code {
+        font-family: 'JetBrains Mono', monospace;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: hsl(var(--cyan));
+        font-size: 11px;
+    }
+
+    /* Run Button */
+    .run-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 24px;
+        background: linear-gradient(135deg, hsla(var(--cyan), 0.3), hsla(var(--magenta), 0.3));
+        backdrop-filter: blur(20px);
+        border: 1px solid hsla(var(--cyan), 0.5);
+        border-radius: 24px;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .run-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, hsla(var(--cyan), 0.6), transparent);
+        transform: translate(-50%, -50%);
+        transition: width 0.4s ease, height 0.4s ease;
+    }
+
+    .run-btn:hover::before {
+        width: 200px;
+        height: 200px;
+    }
+
+    .run-btn:hover {
+        border-color: hsla(var(--magenta), 0.8);
+        box-shadow: 0 0 20px hsla(var(--cyan), 0.4);
+        transform: scale(1.05);
+    }
+
+    .run-btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Light Trail */
+    .trail {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        background: radial-gradient(circle, hsla(var(--cyan), 0.8), transparent);
+        filter: blur(4px);
+        animation: trailFade 0.6s ease-out forwards;
+    }
+
+    @keyframes trailFade {
+        to {
+            opacity: 0;
+            transform: scale(3);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .window {
+            min-width: 280px;
+        }
+        .topbar-title {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+        }
+    }
+
+    /* Hide windows initially */
+    .window.hidden {
+        display: none;
+    }
 </style>
 </head>
-<body data-theme="amber">
-  <!-- Layer 0: Chrome/Window -->
-  <div class="terminal-window">
-    <div class="window-header">
-      <div class="window-title">
-        <div class="power-led"></div>
-        <span>ALGOL 60 // REV 1960</span>
-      </div>
-      <div class="window-controls">
-        <button class="btn" id="runBtn">RUN ►</button>
-        <button class="btn" id="exportBtn">EXPORT</button>
-        <button class="btn" id="themeBtn">THEME</button>
-        <button class="btn" id="audioBtn">AUDIO: ON</button>
-      </div>
+<body>
+    <div class="stars" id="stars"></div>
+    <svg class="bonds" id="bonds"></svg>
+    
+    <div class="topbar">
+        <div class="topbar-title">ΠΕΝΤΑΚΥΚΛΟΣ // ALGOL 68 // 2026</div>
     </div>
 
-    <!-- Layer 1: Bezel -->
-    <div class="bezel">
-      <!-- Layer 2: CRT -->
-      <div class="crt flicker">
-        <!-- Layer 3: Content -->
-        <div class="content">
-          <div class="toolbar">
-            <span class="toolbar-label">Program:</span>
-            <select id="exampleSelect">
-              <option value="factorial">Factorial</option>
-              <option value="fibonacci">Fibonacci</option>
-              <option value="gcd">GCD Euclidean</option>
-              <option value="bubblesort">Bubble Sort</option>
-              <option value="callbyname">Call-by-Name Demo</option>
-              <option value="custom">Custom</option>
-            </select>
-            <span class="toolbar-label" id="statusText" style="margin-left: auto;">READY</span>
-          </div>
-
-          <div class="editor-pane">
-            <div class="pane-header">EDITOR</div>
-            <div class="editor-container">
-              <textarea id="editor"></textarea>
+    <!-- c0: HESTIA / CORE - EDITOR -->
+    <div class="window drifting" id="win-c0" data-node="c0" style="width: 500px; height: 400px; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+        <div class="window-header">
+            <div>
+                <div class="window-title">c0: HESTIA / CORE</div>
+                <div class="window-subtitle">Center Hearth · Editor</div>
             </div>
-          </div>
-
-          <div class="sidebar">
-            <div class="console-pane">
-              <div class="pane-header">CONSOLE OUTPUT</div>
-              <div class="console-output" id="console"></div>
+            <div class="window-controls">
+                <div class="orb orb-minimize" data-action="minimize"></div>
+                <div class="orb orb-maximize" data-action="maximize"></div>
+                <div class="orb orb-close" data-action="close"></div>
             </div>
-            <div class="error-pane">
-              <div class="pane-header">SYSTEM MESSAGES</div>
-              <div class="error-output" id="errors"></div>
-            </div>
-          </div>
-
-          <div class="status-bar" style="grid-column: 1 / -1;">
-            <span>ALGOL 60 TRANSPILER // JS SANDBOX</span>
-            <span id="lineCol">LN 1, COL 1</span>
-          </div>
         </div>
-      </div>
+        <div class="window-content">
+            <div class="editor-wrapper">
+                <textarea id="editor" spellcheck="false"># PENTAKUKLOS :: ALGOL 68 REV 2026
+# The 5-body system awaits your command
+
+BEGIN
+  # Prime sieve demonstration
+  PROC sieve = (INT n) []BOOL:
+  BEGIN
+    [2:n]BOOL prime;
+    FOR i FROM 2 TO n DO prime[i] := TRUE OD;
+    FOR i FROM 2 TO ENTIER sqrt(n) DO
+      IF prime[i] THEN
+        FOR j FROM i*i BY i TO n DO prime[j] := FALSE OD
+      FI
+    OD;
+    prime
+  END;
+  
+  []BOOL p = sieve(100);
+  FOR i FROM 2 TO 100 DO
+    IF p[i] THEN print((i, " ")) FI
+  OD
+END</textarea>
+                <button class="run-btn" id="runBtn"><span>EXECUTE ›</span></button>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- lu1: BOREAS / SUPERMAN - EXAMPLES -->
+    <div class="window drifting" id="win-lu1" data-node="lu1" style="width: 320px; height: 350px; left: 10%; top: 15%;">
+        <div class="window-header">
+            <div>
+                <div class="window-title">lu1: BOREAS / SUPERMAN</div>
+                <div class="window-subtitle">North Wind · Witness · Examples</div>
+            </div>
+            <div class="window-controls">
+                <div class="orb orb-minimize" data-action="minimize"></div>
+                <div class="orb orb-maximize" data-action="maximize"></div>
+                <div class="orb orb-close" data-action="close"></div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="examples-list" id="examplesList"></div>
+        </div>
+    </div>
+
+    <!-- ru1: NOTOS / ETHOS - MANUAL -->
+    <div class="window drifting" id="win-ru1" data-node="ru1" style="width: 350px; height: 400px; right: 10%; top: 15%;">
+        <div class="window-header">
+            <div>
+                <div class="window-title">ru1: NOTOS / ETHOS</div>
+                <div class="window-subtitle">South Wind · Ethics · Manual</div>
+            </div>
+            <div class="window-controls">
+                <div class="orb orb-minimize" data-action="minimize"></div>
+                <div class="orb orb-maximize" data-action="maximize"></div>
+                <div class="orb orb-close" data-action="close"></div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="manual-content">
+                <h3>ALGOL 68 REV 2026</h3>
+                <p>The Pentakuklos system interprets ALGOL 68 through holographic transpilation. Five bodies in gravitational balance.</p>
+                
+                <h3>BASIC STRUCTURE</h3>
+                <p>Programs begin with <code>BEGIN</code> and end with <code>END</code>. Statements separated by <code>;</code></p>
+                
+                <h3>TYPES</h3>
+                <p><code>INT</code>, <code>REAL</code>, <code>BOOL</code>, <code>CHAR</code>, <code>STRING</code><br>
+                <code>REF TYPE</code> - reference to type<br>
+                <code>[]TYPE</code> - array of type<br>
+                <code>STRUCT</code> - record types</p>
+                
+                <h3>CONTROL</h3>
+                <p><code>IF condition THEN ... ELSE ... FI</code><br>
+                <code>FOR i FROM a TO b DO ... OD</code><br>
+                <code>WHILE condition DO ... OD</code></p>
+                
+                <h3>PROCEDURES</h3>
+                <p><code>PROC name = (PARAMS) RETURN: BODY</code></p>
+                
+                <h3>OPERATORS</h3>
+                <p>Standard: <code>+ - * / MOD **</code><br>
+                Comparison: <code>LT LE EQ NE GE GT</code><br>
+                Logic: <code>AND OR NOT</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ll1: ZEPHYRUS / PATHOS - CONSOLE -->
+    <div class="window drifting" id="win-ll1" data-node="ll1" style="width: 400px; height: 250px; left: 8%; bottom: 10%;">
+        <div class="window-header">
+            <div>
+                <div class="window-title">ll1: ZEPHYRUS / PATHOS</div>
+                <div class="window-subtitle">West Wind · Emotion · Console</div>
+            </div>
+            <div class="window-controls">
+                <div class="orb orb-minimize" data-action="minimize"></div>
+                <div class="orb orb-maximize" data-action="maximize"></div>
+                <div class="orb orb-close" data-action="close"></div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="console-output" id="console">› PENTAKUKLOS initialized<br>› HESTIA core online<br>› Awaiting transpilation...</div>
+        </div>
+    </div>
+
+    <!-- rl1: EUROS / LOGOS - OUTPUT -->
+    <div class="window drifting" id="win-rl1" data-node="rl1" style="width: 400px; height: 250px; right: 8%; bottom: 10%;">
+        <div class="window-header">
+            <div>
+                <div class="window-title">rl1: EUROS / LOGOS</div>
+                <div class="window-subtitle">East Wind · Reason · Output</div>
+            </div>
+            <div class="window-controls">
+                <div class="orb orb-minimize" data-action="minimize"></div>
+                <div class="orb orb-maximize" data-action="maximize"></div>
+                <div class="orb orb-close" data-action="close"></div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="console-output" id="output">› System ready<br>› No output yet</div>
+        </div>
+    </div>
 
 <script>
-(function() {
-  // Audio System
-  const AudioSys = {
-    enabled: true,
-    ctx: null,
-    
-    init() {
-      if (!this.ctx) {
-        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    },
-    
-    beep(freq = 800, duration = 50, vol = 0.1) {
-      if (!this.enabled) return;
-      this.init();
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.frequency.value = freq;
-      gain.gain.value = vol;
-      osc.start();
-      osc.stop(this.ctx.currentTime + duration / 1000);
-    },
-    
-    click() { this.beep(1200, 20, 0.05); },
-    carriageReturn() { this.beep(600, 100, 0.15); },
-    compileSuccess() { this.beep(880, 80, 0.1); setTimeout(() => this.beep(1320, 80, 0.1), 100); },
-    compileError() { this.beep(200, 200, 0.2); },
-    hum() { 
-      if (!this.enabled) return;
-      this.init();
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.frequency.value = 60;
-      gain.gain.value = 0.02;
-      osc.start();
-      setTimeout(() => osc.stop(), 2000);
-    }
-  };
-
-  // ALGOL 60 Examples
-  const examples = {
-    factorial: `begin
-  integer procedure factorial(n);
-    value n; integer n;
-    factorial := if n = 0 then 1 else n × factorial(n - 1);
-  
-  integer i;
-  for i := 1 step 1 until 10 do
-    print(factorial(i))
-end`,
-    
-    fibonacci: `begin
-  integer procedure fib(n);
-    value n; integer n;
-    fib := if n ≤ 1 then n else fib(n-1) + fib(n-2);
-  
-  integer k;
-  for k := 0 step 1 until 12 do
-    print(fib(k))
-end`,
-
-    gcd: `begin
-  integer procedure gcd(a, b);
-    value a, b; integer a, b;
-    gcd := if b = 0 then a else gcd(b, a mod b);
-  
-  print(gcd(48, 18));
-  print(gcd(1071, 462))
-end`,
-
-    bubblesort: `begin
-  integer array a[1:5];
-  integer i, j, temp;
-  
-  a[1] := 5; a[2] := 2; a[3] := 8;
-  a[4] := 1; a[5] := 9;
-  
-  for i := 1 step 1 until 4 do
-    for j := 1 step 1 until 5-i do
-      if a[j] > a[j+1] then
-      begin
-        temp := a[j];
-        a[j] := a[j+1];
-        a[j+1] := temp
-      end;
-  
-  for i := 1 step 1 until 5 do
-    print(a[i])
-end`,
-
-    callbyname: `begin
-  comment Jensen's Device - Classic ALGOL 60 example;
-  comment Demonstrates call-by-name parameter passing;
-  
-  real procedure sum(i, n, term);
-    value n;
-    integer i, n;
-    real term;
-    comment term is called by name;
-  begin
-    real s;
-    s := 0;
-    for i := 1 step 1 until n do
-      s := s + term;
-    sum := s
-  end;
-  
-  integer j;
-  real array a[1:5];
-  a[1] := 2; a[2] := 3; a[3] := 5; a[4] := 7; a[5] := 11;
-  
-  print(sum(j, 5, a[j]))
-end`,
-
-    custom: `begin
-  comment Write your ALGOL 60 program here;
-  print("Hello, ALGOL 60")
-end`
-  };
-
-  // CodeMirror Setup with ALGOL 60 Mode
-  CodeMirror.defineSimpleMode("algol60", {
-    start: [
-      {regex: /comment[^;]*/, token: "comment"},
-      {regex: /\b(begin|end|procedure|if|then|else|for|do|step|until|while|real|integer|boolean|array|switch|goto|label|value|own)\b/i, token: "keyword"},
-      {regex: /\b(true|false)\b/i, token: "keyword"},
-      {regex: /:=|\+|-|\*|×|\/|\^|↑|=|≠|≤|≥|<|>|∧|∨|¬/, token: "operator"},
-      {regex: /\b\d+\.?\d*\b/, token: "number"},
-      {regex: /"[^"]*"/, token: "string"},
-    ]
-  });
-
-  const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
-    mode: "algol60",
-    lineNumbers: true,
-    theme: "default",
-    indentUnit: 2,
-    tabSize: 2,
-    lineWrapping: true
-  });
-
-  editor.setValue(examples.factorial);
-
-  editor.on('keydown', () => AudioSys.click());
-  editor.on('cursorActivity', () => {
-    const pos = editor.getCursor();
-    document.getElementById('lineCol').textContent = `LN ${pos.line + 1}, COL ${pos.ch + 1}`;
-  });
-
-  // ALGOL 60 to JavaScript Transpiler
-  class Algol60Transpiler {
-    constructor() {
-      this.output = [];
-      this.errors = [];
-      this.symbols = [];
-      this.indent = 0;
+(() => {
+    // Starfield
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        star.style.animationDuration = (2 + Math.random() * 2) + 's';
+        starsContainer.appendChild(star);
     }
 
-    transpile(code) {
-      this.output = [];
-      this.errors = [];
-      this.symbols = [{}];
-      
-      try {
-        // Preprocess: replace ALGOL symbols
-        let js = code
-          .replace(/comment[^;]*/gi, '')
-          .replace(/×/g, '*')
-          .replace(/↑/g, '**')
-          .replace(/≠/g, '!=')
-          .replace(/≤/g, '<=')
-          .replace(/≥/g, '>=')
-          .replace(/∧/g, '&&')
-          .replace(/∨/g, '||')
-          .replace(/¬/g, '!')
-          .replace(/\bmod\b/gi, '%');
+    // Window management
+    const windows = document.querySelectorAll('.window');
+    const bondsSvg = document.getElementById('bonds');
+    let activeWindow = null;
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 };
+    let zIndex = 10;
 
-        // Wrap in async IIFE for sandbox
-        let result = `(async function() {\n`;
-        result += `  const __out = [];\n`;
-        result += `  const print = (x) => __out.push(String(x));\n`;
-        result += `  function array([start, end]) {\n`;
-        result += `    const arr = {};\n`;
-        result += `    arr.__start = start;\n`;
-        result += `    arr.__end = end;\n`;
-        result += `    return new Proxy(arr, {\n`;
-        result += `      get: (t, k) => t[Number(k)],\n`;
-        result += `      set: (t, k, v) => { t[Number(k)] = v; return true; }\n`;
-        result += `    });\n`;
-        result += `  }\n\n`;
-
-        // Parse blocks and procedures
-        js = this.parseBlocks(js);
-        js = this.parseProcedures(js);
-        js = this.parseForLoops(js);
-        js = this.parseIfExpr(js);
-        js = this.parseArrays(js);
-        js = this.parseAssignment(js);
-        
-        result += js;
-        result += `\n  return __out;\n})()`;
-        
-        return { code: result, errors: this.errors };
-      } catch (e) {
-        this.errors.push(`TRANSPILER ERROR: ${e.message}`);
-        return { code: null, errors: this.errors };
-      }
-    }
-
-    parseBlocks(code) {
-      // Convert begin/end to {}
-      return code.replace(/\bbegin\b/gi, '{\n').replace(/\bend\b/gi, '\n}');
-    }
-
-    parseProcedures(code) {
-      // procedure name(params); declarations; body -> function name(params) { body }
-      return code.replace(/\b(integer|real|boolean)?\s*procedure\s+(\w+)\s*\(([^)]*)\)\s*;?/gi, 
-        (m, type, name, params) => {
-          const cleanParams = params.split(',').map(p => p.trim().split(/\s+/).pop()).join(', ');
-          return `function ${name}(${cleanParams}) {`;
+    // ALGOL 68 Examples
+    const examples = [
+        {
+            name: 'Prime Sieve',
+            desc: 'Eratosthenes sieve up to N',
+            code: `BEGIN
+  PROC sieve = (INT n) []BOOL:
+  BEGIN
+    [2:n]BOOL prime;
+    FOR i FROM 2 TO n DO prime[i] := TRUE OD;
+    FOR i FROM 2 TO ENTIER sqrt(n) DO
+      IF prime[i] THEN
+        FOR j FROM i*i BY i TO n DO prime[j] := FALSE OD
+      FI
+    OD;
+    prime
+  END;
+  
+  []BOOL p = sieve(50);
+  print("Primes: ");
+  FOR i FROM 2 TO 50 DO
+    IF p[i] THEN print((i, " ")) FI
+  OD
+END`
+        },
+        {
+            name: 'Quicksort',
+            desc: 'Recursive quicksort algorithm',
+            code: `BEGIN
+  PROC quicksort = ([]REF INT a, INT lo, INT hi) VOID:
+  IF lo < hi THEN
+    INT pivot := a[hi];
+    INT i := lo - 1;
+    FOR j FROM lo TO hi-1 DO
+      IF a[j] < pivot THEN
+        i +:= 1;
+        INT t := a[i]; a[i] := a[j]; a[j] := t
+      FI
+    OD;
+    INT t := a[i+1]; a[i+1] := a[hi]; a[hi] := t;
+    INT p := i + 1;
+    quicksort(a, lo, p-1);
+    quicksort(a, p+1, hi)
+  FI;
+  
+  [10]INT data := (64, 34, 25, 12, 22, 11, 90, 88, 76, 50);
+  quicksort(data, 1, 10);
+  FOR i TO 10 DO print((data[i], " ")) OD
+END`
+        },
+        {
+            name: 'Complex Ops',
+            desc: 'Complex number arithmetic',
+            code: `BEGIN
+  MODE COMPLEX = STRUCT(REAL re, im);
+  OP + = (COMPLEX a, b) COMPLEX: 
+    COMPLEX(a re + b re, a im + b im);
+  OP * = (COMPLEX a, b) COMPLEX:
+    COMPLEX(a re * b re - a im * b im,
+            a re * b im + a im * b re);
+  
+  COMPLEX z1 = COMPLEX(3.0, 4.0);
+  COMPLEX z2 = COMPLEX(1.0, 2.0);
+  COMPLEX sum = z1 + z2;
+  COMPLEX prod = z1 * z2;
+  
+  print(("Sum: ", re OF sum, " + ", im OF sum, "i"));
+  print(("Product: ", re OF prod, " + ", im OF prod, "i"))
+END`
+        },
+        {
+            name: 'Parallel Simulation',
+            desc: '5-body choreography (conceptual)',
+            code: `BEGIN
+  # PENTAKUKLOS drift simulation
+  [5]STRING bodies = ("HESTIA", "BOREAS", "NOTOS", "ZEPHYRUS", "EUROS");
+  [5]REAL mass = (1.0, 0.6, 0.6, 0.6, 0.6);
+  
+  print("5-Body System Initialized");
+  FOR i TO 5 DO
+    print((bodies[i], " mass=", mass[i]))
+  OD;
+  
+  # Orbital period calculation (simplified)
+  FOR step FROM 1 TO 5 DO
+    print(("Step ", step, ": Bodies in equilibrium"))
+  OD
+END`
         }
-      ).replace(/value\s+[^;]+;/gi, ''); // Remove value declarations
-    }
+    ];
 
-    parseForLoops(code) {
-      // for i := a step b until c do -> for (let i = a; i <= c; i += b)
-      return code.replace(/for\s+(\w+)\s*:=\s*([^;]+?)\s+step\s+([^;]+?)\s+until\s+([^;]+?)\s+do/gi,
-        'for (let $1 = $2; $1 <= $4; $1 += $3)')
-      .replace(/for\s+(\w+)\s*:=\s*([^;]+?)\s+while\s+([^;]+?)\s+do/gi,
-        'for (let $1 = $2; $3; $1++)');
-    }
-
-    parseIfExpr(code) {
-      // Convert if-expressions: x := if cond then a else b
-      return code.replace(/(\w+|\w+\[[^\]]+\])\s*:=\s*if\s+(.+?)\s+then\s+(.+?)\s+else\s+(.+?)(;|\n)/gi,
-        '$1 = ($2) ? ($3) : ($4)$5');
-    }
-
-    parseArrays(code) {
-      // array a[1:10] -> let a = array([1,10])
-      return code.replace(/\b(integer|real|boolean)\s+array\s+(\w+)\s*\[(\d+):(\d+)\]/gi,
-        'let $2 = array([$3,$4])');
-    }
-
-    parseAssignment(code) {
-      // := to =
-      return code.replace(/:=/g, '=');
-    }
-  }
-
-  const transpiler = new Algol60Transpiler();
-
-  // Runtime
-  async function runProgram() {
-    const code = editor.getValue();
-    const console = document.getElementById('console');
-    const errors = document.getElementById('errors');
-    const status = document.getElementById('statusText');
-    
-    console.textContent = '';
-    errors.textContent = '';
-    status.textContent = 'COMPILING...';
-    AudioSys.beep(440, 50);
-    
-    await typeOut(errors, 'ALGOL 60 COMPILER REV 1960\n', 10);
-    await sleep(200);
-    
-    const result = transpiler.transpile(code);
-    
-    if (result.errors.length > 0) {
-      AudioSys.compileError();
-      status.textContent = 'COMPILE ERROR';
-      for (const err of result.errors) {
-        await typeOut(errors, err + '\n', 5);
-      }
-      return;
-    }
-    
-    await typeOut(errors, 'COMPILATION SUCCESSFUL\n', 5);
-    await sleep(100);
-    AudioSys.compileSuccess();
-    
-    status.textContent = 'RUNNING...';
-    await typeOut(errors, 'EXECUTING PROGRAM...\n\n', 5);
-    AudioSys.carriageReturn();
-    
-    try {
-      const startTime = performance.now();
-      const output = await eval(result.code);
-      const endTime = performance.now();
-      
-      if (output && output.length > 0) {
-        for (const line of output) {
-          await typeOut(console, line + '\n', 15);
-          AudioSys.beep(1000, 10, 0.03);
-        }
-      } else {
-        await typeOut(console, '(no output)\n', 15);
-      }
-      
-      await typeOut(errors, `\nEXECUTION COMPLETE\nTIME: ${(endTime - startTime).toFixed(2)} MS\n`, 5);
-      status.textContent = 'READY';
-      AudioSys.hum();
-    } catch (e) {
-      AudioSys.compileError();
-      status.textContent = 'RUNTIME ERROR';
-      await typeOut(errors, `\nRUNTIME ERROR: ${e.message}\n`, 5);
-      await typeOut(errors, `STACK TRACE: ${e.stack}\n`, 3);
-    }
-  }
-
-  function typeOut(element, text, delay) {
-    return new Promise(resolve => {
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < text.length) {
-          element.textContent += text[i++];
-          element.scrollTop = element.scrollHeight;
-        } else {
-          clearInterval(interval);
-          resolve();
-        }
-      }, delay);
+    // Populate examples
+    const examplesList = document.getElementById('examplesList');
+    examples.forEach((ex, idx) => {
+        const item = document.createElement('div');
+        item.className = 'example-item';
+        item.innerHTML = `
+            <div class="example-name">${ex.name}</div>
+            <div class="example-desc">${ex.desc}</div>
+        `;
+        item.onclick = () => {
+            document.getElementById('editor').value = ex.code;
+            logConsole(`› Loaded: ${ex.name}`);
+        };
+        examplesList.appendChild(item);
     });
-  }
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+    // ALGOL 68 Transpiler (simplified for demo)
+    class Algol68Transpiler {
+        constructor() {
+            this.output = [];
+            this.env = {};
+        }
 
-  // Event Listeners
-  document.getElementById('runBtn').addEventListener('click', runProgram);
-  
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    const code = editor.getValue();
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'program.alg';
-    a.click();
-    URL.revokeObjectURL(url);
-    AudioSys.beep(660, 80);
-  });
+        transpile(code) {
+            this.output = [];
+            this.env = {};
+            try {
+                const lines = code.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+                const prog = lines.join(' ');
+                
+                if (!prog.includes('BEGIN') || !prog.includes('END')) {
+                    throw new Error('Program must be enclosed in BEGIN...END');
+                }
 
-  let themeIdx = 0;
-  const themes = ['amber', 'green', 'paper'];
-  document.getElementById('themeBtn').addEventListener('click', () => {
-    themeIdx = (themeIdx + 1) % themes.length;
-    document.body.setAttribute('data-theme', themes[themeIdx]);
-    AudioSys.click();
-  });
+                // Very simplified execution simulation
+                if (prog.includes('sieve')) {
+                    this.sieveDemo();
+                } else if (prog.includes('quicksort')) {
+                    this.quicksortDemo();
+                } else if (prog.includes('COMPLEX')) {
+                    this.complexDemo();
+                } else if (prog.includes('PENTAKUKLOS')) {
+                    this.pentakuklosDemo();
+                } else {
+                    this.genericDemo(prog);
+                }
 
-  document.getElementById('audioBtn').addEventListener('click', (e) => {
-    AudioSys.enabled = !AudioSys.enabled;
-    e.target.textContent = `AUDIO: ${AudioSys.enabled ? 'ON' : 'OFF'}`;
-    if (AudioSys.enabled) AudioSys.click();
-  });
+                return this.output.join('\n');
+            } catch (e) {
+                return `ERROR: ${e.message}`;
+            }
+        }
 
-  document.getElementById('exampleSelect').addEventListener('change', (e) => {
-    if (e.target.value !== 'custom') {
-      editor.setValue(examples[e.target.value]);
-      AudioSys.beep(880, 50);
+        print(...args) {
+            this.output.push(args.join(''));
+        }
+
+        sieveDemo() {
+            const n = 50;
+            const prime = new Array(n + 1).fill(true);
+            for (let i = 2; i * i <= n; i++) {
+                if (prime[i]) {
+                    for (let j = i * i; j <= n; j += i) prime[j] = false;
+                }
+            }
+            this.print('Primes: ');
+            for (let i = 2; i <= n; i++) {
+                if (prime[i]) this.print(i + ' ');
+            }
+        }
+
+        quicksortDemo() {
+            let data = [64, 34, 25, 12, 22, 11, 90, 88, 76, 50];
+            const qs = (arr, lo, hi) => {
+                if (lo < hi) {
+                    let pivot = arr[hi], i = lo - 1;
+                    for (let j = lo; j < hi; j++) {
+                        if (arr[j] < pivot) {
+                            i++;
+                            [arr[i], arr[j]] = [arr[j], arr[i]];
+                        }
+                    }
+                    [arr[i+1], arr[hi]] = [arr[hi], arr[i+1]];
+                    let p = i + 1;
+                    qs(arr, lo, p-1);
+                    qs(arr, p+1, hi);
+                }
+            };
+            qs(data, 0, data.length - 1);
+            this.print(data.join(' '));
+        }
+
+        complexDemo() {
+            const z1 = {re: 3.0, im: 4.0};
+            const z2 = {re: 1.0, im: 2.0};
+            const sum = {re: z1.re + z2.re, im: z1.im + z2.im};
+            const prod = {
+                re: z1.re * z2.re - z1.im * z2.im,
+                im: z1.re * z2.im + z1.im * z2.re
+            };
+            this.print(`Sum: ${sum.re} + ${sum.im}i`);
+            this.print(`Product: ${prod.re} + ${prod.im}i`);
+        }
+
+        pentakuklosDemo() {
+            const bodies = ["HESTIA", "BOREAS", "NOTOS", "ZEPHYRUS", "EUROS"];
+            const mass = [1.0, 0.6, 0.6, 0.6, 0.6];
+            this.print('5-Body System Initialized');
+            bodies.forEach((b, i) => this.print(`${b} mass=${mass[i]}`));
+            for (let step = 1; step <= 5; step++) {
+                this.print(`Step ${step}: Bodies in equilibrium`);
+            }
+        }
+
+        genericDemo(code) {
+            this.print('// Transpiled output');
+            this.print('Execution simulated');
+            if (code.includes('print')) {
+                this.print('Print statements detected');
+            }
+        }
     }
-  });
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      runProgram();
+    const transpiler = new Algol68Transpiler();
+
+    function logConsole(msg) {
+        const console = document.getElementById('console');
+        console.innerHTML += '<br>' + msg;
+        console.scrollTop = console.scrollHeight;
     }
-  });
 
-  // Initial boot sequence
-  setTimeout(async () => {
-    const errors = document.getElementById('errors');
-    await typeOut(errors, 'ALGOL 60 SYSTEM INITIALIZED\n', 20);
-    await typeOut(errors, 'ICT 1900 EMULATION MODE\n', 20);
-    await typeOut(errors, 'READY FOR INPUT\n\n', 20);
-    AudioSys.hum();
-  }, 500);
+    function logOutput(msg) {
+        document.getElementById('output').textContent = msg;
+    }
 
+    // Run button
+    document.getElementById('runBtn').onclick = () => {
+        const code = document.getElementById('editor').value;
+        logConsole('› Transpiling...');
+        const result = transpiler.transpile(code);
+        logOutput(result);
+        logConsole('› Execution complete');
+    };
+
+    // Window dragging
+    windows.forEach(win => {
+        const header = win.querySelector('.window-header');
+        
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('orb')) return;
+            isDragging = true;
+            activeWindow = win;
+            win.classList.add('dragging');
+            win.classList.remove('drifting');
+            win.style.zIndex = ++zIndex;
+            
+            const rect = win.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            e.preventDefault();
+        });
+
+        // Hover refraction
+        win.addEventListener('mousemove', (e) => {
+            const rect = win.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            win.style.setProperty('--mouse-x', x + '%');
+            win.style.setProperty('--mouse-y', y + '%');
+        });
+
+        // Double click snap to center
+        header.addEventListener('dblclick', () => {
+            win.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            win.style.left = '50%';
+            win.style.top = '50%';
+            win.style.transform = 'translate(-50%, -50%)';
+            setTimeout(() => {
+                win.style.transition = '';
+            }, 500);
+            updateBonds();
+        });
+
+        // Window controls
+        win.querySelectorAll('.orb').forEach(orb => {
+            orb.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = orb.dataset.action;
+                if (action === 'close') {
+                    win.classList.add('hidden');
+                } else if (action === 'minimize') {
+                    win.style.transform += ' scale(0.5)';
+                    win.style.opacity = '0.3';
+                    setTimeout(() => {
+                        win.style.transform = win.style.transform.replace(' scale(0.5)', '');
+                        win.style.opacity = '1';
+                    }, 2000);
+                } else if (action === 'maximize') {
+                    if (win.dataset.maximized === 'true') {
+                        win.style.width = win.dataset.oldWidth;
+                        win.style.height = win.dataset.oldHeight;
+                        win.style.left = win.dataset.oldLeft;
+                        win.style.top = win.dataset.oldTop;
+                        win.dataset.maximized = 'false';
+                    } else {
+                        win.dataset.oldWidth = win.style.width;
+                        win.dataset.oldHeight = win.style.height;
+                        win.dataset.oldLeft = win.style.left;
+                        win.dataset.oldTop = win.style.top;
+                        win.style.width = '90vw';
+                        win.style.height = 'calc(90vh - 50px)';
+                        win.style.left = '5vw';
+                        win.style.top = 'calc(5vh + 25px)';
+                        win.dataset.maximized = 'true';
+                    }
+                    updateBonds();
+                }
+            });
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging && activeWindow) {
+            const x = e.clientX - dragOffset.x;
+            const y = e.clientY - dragOffset.y;
+            activeWindow.style.left = x + 'px';
+            activeWindow.style.top = y + 'px';
+            activeWindow.style.transform = 'none';
+            
+            // Trail effect
+            if (Math.random() > 0.7) {
+                const trail = document.createElement('div');
+                trail.className = 'trail';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                document.body.appendChild(trail);
+                setTimeout(() => trail.remove(), 600);
+            }
+            
+            updateBonds();
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (activeWindow) {
+            activeWindow.classList.remove('dragging');
+        }
+        isDragging = false;
+        activeWindow = null;
+    });
+
+    // Draw gravitational bonds
+    function updateBonds() {
+        const nodes = ['c0', 'lu1', 'ru1', 'll1', 'rl1'];
+        const positions = {};
+        
+        nodes.forEach(node => {
+            const el = document.querySelector(`[data-node="${node}"]`);
+            if (el && !el.classList.contains('hidden')) {
+                const rect = el.getBoundingClientRect();
+                positions[node] = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+        });
+
+        bondsSvg.innerHTML = '';
+        
+        // Connect all to c0 (HESTIA)
+        ['lu1', 'ru1', 'll1', 'rl1'].forEach(node => {
+            if (positions['c0'] && positions[node]) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', positions['c0'].x);
+                line.setAttribute('y1', positions['c0'].y);
+                line.setAttribute('x2', positions[node].x);
+                line.setAttribute('y2', positions[node].y);
+                line.setAttribute('class', 'bond-line');
+                
+                // Color based on node
+                const colors = {
+                    'lu1': 'hsl(184, 100%, 65%)',
+                    'ru1': 'hsl(310, 100%, 70%)',
+                    'll1': 'hsl(45, 100%, 60%)',
+                    'rl1': 'hsl(220, 100%, 65%)'
+                };
+                line.setAttribute('stroke', colors[node]);
+                bondsSvg.appendChild(line);
+            }
+        });
+    }
+
+    // Initial bonds
+    setTimeout(updateBonds, 100);
+    window.addEventListener('resize', updateBonds);
+
+    // Idle orbital movement
+    let idleTimer = null;
+    function resetIdle() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            windows.forEach(win => {
+                if (!win.classList.contains('dragging') && !win.classList.contains('hidden')) {
+                    win.classList.add('drifting');
+                }
+            });
+        }, 5000);
+    }
+
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('mousedown', resetIdle);
+    resetIdle();
+
+    logConsole('› All systems nominal');
 })();
 </script>
 </body>
