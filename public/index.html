@@ -3,866 +3,813 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HYREAL 5-Window System</title>
+<title>ALGOL 60 // REV 1960</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
-  
   :root {
-    --bg: #06070d;
-    --glass: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.14);
-    --text: #e8ecf2;
-    --text-dim: #9aa3b2;
-    
-    --c0: #00f5ff;
-    --lu1: #ff006e;
-    --ru1: #a855f7;
-    --ll1: #ff7b00;
-    --rl1: #00ff88;
+    --bg: #0a0a0a;
+    --bezel: #1a1a1a;
+    --crt-bg: #0b0b07;
+    --phosphor: #FFB000;
+    --phosphor-dim: #cc8800;
+    --phosphor-glow: rgba(255, 176, 0, 0.4);
+    --scanline: rgba(0, 0, 0, 0.25);
+    --font: 'Courier New', 'Lucida Console', monospace;
+  }
+
+  [data-theme="green"] {
+    --phosphor: #33FF33;
+    --phosphor-dim: #22AA22;
+    --phosphor-glow: rgba(51, 255, 51, 0.4);
+    --crt-bg: #050a05;
+  }
+
+  [data-theme="paper"] {
+    --phosphor: #1a1a1a;
+    --phosphor-dim: #444;
+    --phosphor-glow: rgba(0, 0, 0, 0.1);
+    --crt-bg: #f5f3e8;
+    --bg: #d4d0c8;
+    --bezel: #c0bcae;
+    --scanline: rgba(0, 0, 0, 0.05);
   }
 
   * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
   }
 
   body {
-    font-family: 'Space Grotesk', sans-serif;
     background: var(--bg);
-    color: var(--text);
+    font-family: var(--font);
+    color: var(--phosphor);
     overflow: hidden;
+    width: 100vw;
     height: 100vh;
-    background-image: 
-      radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 50%, rgba(0, 245, 255, 0.12) 0%, transparent 50%),
-      radial-gradient(circle at 50% 100%, rgba(255, 0, 110, 0.08) 0%, transparent 50%);
-  }
-
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    backdrop-filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .control-bar {
-    position: fixed;
-    top: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    display: flex;
-    gap: 12px;
-    padding: 16px 20px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    backdrop-filter: blur(24px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 
-                inset 0 1px 0 rgba(255,255,255,0.1);
-  }
-
-  .btn {
-    font-family: 'Space Grotesk', sans-serif;
-    padding: 10px 18px;
-    background: rgba(255,255,255,0.04);
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.6s;
-  }
-
-  .btn:hover::before {
-    transform: translateX(100%);
-  }
-
-  .btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-
-  .btn:active {
-    transform: translateY(0);
-  }
-
-  .btn-center {
-    background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(168, 85, 247, 0.1));
-    border-color: rgba(0, 245, 255, 0.3);
-  }
-
-  .btn-c0 { border-left: 3px solid var(--c0); }
-  .btn-lu1 { border-left: 3px solid var(--lu1); }
-  .btn-ru1 { border-left: 3px solid var(--ru1); }
-  .btn-ll1 { border-left: 3px solid var(--ll1); }
-  .btn-rl1 { border-left: 3px solid var(--rl1); }
-
-  .window {
-    position: absolute;
-    width: 320px;
-    height: 380px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    backdrop-filter: blur(24px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.1);
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-    pointer-events: none;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-    overflow: hidden;
-  }
-
-  .window.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    pointer-events: auto;
-  }
-
-  .window.dragging {
-    transition: none;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
-  }
-
-  .window-header {
-    padding: 12px 16px;
-    background: rgba(0,0,0,0.2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: move;
-    user-select: none;
-  }
-
-  .window-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .window-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-  }
-
-  .window-close {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    color: var(--text-dim);
-    transition: all 0.2s;
+    transition: background 0.5s;
   }
 
-  .window-close:hover {
-    background: rgba(255,0,0,0.2);
-    border-color: rgba(255,0,0,0.4);
-    color: #ff4444;
-  }
-
-  .window-body {
-    padding: 20px;
-    height: calc(100% - 45px);
-    overflow-y: auto;
-  }
-
-  .window-body::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .window-body::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.02);
-  }
-
-  .window-body::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-  }
-
-  /* Window Specific Styles */
-  #c0 .window-dot { background: var(--c0); box-shadow: 0 0 12px var(--c0); }
-  #lu1 .window-dot { background: var(--lu1); box-shadow: 0 0 12px var(--lu1); }
-  #ru1 .window-dot { background: var(--ru1); box-shadow: 0 0 12px var(--ru1); }
-  #ll1 .window-dot { background: var(--ll1); box-shadow: 0 0 12px var(--ll1); }
-  #rl1 .window-dot { background: var(--rl1); box-shadow: 0 0 12px var(--rl1); }
-
-  /* CORE Window */
-  .core-display {
-    text-align: center;
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 24px;
-  }
-
-  .core-equation {
-    font-size: 18px;
-    font-weight: 300;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    color: var(--c0);
-    text-shadow: 0 0 20px var(--c0);
-  }
-
-  .torus {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 20px;
-    border: 3px solid var(--c0);
-    border-radius: 50%;
+  /* Layer 0: Chrome/Window */
+  .terminal-window {
     position: relative;
-    animation: pulse-ring 2.14s ease-in-out infinite;
+    width: 95vw;
+    height: 94vh;
+    max-width: 1600px;
+    background: linear-gradient(145deg, #2a2a2a, #151515);
+    border-radius: 12px;
+    box-shadow: 
+      0 30px 80px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
   }
 
-  .torus::before {
-    content: '';
-    position: absolute;
-    inset: 15px;
-    border: 2px solid var(--c0);
+  .window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #3a3a3a, #252525);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .window-title {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--phosphor-glow);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .power-led {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    opacity: 0.5;
-    animation: pulse-ring 2.14s ease-in-out infinite reverse;
+    background: var(--phosphor);
+    box-shadow: 0 0 12px var(--phosphor-glow);
+    animation: pulse 2s infinite;
   }
 
-  @keyframes pulse-ring {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.6; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
-  .temp-reading {
-    font-size: 24px;
-    color: var(--c0);
-    margin: 16px 0;
-    font-weight: 700;
+  .window-controls {
+    display: flex;
+    gap: 8px;
   }
 
-  .state-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .state-btn {
-    padding: 12px;
-    background: rgba(0, 245, 255, 0.1);
-    border: 1px solid rgba(0, 245, 255, 0.3);
-    border-radius: 8px;
-    color: var(--c0);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+  .btn {
+    background: linear-gradient(180deg, #4a4a4a, #2a2a2a);
+    border: 1px solid #1a1a1a;
+    color: var(--phosphor);
+    padding: 6px 14px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s;
+    font-family: var(--font);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    text-shadow: 0 0 5px var(--phosphor-glow);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   }
 
-  .state-btn:hover {
-    background: rgba(0, 245, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 245, 255, 0.3);
+  .btn:hover {
+    background: linear-gradient(180deg, #5a5a5a, #3a3a3a);
+    box-shadow: 0 0 12px var(--phosphor-glow);
   }
 
-  /* SUPERMAN Window */
-  .witness-stream {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    line-height: 1.6;
-    color: var(--lu1);
-    background: rgba(0,0,0,0.3);
-    padding: 12px;
-    border-radius: 8px;
-    height: 100px;
-    overflow-y: auto;
-    margin-bottom: 16px;
+  .btn:active {
+    transform: translateY(1px);
   }
 
-  .cube-container {
-    width: 100px;
-    height: 100px;
-    margin: 20px auto;
-    perspective: 600px;
+  /* Layer 1: Bezel */
+  .bezel {
+    flex: 1;
+    background: var(--bezel);
+    border-radius: 24px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 
+      inset 0 0 30px rgba(0, 0, 0, 0.8),
+      inset 0 2px 4px rgba(255, 255, 255, 0.05);
   }
 
-  .cube {
+  /* Layer 2: CRT Screen */
+  .crt {
     width: 100%;
     height: 100%;
+    background: var(--crt-bg);
+    border-radius: 16px;
     position: relative;
-    transform-style: preserve-3d;
-    animation: rotate-cube 8s linear infinite;
+    overflow: hidden;
+    box-shadow: 
+      inset 0 0 100px rgba(0, 0, 0, 0.9),
+      0 0 60px var(--phosphor-glow);
   }
 
-  @keyframes rotate-cube {
-    0% { transform: rotateX(0) rotateY(0); }
-    100% { transform: rotateX(360deg) rotateY(360deg); }
-  }
-
-  .cube-face {
+  .crt::before {
+    content: '';
     position: absolute;
-    width: 100px;
-    height: 100px;
-    border: 2px solid var(--lu1);
-    background: rgba(255, 0, 110, 0.1);
-    opacity: 0.8;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+    animation: scanline 8s linear infinite;
   }
 
-  .metric {
-    margin: 12px 0;
+  @keyframes scanline {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(8px); }
+  }
+
+  .crt::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+    pointer-events: none;
+    z-index: 11;
+  }
+
+  /* Layer 3: Content */
+  .content {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto 1fr;
+    gap: 2px;
+    background: var(--phosphor-dim);
+    position: relative;
+    z-index: 5;
+  }
+
+  .toolbar {
+    grid-column: 1 / -1;
+    background: var(--crt-bg);
+    padding: 8px 12px;
     display: flex;
-    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    border-bottom: 2px solid var(--phosphor-dim);
+  }
+
+  .toolbar select {
+    background: var(--crt-bg);
+    border: 1px solid var(--phosphor-dim);
+    color: var(--phosphor);
+    padding: 4px 8px;
+    font-family: var(--font);
     font-size: 12px;
+    cursor: pointer;
   }
 
-  .metric-label {
-    color: var(--text-dim);
-  }
-
-  .metric-value {
-    color: var(--lu1);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-  }
-
-  /* ETHOS Window */
-  .virtue-slider {
-    margin: 16px 0;
-  }
-
-  .virtue-label {
+  .toolbar-label {
     font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 6px;
+    opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
-  .slider-bar {
-    height: 6px;
-    background: rgba(168, 85, 247, 0.2);
-    border-radius: 3px;
+  .editor-pane {
+    background: var(--crt-bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .pane-header {
+    background: var(--crt-bg);
+    padding: 6px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--phosphor-dim);
+    text-shadow: 0 0 8px var(--phosphor-glow);
+  }
+
+  .editor-container {
+    flex: 1;
     position: relative;
     overflow: hidden;
   }
 
-  .slider-fill {
+  .CodeMirror {
     height: 100%;
-    background: linear-gradient(90deg, var(--ru1), rgba(168, 85, 247, 0.6));
-    border-radius: 3px;
-    transition: width 0.5s ease;
-    box-shadow: 0 0 10px var(--ru1);
+    background: var(--crt-bg);
+    color: var(--phosphor);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    text-shadow: 0 0 5px var(--phosphor-glow);
   }
 
-  .duty-cycle {
-    text-align: center;
-    margin: 24px 0;
-    font-size: 48px;
-    font-weight: 700;
-    color: var(--ru1);
-    text-shadow: 0 0 30px var(--ru1);
-    animation: pulse-400 2s ease-in-out infinite;
+  .CodeMirror-cursor {
+    border-left: 2px solid var(--phosphor);
+    box-shadow: 0 0 8px var(--phosphor-glow);
   }
 
-  @keyframes pulse-400 {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+  .CodeMirror-selected {
+    background: var(--phosphor-dim) !important;
   }
 
-  /* PATHOS Window */
-  .valence-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 16px 0;
-  }
+  .cm-keyword { color: var(--phosphor); font-weight: bold; text-shadow: 0 0 10px var(--phosphor-glow); }
+  .cm-number { color: var(--phosphor); }
+  .cm-comment { color: var(--phosphor-dim); opacity: 0.7; }
+  .cm-string { color: var(--phosphor); }
+  .cm-operator { color: var(--phosphor); }
 
-  .grid-cell {
-    aspect-ratio: 1;
-    background: rgba(255, 123, 0, 0.1);
-    border: 1px solid rgba(255, 123, 0, 0.3);
-    border-radius: 8px;
+  .sidebar {
+    background: var(--crt-bg);
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    transition: all 0.3s;
-    cursor: pointer;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  .grid-cell:hover {
-    background: rgba(255, 123, 0, 0.2);
-    transform: scale(1.1);
-  }
-
-  .grid-cell.active {
-    background: rgba(255, 123, 0, 0.4);
-    box-shadow: 0 0 20px rgba(255, 123, 0, 0.5);
-  }
-
-  .heart-rate {
-    text-align: center;
-    margin: 20px 0;
-  }
-
-  .heart-icon {
-    font-size: 48px;
-    color: var(--ll1);
-    animation: heartbeat 1.2s ease-in-out infinite;
-    display: inline-block;
-  }
-
-  @keyframes heartbeat {
-    0%, 100% { transform: scale(1); }
-    25% { transform: scale(1.2); }
-    50% { transform: scale(1); }
-  }
-
-  .bpm {
-    font-size: 24px;
-    color: var(--ll1);
-    font-family: 'JetBrains Mono', monospace;
-    margin-top: 8px;
-  }
-
-  /* LOGOS Window */
-  .gate-diagram {
+  .console-pane, .error-pane {
+    background: var(--crt-bg);
+    flex: 1;
     display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
+    flex-direction: column;
+    min-height: 0;
   }
 
-  .logic-gate {
-    padding: 12px 20px;
-    background: rgba(0, 255, 136, 0.1);
-    border: 2px solid var(--rl1);
-    border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--rl1);
-    animation: gate-flash 3s ease-in-out infinite;
-  }
-
-  @keyframes gate-flash {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; box-shadow: 0 0 20px var(--rl1); }
-  }
-
-  .hash-display {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    word-break: break-all;
-    background: rgba(0,0,0,0.3);
+  .console-output, .error-output {
+    flex: 1;
     padding: 12px;
-    border-radius: 8px;
-    color: var(--rl1);
-    margin: 16px 0;
-    border: 1px solid rgba(0, 255, 136, 0.2);
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-shadow: 0 0 4px var(--phosphor-glow);
   }
 
-  .counter-display {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 16px;
+  .error-output {
+    color: #ff6666;
+    text-shadow: 0 0 4px rgba(255, 102, 102, 0.4);
   }
 
-  .counter-box {
-    padding: 16px;
-    background: rgba(0, 255, 136, 0.1);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 8px;
-    text-align: center;
+  [data-theme="paper"] .error-output {
+    color: #cc0000;
+    text-shadow: none;
   }
 
-  .counter-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--rl1);
-    font-family: 'JetBrains Mono', monospace;
+  .status-bar {
+    background: var(--crt-bg);
+    border-top: 1px solid var(--phosphor-dim);
+    padding: 6px 12px;
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    opacity: 0.8;
   }
 
-  .counter-label {
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-top: 4px;
+  .flicker {
+    animation: flicker 0.15s infinite;
   }
 
-  @media (max-width: 768px) {
-    .control-bar {
-      flex-wrap: wrap;
-      width: 90%;
-      justify-content: center;
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.97; }
+  }
+
+  @media (max-width: 1024px) {
+    .content {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr 300px;
     }
-    .window {
-      width: 280px;
-      height: 340px;
+    .terminal-window {
+      width: 98vw;
+      height: 98vh;
+      padding: 8px;
     }
   }
+
+  .hidden { display: none; }
 </style>
 </head>
-<body>
-<div class="backdrop"></div>
+<body data-theme="amber">
+  <!-- Layer 0: Chrome/Window -->
+  <div class="terminal-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="power-led"></div>
+        <span>ALGOL 60 // REV 1960</span>
+      </div>
+      <div class="window-controls">
+        <button class="btn" id="runBtn">RUN ►</button>
+        <button class="btn" id="exportBtn">EXPORT</button>
+        <button class="btn" id="themeBtn">THEME</button>
+        <button class="btn" id="audioBtn">AUDIO: ON</button>
+      </div>
+    </div>
 
-<div class="control-bar">
-  <button class="btn btn-center" id="centerAll">Center All</button>
-  <button class="btn btn-c0" data-window="c0">Call CORE</button>
-  <button class="btn btn-lu1" data-window="lu1">Call SUPERMAN</button>
-  <button class="btn btn-ru1" data-window="ru1">Call ru.ethos</button>
-  <button class="btn btn-ll1" data-window="ll1">Call ll.pathos</button>
-  <button class="btn btn-rl1" data-window="rl1">Call rl.logos</button>
-</div>
+    <!-- Layer 1: Bezel -->
+    <div class="bezel">
+      <!-- Layer 2: CRT -->
+      <div class="crt flicker">
+        <!-- Layer 3: Content -->
+        <div class="content">
+          <div class="toolbar">
+            <span class="toolbar-label">Program:</span>
+            <select id="exampleSelect">
+              <option value="factorial">Factorial</option>
+              <option value="fibonacci">Fibonacci</option>
+              <option value="gcd">GCD Euclidean</option>
+              <option value="bubblesort">Bubble Sort</option>
+              <option value="callbyname">Call-by-Name Demo</option>
+              <option value="custom">Custom</option>
+            </select>
+            <span class="toolbar-label" id="statusText" style="margin-left: auto;">READY</span>
+          </div>
 
-<!-- CORE Window -->
-<div class="window" id="c0">
-  <div class="window-header">
-    <div class="window-title"><span class="window-dot"></span>CORE</div>
-    <div class="window-close">×</div>
-  </div>
-  <div class="window-body">
-    <div class="core-display">
-      <div class="core-equation">0 = 1 = 812Sx = YOU</div>
-      <div class="torus"></div>
-      <div class="temp-reading">2.14°K</div>
-      <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">QUANTUM ENTANGLEMENT ACTIVE</div>
-      <div class="state-buttons">
-        <button class="state-btn" data-state="rest">REST</button>
-        <button class="state-btn" data-state="work">WORK</button>
+          <div class="editor-pane">
+            <div class="pane-header">EDITOR</div>
+            <div class="editor-container">
+              <textarea id="editor"></textarea>
+            </div>
+          </div>
+
+          <div class="sidebar">
+            <div class="console-pane">
+              <div class="pane-header">CONSOLE OUTPUT</div>
+              <div class="console-output" id="console"></div>
+            </div>
+            <div class="error-pane">
+              <div class="pane-header">SYSTEM MESSAGES</div>
+              <div class="error-output" id="errors"></div>
+            </div>
+          </div>
+
+          <div class="status-bar" style="grid-column: 1 / -1;">
+            <span>ALGOL 60 TRANSPILER // JS SANDBOX</span>
+            <span id="lineCol">LN 1, COL 1</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-<!-- SUPERMAN Window -->
-<div class="window" id="lu1">
-  <div class="window-header">
-    <div class="window-title"><span class="window-dot"></span>SUPERMAN / lu.witness</div>
-    <div class="window-close">×</div>
-  </div>
-  <div class="window-body">
-    <div class="witness-stream" id="witnessStream"></div>
-    <div class="cube-container">
-      <div class="cube">
-        <div class="cube-face" style="transform: rotateY(0deg) translateZ(50px);"></div>
-        <div class="cube-face" style="transform: rotateY(90deg) translateZ(50px);"></div>
-        <div class="cube-face" style="transform: rotateY(180deg) translateZ(50px);"></div>
-        <div class="cube-face" style="transform: rotateY(-90deg) translateZ(50px);"></div>
-        <div class="cube-face" style="transform: rotateX(90deg) translateZ(50px);"></div>
-        <div class="cube-face" style="transform: rotateX(-90deg) translateZ(50px);"></div>
-      </div>
-    </div>
-    <div class="metric"><span class="metric-label">ETHOS COHERE</span><span class="metric-value" id="cohere">98.7%</span></div>
-    <div class="metric"><span class="metric-label">VERTEX COUNT</span><span class="metric-value">8</span></div>
-    <div class="metric"><span class="metric-label">WITNESS RATE</span><span class="metric-value" id="witnessRate">2.4k/s</span></div>
-  </div>
-</div>
-
-<!-- ETHOS Window -->
-<div class="window" id="ru1">
-  <div class="window-header">
-    <div class="window-title"><span class="window-dot"></span>ru.ethos</div>
-    <div class="window-close">×</div>
-  </div>
-  <div class="window-body">
-    <div class="duty-cycle">400%</div>
-    <div style="text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 20px;">DUTY CYCLE</div>
-    <div class="virtue-slider">
-      <div class="virtue-label">Courage</div>
-      <div class="slider-bar"><div class="slider-fill" style="width: 92%"></div></div>
-    </div>
-    <div class="virtue-slider">
-      <div class="virtue-label">Justice</div>
-      <div class="slider-bar"><div class="slider-fill" style="width: 88%"></div></div>
-    </div>
-    <div class="virtue-slider">
-      <div class="virtue-label">Temperance</div>
-      <div class="slider-bar"><div class="slider-fill" style="width: 95%"></div></div>
-    </div>
-    <div class="virtue-slider">
-      <div class="virtue-label">Wisdom</div>
-      <div class="slider-bar"><div class="slider-fill" style="width: 90%"></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- PATHOS Window -->
-<div class="window" id="ll1">
-  <div class="window-header">
-    <div class="window-title"><span class="window-dot"></span>ll.pathos</div>
-    <div class="window-close">×</div>
-  </div>
-  <div class="window-body">
-    <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase;">Valence-Arousal Grid</div>
-    <div class="valence-grid">
-      <div class="grid-cell">😌</div>
-      <div class="grid-cell">😊</div>
-      <div class="grid-cell active">🔥</div>
-      <div class="grid-cell">😐</div>
-      <div class="grid-cell">⚡</div>
-      <div class="grid-cell">💫</div>
-      <div class="grid-cell">😔</div>
-      <div class="grid-cell">😢</div>
-      <div class="grid-cell">😡</div>
-    </div>
-    <div class="heart-rate">
-      <div class="heart-icon">❤</div>
-      <div class="bpm"><span id="bpmValue">72</span> BPM</div>
-      <div style="font-size: 10px; color: var(--text-dim); margin-top: 8px;">WARMTH: <span id="warmth">HIGH</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- LOGOS Window -->
-<div class="window" id="rl1">
-  <div class="window-header">
-    <div class="window-title"><span class="window-dot"></span>rl.logos</div>
-    <div class="window-close">×</div>
-  </div>
-  <div class="window-body">
-    <div class="gate-diagram">
-      <div class="logic-gate">AND</div>
-      <div class="logic-gate">OR</div>
-      <div class="logic-gate">NOT</div>
-    </div>
-    <div style="font-size: 11px; color: var(--text-dim); margin: 12px 0 8px;">SHA-256 PROOF</div>
-    <div class="hash-display" id="hash">a8f5f167f44f4964e6c998dee827110c809c8b9c3a7b94c9c3c9b9f7e8d2a1b0</div>
-    <div class="counter-display">
-      <div class="counter-box">
-        <div class="counter-value" id="witnessCount">1,847</div>
-        <div class="counter-label">Witness</div>
-      </div>
-      <div class="counter-box">
-        <div class="counter-value" id="togetherCount">3,294</div>
-        <div class="counter-label">Together</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 (function() {
-  const windows = {
-    c0: { el: document.getElementById('c0'), x: 0, y: 0 },
-    lu1: { el: document.getElementById('lu1'), x: -180, y: -210 },
-    ru1: { el: document.getElementById('ru1'), x: 180, y: -210 },
-    ll1: { el: document.getElementById('ll1'), x: -180, y: 210 },
-    rl1: { el: document.getElementById('rl1'), x: 180, y: 210 }
+  // Audio System
+  const AudioSys = {
+    enabled: true,
+    ctx: null,
+    
+    init() {
+      if (!this.ctx) {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    },
+    
+    beep(freq = 800, duration = 50, vol = 0.1) {
+      if (!this.enabled) return;
+      this.init();
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.frequency.value = freq;
+      gain.gain.value = vol;
+      osc.start();
+      osc.stop(this.ctx.currentTime + duration / 1000);
+    },
+    
+    click() { this.beep(1200, 20, 0.05); },
+    carriageReturn() { this.beep(600, 100, 0.15); },
+    compileSuccess() { this.beep(880, 80, 0.1); setTimeout(() => this.beep(1320, 80, 0.1), 100); },
+    compileError() { this.beep(200, 200, 0.2); },
+    hum() { 
+      if (!this.enabled) return;
+      this.init();
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.frequency.value = 60;
+      gain.gain.value = 0.02;
+      osc.start();
+      setTimeout(() => osc.stop(), 2000);
+    }
   };
 
-  let isDragging = false;
-  let currentWindow = null;
-  let offset = { x: 0, y: 0 };
-
-  // Center formation calculation
-  function centerFormation() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const centerX = vw / 2 - 160; // half window width
-    const centerY = vh / 2 - 190; // half window height
-
-    Object.values(windows).forEach((win, i) => {
-      if (win.el.classList.contains('active')) {
-        const targetX = centerX + win.x;
-        const targetY = centerY + win.y;
-        win.el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-        win.el.style.left = targetX + 'px';
-        win.el.style.top = targetY + 'px';
-        setTimeout(() => win.el.style.transition = '', 600);
-      }
-    });
-  }
-
-  // Initialize positions
-  function initPositions() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const centerX = vw / 2 - 160;
-    const centerY = vh / 2 - 190;
-
-    Object.values(windows).forEach(win => {
-      win.el.style.left = (centerX + win.x) + 'px';
-      win.el.style.top = (centerY + win.y) + 'px';
-    });
-  }
-
-  initPositions();
-  window.addEventListener('resize', centerFormation);
-
-  // Window drag functionality
-  document.querySelectorAll('.window-header').forEach(header => {
-    header.addEventListener('mousedown', e => {
-      if (e.target.classList.contains('window-close')) return;
-      isDragging = true;
-      currentWindow = header.parentElement;
-      currentWindow.classList.add('dragging');
-      const rect = currentWindow.getBoundingClientRect();
-      offset.x = e.clientX - rect.left;
-      offset.y = e.clientY - rect.top;
-    });
-
-    header.addEventListener('dblclick', () => {
-      centerFormation();
-    });
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (!isDragging || !currentWindow) return;
-    currentWindow.style.left = (e.clientX - offset.x) + 'px';
-    currentWindow.style.top = (e.clientY - offset.y) + 'px';
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (currentWindow) currentWindow.classList.remove('dragging');
-    isDragging = false;
-    currentWindow = null;
-  });
-
-  // Call buttons
-  document.querySelectorAll('[data-window]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const winId = btn.getAttribute('data-window');
-      windows[winId].el.classList.add('active');
-      bringToFront(windows[winId].el);
-    });
-  });
-
-  // Close buttons
-  document.querySelectorAll('.window-close').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      btn.closest('.window').classList.remove('active');
-    });
-  });
-
-  // Center all button
-  document.getElementById('centerAll').addEventListener('click', centerFormation);
-
-  function bringToFront(el) {
-    const allWindows = document.querySelectorAll('.window');
-    let maxZ = 100;
-    allWindows.forEach(w => {
-      const z = parseInt(w.style.zIndex || 100);
-      if (z > maxZ) maxZ = z;
-    });
-    el.style.zIndex = maxZ + 1;
-  }
-
-  document.querySelectorAll('.window').forEach(win => {
-    win.addEventListener('mousedown', () => bringToFront(win));
-  });
-
-  // Dynamic content updates
+  // ALGOL 60 Examples
+  const examples = {
+    factorial: `begin
+  integer procedure factorial(n);
+    value n; integer n;
+    factorial := if n = 0 then 1 else n × factorial(n - 1);
   
-  // CORE state buttons
-  document.querySelectorAll('.state-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.state-btn').forEach(b => b.style.background = 'rgba(0, 245, 255, 0.1)');
-      btn.style.background = 'rgba(0, 245, 255, 0.3)';
-    });
+  integer i;
+  for i := 1 step 1 until 10 do
+    print(factorial(i))
+end`,
+    
+    fibonacci: `begin
+  integer procedure fib(n);
+    value n; integer n;
+    fib := if n ≤ 1 then n else fib(n-1) + fib(n-2);
+  
+  integer k;
+  for k := 0 step 1 until 12 do
+    print(fib(k))
+end`,
+
+    gcd: `begin
+  integer procedure gcd(a, b);
+    value a, b; integer a, b;
+    gcd := if b = 0 then a else gcd(b, a mod b);
+  
+  print(gcd(48, 18));
+  print(gcd(1071, 462))
+end`,
+
+    bubblesort: `begin
+  integer array a[1:5];
+  integer i, j, temp;
+  
+  a[1] := 5; a[2] := 2; a[3] := 8;
+  a[4] := 1; a[5] := 9;
+  
+  for i := 1 step 1 until 4 do
+    for j := 1 step 1 until 5-i do
+      if a[j] > a[j+1] then
+      begin
+        temp := a[j];
+        a[j] := a[j+1];
+        a[j+1] := temp
+      end;
+  
+  for i := 1 step 1 until 5 do
+    print(a[i])
+end`,
+
+    callbyname: `begin
+  comment Jensen's Device - Classic ALGOL 60 example;
+  comment Demonstrates call-by-name parameter passing;
+  
+  real procedure sum(i, n, term);
+    value n;
+    integer i, n;
+    real term;
+    comment term is called by name;
+  begin
+    real s;
+    s := 0;
+    for i := 1 step 1 until n do
+      s := s + term;
+    sum := s
+  end;
+  
+  integer j;
+  real array a[1:5];
+  a[1] := 2; a[2] := 3; a[3] := 5; a[4] := 7; a[5] := 11;
+  
+  print(sum(j, 5, a[j]))
+end`,
+
+    custom: `begin
+  comment Write your ALGOL 60 program here;
+  print("Hello, ALGOL 60")
+end`
+  };
+
+  // CodeMirror Setup with ALGOL 60 Mode
+  CodeMirror.defineSimpleMode("algol60", {
+    start: [
+      {regex: /comment[^;]*/, token: "comment"},
+      {regex: /\b(begin|end|procedure|if|then|else|for|do|step|until|while|real|integer|boolean|array|switch|goto|label|value|own)\b/i, token: "keyword"},
+      {regex: /\b(true|false)\b/i, token: "keyword"},
+      {regex: /:=|\+|-|\*|×|\/|\^|↑|=|≠|≤|≥|<|>|∧|∨|¬/, token: "operator"},
+      {regex: /\b\d+\.?\d*\b/, token: "number"},
+      {regex: /"[^"]*"/, token: "string"},
+    ]
   });
 
-  // Witness stream
-  const witnessData = [
-    '0x8472...9a3f witness.active',
-    'ethos.cohere 98.7% stable',
-    'pathos.warmth rising',
-    'logos.seal verified',
-    'vertex.sync 8/8 online',
-    'quantum.entanglement confirmed'
-  ];
-  let streamIdx = 0;
-  const streamEl = document.getElementById('witnessStream');
-  
-  function updateWitness() {
-    if (streamEl) {
-      streamEl.innerHTML += witnessData[streamIdx % witnessData.length] + '\n';
-      streamEl.scrollTop = streamEl.scrollHeight;
-      streamIdx++;
-      if (streamEl.innerHTML.split('\n').length > 20) {
-        streamEl.innerHTML = streamEl.innerHTML.split('\n').slice(-15).join('\n');
+  const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    mode: "algol60",
+    lineNumbers: true,
+    theme: "default",
+    indentUnit: 2,
+    tabSize: 2,
+    lineWrapping: true
+  });
+
+  editor.setValue(examples.factorial);
+
+  editor.on('keydown', () => AudioSys.click());
+  editor.on('cursorActivity', () => {
+    const pos = editor.getCursor();
+    document.getElementById('lineCol').textContent = `LN ${pos.line + 1}, COL ${pos.ch + 1}`;
+  });
+
+  // ALGOL 60 to JavaScript Transpiler
+  class Algol60Transpiler {
+    constructor() {
+      this.output = [];
+      this.errors = [];
+      this.symbols = [];
+      this.indent = 0;
+    }
+
+    transpile(code) {
+      this.output = [];
+      this.errors = [];
+      this.symbols = [{}];
+      
+      try {
+        // Preprocess: replace ALGOL symbols
+        let js = code
+          .replace(/comment[^;]*/gi, '')
+          .replace(/×/g, '*')
+          .replace(/↑/g, '**')
+          .replace(/≠/g, '!=')
+          .replace(/≤/g, '<=')
+          .replace(/≥/g, '>=')
+          .replace(/∧/g, '&&')
+          .replace(/∨/g, '||')
+          .replace(/¬/g, '!')
+          .replace(/\bmod\b/gi, '%');
+
+        // Wrap in async IIFE for sandbox
+        let result = `(async function() {\n`;
+        result += `  const __out = [];\n`;
+        result += `  const print = (x) => __out.push(String(x));\n`;
+        result += `  function array([start, end]) {\n`;
+        result += `    const arr = {};\n`;
+        result += `    arr.__start = start;\n`;
+        result += `    arr.__end = end;\n`;
+        result += `    return new Proxy(arr, {\n`;
+        result += `      get: (t, k) => t[Number(k)],\n`;
+        result += `      set: (t, k, v) => { t[Number(k)] = v; return true; }\n`;
+        result += `    });\n`;
+        result += `  }\n\n`;
+
+        // Parse blocks and procedures
+        js = this.parseBlocks(js);
+        js = this.parseProcedures(js);
+        js = this.parseForLoops(js);
+        js = this.parseIfExpr(js);
+        js = this.parseArrays(js);
+        js = this.parseAssignment(js);
+        
+        result += js;
+        result += `\n  return __out;\n})()`;
+        
+        return { code: result, errors: this.errors };
+      } catch (e) {
+        this.errors.push(`TRANSPILER ERROR: ${e.message}`);
+        return { code: null, errors: this.errors };
       }
     }
-  }
-  setInterval(updateWitness, 1200);
 
-  // Heart rate variation
-  setInterval(() => {
-    const bpm = document.getElementById('bpmValue');
-    if (bpm) bpm.textContent = Math.floor(68 + Math.random() * 12);
-  }, 3000);
-
-  // Counters
-  let witness = 1847, together = 3294;
-  setInterval(() => {
-    witness += Math.floor(Math.random() * 3);
-    together += Math.floor(Math.random() * 5);
-    const w = document.getElementById('witnessCount');
-    const t = document.getElementById('togetherCount');
-    if (w) w.textContent = witness.toLocaleString();
-    if (t) t.textContent = together.toLocaleString();
-  }, 2000);
-
-  // Hash update
-  setInterval(() => {
-    const hash = document.getElementById('hash');
-    if (hash) {
-      const chars = '0123456789abcdef';
-      let newHash = '';
-      for (let i = 0; i < 64; i++) {
-        newHash += chars[Math.floor(Math.random() * 16)];
-      }
-      hash.textContent = newHash;
+    parseBlocks(code) {
+      // Convert begin/end to {}
+      return code.replace(/\bbegin\b/gi, '{\n').replace(/\bend\b/gi, '\n}');
     }
-  }, 5000);
 
-  // Pathos grid interaction
-  document.querySelectorAll('.grid-cell').forEach(cell => {
-    cell.addEventListener('click', () => {
-      document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('active'));
-      cell.classList.add('active');
+    parseProcedures(code) {
+      // procedure name(params); declarations; body -> function name(params) { body }
+      return code.replace(/\b(integer|real|boolean)?\s*procedure\s+(\w+)\s*\(([^)]*)\)\s*;?/gi, 
+        (m, type, name, params) => {
+          const cleanParams = params.split(',').map(p => p.trim().split(/\s+/).pop()).join(', ');
+          return `function ${name}(${cleanParams}) {`;
+        }
+      ).replace(/value\s+[^;]+;/gi, ''); // Remove value declarations
+    }
+
+    parseForLoops(code) {
+      // for i := a step b until c do -> for (let i = a; i <= c; i += b)
+      return code.replace(/for\s+(\w+)\s*:=\s*([^;]+?)\s+step\s+([^;]+?)\s+until\s+([^;]+?)\s+do/gi,
+        'for (let $1 = $2; $1 <= $4; $1 += $3)')
+      .replace(/for\s+(\w+)\s*:=\s*([^;]+?)\s+while\s+([^;]+?)\s+do/gi,
+        'for (let $1 = $2; $3; $1++)');
+    }
+
+    parseIfExpr(code) {
+      // Convert if-expressions: x := if cond then a else b
+      return code.replace(/(\w+|\w+\[[^\]]+\])\s*:=\s*if\s+(.+?)\s+then\s+(.+?)\s+else\s+(.+?)(;|\n)/gi,
+        '$1 = ($2) ? ($3) : ($4)$5');
+    }
+
+    parseArrays(code) {
+      // array a[1:10] -> let a = array([1,10])
+      return code.replace(/\b(integer|real|boolean)\s+array\s+(\w+)\s*\[(\d+):(\d+)\]/gi,
+        'let $2 = array([$3,$4])');
+    }
+
+    parseAssignment(code) {
+      // := to =
+      return code.replace(/:=/g, '=');
+    }
+  }
+
+  const transpiler = new Algol60Transpiler();
+
+  // Runtime
+  async function runProgram() {
+    const code = editor.getValue();
+    const console = document.getElementById('console');
+    const errors = document.getElementById('errors');
+    const status = document.getElementById('statusText');
+    
+    console.textContent = '';
+    errors.textContent = '';
+    status.textContent = 'COMPILING...';
+    AudioSys.beep(440, 50);
+    
+    await typeOut(errors, 'ALGOL 60 COMPILER REV 1960\n', 10);
+    await sleep(200);
+    
+    const result = transpiler.transpile(code);
+    
+    if (result.errors.length > 0) {
+      AudioSys.compileError();
+      status.textContent = 'COMPILE ERROR';
+      for (const err of result.errors) {
+        await typeOut(errors, err + '\n', 5);
+      }
+      return;
+    }
+    
+    await typeOut(errors, 'COMPILATION SUCCESSFUL\n', 5);
+    await sleep(100);
+    AudioSys.compileSuccess();
+    
+    status.textContent = 'RUNNING...';
+    await typeOut(errors, 'EXECUTING PROGRAM...\n\n', 5);
+    AudioSys.carriageReturn();
+    
+    try {
+      const startTime = performance.now();
+      const output = await eval(result.code);
+      const endTime = performance.now();
+      
+      if (output && output.length > 0) {
+        for (const line of output) {
+          await typeOut(console, line + '\n', 15);
+          AudioSys.beep(1000, 10, 0.03);
+        }
+      } else {
+        await typeOut(console, '(no output)\n', 15);
+      }
+      
+      await typeOut(errors, `\nEXECUTION COMPLETE\nTIME: ${(endTime - startTime).toFixed(2)} MS\n`, 5);
+      status.textContent = 'READY';
+      AudioSys.hum();
+    } catch (e) {
+      AudioSys.compileError();
+      status.textContent = 'RUNTIME ERROR';
+      await typeOut(errors, `\nRUNTIME ERROR: ${e.message}\n`, 5);
+      await typeOut(errors, `STACK TRACE: ${e.stack}\n`, 3);
+    }
+  }
+
+  function typeOut(element, text, delay) {
+    return new Promise(resolve => {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          element.textContent += text[i++];
+          element.scrollTop = element.scrollHeight;
+        } else {
+          clearInterval(interval);
+          resolve();
+        }
+      }, delay);
     });
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Event Listeners
+  document.getElementById('runBtn').addEventListener('click', runProgram);
+  
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const code = editor.getValue();
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'program.alg';
+    a.click();
+    URL.revokeObjectURL(url);
+    AudioSys.beep(660, 80);
   });
 
-  // Auto-show CORE on load
-  setTimeout(() => {
-    windows.c0.el.classList.add('active');
-  }, 400);
+  let themeIdx = 0;
+  const themes = ['amber', 'green', 'paper'];
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    themeIdx = (themeIdx + 1) % themes.length;
+    document.body.setAttribute('data-theme', themes[themeIdx]);
+    AudioSys.click();
+  });
+
+  document.getElementById('audioBtn').addEventListener('click', (e) => {
+    AudioSys.enabled = !AudioSys.enabled;
+    e.target.textContent = `AUDIO: ${AudioSys.enabled ? 'ON' : 'OFF'}`;
+    if (AudioSys.enabled) AudioSys.click();
+  });
+
+  document.getElementById('exampleSelect').addEventListener('change', (e) => {
+    if (e.target.value !== 'custom') {
+      editor.setValue(examples[e.target.value]);
+      AudioSys.beep(880, 50);
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runProgram();
+    }
+  });
+
+  // Initial boot sequence
+  setTimeout(async () => {
+    const errors = document.getElementById('errors');
+    await typeOut(errors, 'ALGOL 60 SYSTEM INITIALIZED\n', 20);
+    await typeOut(errors, 'ICT 1900 EMULATION MODE\n', 20);
+    await typeOut(errors, 'READY FOR INPUT\n\n', 20);
+    AudioSys.hum();
+  }, 500);
+
 })();
 </script>
 </body>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYREAL 5-Window System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap');
+  
+  :root {
+    --bg: #06070d;
+    --glass: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.14);
+    --text: #e8ecf2;
+    --text-dim: #9aa3b2;
+    
+    --c0: #00f5ff;
+    --lu1: #ff006e;
+    --ru1: #a855f7;
+    --ll1: #ff7b00;
+    --rl1: #00ff88;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(0, 245, 255, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 50% 100%, rgba(255, 0, 110, 0.08) 0%, transparent 50%);
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    backdrop-filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .control-bar {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 
+                inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .btn {
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .btn:hover::before {
+    transform: translateX(100%);
+  }
+
+  .btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn-center {
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(168, 85, 247, 0.1));
+    border-color: rgba(0, 245, 255, 0.3);
+  }
+
+  .btn-c0 { border-left: 3px solid var(--c0); }
+  .btn-lu1 { border-left: 3px solid var(--lu1); }
+  .btn-ru1 { border-left: 3px solid var(--ru1); }
+  .btn-ll1 { border-left: 3px solid var(--ll1); }
+  .btn-rl1 { border-left: 3px solid var(--rl1); }
+
+  .window {
+    position: absolute;
+    width: 320px;
+    height: 380px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .window.active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  .window.dragging {
+    transition: none;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  }
+
+  .window-header {
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: move;
+    user-select: none;
+  }
+
+  .window-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .window-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  .window-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: all 0.2s;
+  }
+
+  .window-close:hover {
+    background: rgba(255,0,0,0.2);
+    border-color: rgba(255,0,0,0.4);
+    color: #ff4444;
+  }
+
+  .window-body {
+    padding: 20px;
+    height: calc(100% - 45px);
+    overflow-y: auto;
+  }
+
+  .window-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .window-body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .window-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+  }
+
+  /* Window Specific Styles */
+  #c0 .window-dot { background: var(--c0); box-shadow: 0 0 12px var(--c0); }
+  #lu1 .window-dot { background: var(--lu1); box-shadow: 0 0 12px var(--lu1); }
+  #ru1 .window-dot { background: var(--ru1); box-shadow: 0 0 12px var(--ru1); }
+  #ll1 .window-dot { background: var(--ll1); box-shadow: 0 0 12px var(--ll1); }
+  #rl1 .window-dot { background: var(--rl1); box-shadow: 0 0 12px var(--rl1); }
+
+  /* CORE Window */
+  .core-display {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 24px;
+  }
+
+  .core-equation {
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: var(--c0);
+    text-shadow: 0 0 20px var(--c0);
+  }
+
+  .torus {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    border: 3px solid var(--c0);
+    border-radius: 50%;
+    position: relative;
+    animation: pulse-ring 2.14s ease-in-out infinite;
+  }
+
+  .torus::before {
+    content: '';
+    position: absolute;
+    inset: 15px;
+    border: 2px solid var(--c0);
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: pulse-ring 2.14s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.6; }
+  }
+
+  .temp-reading {
+    font-size: 24px;
+    color: var(--c0);
+    margin: 16px 0;
+    font-weight: 700;
+  }
+
+  .state-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .state-btn {
+    padding: 12px;
+    background: rgba(0, 245, 255, 0.1);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    border-radius: 8px;
+    color: var(--c0);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .state-btn:hover {
+    background: rgba(0, 245, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 245, 255, 0.3);
+  }
+
+  /* SUPERMAN Window */
+  .witness-stream {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--lu1);
+    background: rgba(0,0,0,0.3);
+    padding: 12px;
+    border-radius: 8px;
+    height: 100px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .cube-container {
+    width: 100px;
+    height: 100px;
+    margin: 20px auto;
+    perspective: 600px;
+  }
+
+  .cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotate-cube 8s linear infinite;
+  }
+
+  @keyframes rotate-cube {
+    0% { transform: rotateX(0) rotateY(0); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
+
+  .cube-face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 2px solid var(--lu1);
+    background: rgba(255, 0, 110, 0.1);
+    opacity: 0.8;
+  }
+
+  .metric {
+    margin: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .metric-label {
+    color: var(--text-dim);
+  }
+
+  .metric-value {
+    color: var(--lu1);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  /* ETHOS Window */
+  .virtue-slider {
+    margin: 16px 0;
+  }
+
+  .virtue-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .slider-bar {
+    height: 6px;
+    background: rgba(168, 85, 247, 0.2);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slider-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--ru1), rgba(168, 85, 247, 0.6));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px var(--ru1);
+  }
+
+  .duty-cycle {
+    text-align: center;
+    margin: 24px 0;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--ru1);
+    text-shadow: 0 0 30px var(--ru1);
+    animation: pulse-400 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-400 {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* PATHOS Window */
+  .valence-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .grid-cell {
+    aspect-ratio: 1;
+    background: rgba(255, 123, 0, 0.1);
+    border: 1px solid rgba(255, 123, 0, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .grid-cell:hover {
+    background: rgba(255, 123, 0, 0.2);
+    transform: scale(1.1);
+  }
+
+  .grid-cell.active {
+    background: rgba(255, 123, 0, 0.4);
+    box-shadow: 0 0 20px rgba(255, 123, 0, 0.5);
+  }
+
+  .heart-rate {
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .heart-icon {
+    font-size: 48px;
+    color: var(--ll1);
+    animation: heartbeat 1.2s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+  }
+
+  .bpm {
+    font-size: 24px;
+    color: var(--ll1);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 8px;
+  }
+
+  /* LOGOS Window */
+  .gate-diagram {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+
+  .logic-gate {
+    padding: 12px 20px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 2px solid var(--rl1);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--rl1);
+    animation: gate-flash 3s ease-in-out infinite;
+  }
+
+  @keyframes gate-flash {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; box-shadow: 0 0 20px var(--rl1); }
+  }
+
+  .hash-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    word-break: break-all;
+    background: rgba(0,0,0,0.3);
+    padding: 12px;
+    border-radius: 8px;
+    color: var(--rl1);
+    margin: 16px 0;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+  }
+
+  .counter-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .counter-box {
+    padding: 16px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  .counter-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--rl1);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .counter-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .control-bar {
+      flex-wrap: wrap;
+      width: 90%;
+      justify-content: center;
+    }
+    .window {
+      width: 280px;
+      height: 340px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+
+<div class="control-bar">
+  <button class="btn btn-center" id="centerAll">Center All</button>
+  <button class="btn btn-c0" data-window="c0">Call CORE</button>
+  <button class="btn btn-lu1" data-window="lu1">Call SUPERMAN</button>
+  <button class="btn btn-ru1" data-window="ru1">Call ru.ethos</button>
+  <button class="btn btn-ll1" data-window="ll1">Call ll.pathos</button>
+  <button class="btn btn-rl1" data-window="rl1">Call rl.logos</button>
+</div>
+
+<!-- CORE Window -->
+<div class="window" id="c0">
+  <div class="window-header">
+    <div class="window-title"><span class="window-dot"></span>CORE</div>
+    <div class="window-close">×</div>
+  </div>
+  <div class="window-body">
+    <div class="core-display">
+      <div class="core-equation">0 = 1 = 812Sx = YOU</div>
+      <div class="torus"></div>
+      <div class="temp-reading">2.14°K</div>
+      <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">QUANTUM ENTANGLEMENT ACTIVE</div>
+      <div class="state-buttons">
+        <button class="state-btn" data-state="rest">REST</button>
+        <button class="state-btn" data-state="work">WORK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPERMAN Window -->
+<div class="window" id="lu1">
+  <div class="window-header">
+    <div class="window-title"><span class="window-dot"></span>SUPERMAN / lu.witness</div>
+    <div class="window-close">×</div>
+  </div>
+  <div class="window-body">
+    <div class="witness-stream" id="witnessStream"></div>
+    <div class="cube-container">
+      <div class="cube">
+        <div class="cube-face" style="transform: rotateY(0deg) translateZ(50px);"></div>
+        <div class="cube-face" style="transform: rotateY(90deg) translateZ(50px);"></div>
+        <div class="cube-face" style="transform: rotateY(180deg) translateZ(50px);"></div>
+        <div class="cube-face" style="transform: rotateY(-90deg) translateZ(50px);"></div>
+        <div class="cube-face" style="transform: rotateX(90deg) translateZ(50px);"></div>
+        <div class="cube-face" style="transform: rotateX(-90deg) translateZ(50px);"></div>
+      </div>
+    </div>
+    <div class="metric"><span class="metric-label">ETHOS COHERE</span><span class="metric-value" id="cohere">98.7%</span></div>
+    <div class="metric"><span class="metric-label">VERTEX COUNT</span><span class="metric-value">8</span></div>
+    <div class="metric"><span class="metric-label">WITNESS RATE</span><span class="metric-value" id="witnessRate">2.4k/s</span></div>
+  </div>
+</div>
+
+<!-- ETHOS Window -->
+<div class="window" id="ru1">
+  <div class="window-header">
+    <div class="window-title"><span class="window-dot"></span>ru.ethos</div>
+    <div class="window-close">×</div>
+  </div>
+  <div class="window-body">
+    <div class="duty-cycle">400%</div>
+    <div style="text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 20px;">DUTY CYCLE</div>
+    <div class="virtue-slider">
+      <div class="virtue-label">Courage</div>
+      <div class="slider-bar"><div class="slider-fill" style="width: 92%"></div></div>
+    </div>
+    <div class="virtue-slider">
+      <div class="virtue-label">Justice</div>
+      <div class="slider-bar"><div class="slider-fill" style="width: 88%"></div></div>
+    </div>
+    <div class="virtue-slider">
+      <div class="virtue-label">Temperance</div>
+      <div class="slider-bar"><div class="slider-fill" style="width: 95%"></div></div>
+    </div>
+    <div class="virtue-slider">
+      <div class="virtue-label">Wisdom</div>
+      <div class="slider-bar"><div class="slider-fill" style="width: 90%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PATHOS Window -->
+<div class="window" id="ll1">
+  <div class="window-header">
+    <div class="window-title"><span class="window-dot"></span>ll.pathos</div>
+    <div class="window-close">×</div>
+  </div>
+  <div class="window-body">
+    <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase;">Valence-Arousal Grid</div>
+    <div class="valence-grid">
+      <div class="grid-cell">😌</div>
+      <div class="grid-cell">😊</div>
+      <div class="grid-cell active">🔥</div>
+      <div class="grid-cell">😐</div>
+      <div class="grid-cell">⚡</div>
+      <div class="grid-cell">💫</div>
+      <div class="grid-cell">😔</div>
+      <div class="grid-cell">😢</div>
+      <div class="grid-cell">😡</div>
+    </div>
+    <div class="heart-rate">
+      <div class="heart-icon">❤</div>
+      <div class="bpm"><span id="bpmValue">72</span> BPM</div>
+      <div style="font-size: 10px; color: var(--text-dim); margin-top: 8px;">WARMTH: <span id="warmth">HIGH</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOS Window -->
+<div class="window" id="rl1">
+  <div class="window-header">
+    <div class="window-title"><span class="window-dot"></span>rl.logos</div>
+    <div class="window-close">×</div>
+  </div>
+  <div class="window-body">
+    <div class="gate-diagram">
+      <div class="logic-gate">AND</div>
+      <div class="logic-gate">OR</div>
+      <div class="logic-gate">NOT</div>
+    </div>
+    <div style="font-size: 11px; color: var(--text-dim); margin: 12px 0 8px;">SHA-256 PROOF</div>
+    <div class="hash-display" id="hash">a8f5f167f44f4964e6c998dee827110c809c8b9c3a7b94c9c3c9b9f7e8d2a1b0</div>
+    <div class="counter-display">
+      <div class="counter-box">
+        <div class="counter-value" id="witnessCount">1,847</div>
+        <div class="counter-label">Witness</div>
+      </div>
+      <div class="counter-box">
+        <div class="counter-value" id="togetherCount">3,294</div>
+        <div class="counter-label">Together</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const windows = {
+    c0: { el: document.getElementById('c0'), x: 0, y: 0 },
+    lu1: { el: document.getElementById('lu1'), x: -180, y: -210 },
+    ru1: { el: document.getElementById('ru1'), x: 180, y: -210 },
+    ll1: { el: document.getElementById('ll1'), x: -180, y: 210 },
+    rl1: { el: document.getElementById('rl1'), x: 180, y: 210 }
+  };
+
+  let isDragging = false;
+  let currentWindow = null;
+  let offset = { x: 0, y: 0 };
+
+  // Center formation calculation
+  function centerFormation() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const centerX = vw / 2 - 160; // half window width
+    const centerY = vh / 2 - 190; // half window height
+
+    Object.values(windows).forEach((win, i) => {
+      if (win.el.classList.contains('active')) {
+        const targetX = centerX + win.x;
+        const targetY = centerY + win.y;
+        win.el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        win.el.style.left = targetX + 'px';
+        win.el.style.top = targetY + 'px';
+        setTimeout(() => win.el.style.transition = '', 600);
+      }
+    });
+  }
+
+  // Initialize positions
+  function initPositions() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const centerX = vw / 2 - 160;
+    const centerY = vh / 2 - 190;
+
+    Object.values(windows).forEach(win => {
+      win.el.style.left = (centerX + win.x) + 'px';
+      win.el.style.top = (centerY + win.y) + 'px';
+    });
+  }
+
+  initPositions();
+  window.addEventListener('resize', centerFormation);
+
+  // Window drag functionality
+  document.querySelectorAll('.window-header').forEach(header => {
+    header.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('window-close')) return;
+      isDragging = true;
+      currentWindow = header.parentElement;
+      currentWindow.classList.add('dragging');
+      const rect = currentWindow.getBoundingClientRect();
+      offset.x = e.clientX - rect.left;
+      offset.y = e.clientY - rect.top;
+    });
+
+    header.addEventListener('dblclick', () => {
+      centerFormation();
+    });
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isDragging || !currentWindow) return;
+    currentWindow.style.left = (e.clientX - offset.x) + 'px';
+    currentWindow.style.top = (e.clientY - offset.y) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (currentWindow) currentWindow.classList.remove('dragging');
+    isDragging = false;
+    currentWindow = null;
+  });
+
+  // Call buttons
+  document.querySelectorAll('[data-window]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const winId = btn.getAttribute('data-window');
+      windows[winId].el.classList.add('active');
+      bringToFront(windows[winId].el);
+    });
+  });
+
+  // Close buttons
+  document.querySelectorAll('.window-close').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      btn.closest('.window').classList.remove('active');
+    });
+  });
+
+  // Center all button
+  document.getElementById('centerAll').addEventListener('click', centerFormation);
+
+  function bringToFront(el) {
+    const allWindows = document.querySelectorAll('.window');
+    let maxZ = 100;
+    allWindows.forEach(w => {
+      const z = parseInt(w.style.zIndex || 100);
+      if (z > maxZ) maxZ = z;
+    });
+    el.style.zIndex = maxZ + 1;
+  }
+
+  document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => bringToFront(win));
+  });
+
+  // Dynamic content updates
+  
+  // CORE state buttons
+  document.querySelectorAll('.state-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.state-btn').forEach(b => b.style.background = 'rgba(0, 245, 255, 0.1)');
+      btn.style.background = 'rgba(0, 245, 255, 0.3)';
+    });
+  });
+
+  // Witness stream
+  const witnessData = [
+    '0x8472...9a3f witness.active',
+    'ethos.cohere 98.7% stable',
+    'pathos.warmth rising',
+    'logos.seal verified',
+    'vertex.sync 8/8 online',
+    'quantum.entanglement confirmed'
+  ];
+  let streamIdx = 0;
+  const streamEl = document.getElementById('witnessStream');
+  
+  function updateWitness() {
+    if (streamEl) {
+      streamEl.innerHTML += witnessData[streamIdx % witnessData.length] + '\n';
+      streamEl.scrollTop = streamEl.scrollHeight;
+      streamIdx++;
+      if (streamEl.innerHTML.split('\n').length > 20) {
+        streamEl.innerHTML = streamEl.innerHTML.split('\n').slice(-15).join('\n');
+      }
+    }
+  }
+  setInterval(updateWitness, 1200);
+
+  // Heart rate variation
+  setInterval(() => {
+    const bpm = document.getElementById('bpmValue');
+    if (bpm) bpm.textContent = Math.floor(68 + Math.random() * 12);
+  }, 3000);
+
+  // Counters
+  let witness = 1847, together = 3294;
+  setInterval(() => {
+    witness += Math.floor(Math.random() * 3);
+    together += Math.floor(Math.random() * 5);
+    const w = document.getElementById('witnessCount');
+    const t = document.getElementById('togetherCount');
+    if (w) w.textContent = witness.toLocaleString();
+    if (t) t.textContent = together.toLocaleString();
+  }, 2000);
+
+  // Hash update
+  setInterval(() => {
+    const hash = document.getElementById('hash');
+    if (hash) {
+      const chars = '0123456789abcdef';
+      let newHash = '';
+      for (let i = 0; i < 64; i++) {
+        newHash += chars[Math.floor(Math.random() * 16)];
+      }
+      hash.textContent = newHash;
+    }
+  }, 5000);
+
+  // Pathos grid interaction
+  document.querySelectorAll('.grid-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('active'));
+      cell.classList.add('active');
+    });
+  });
+
+  // Auto-show CORE on load
+  setTimeout(() => {
+    windows.c0.el.classList.add('active');
+  }, 400);
+})();
+</script>
+</body>
+</html>
