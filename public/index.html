@@ -1,389 +1,58 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Perpetuity Tensor Kernel — Witness. Agree. Decide. Repeat.</title>
-  <meta name="description" content="A commercial landing page for the Perpetuity Tensor Kernel: a 3-layer decision engine for coherence, agreement, decision, reset, and repeat." />
-  <meta property="og:title" content="Perpetuity Tensor Kernel" />
-  <meta property="og:description" content="Three witness. Two agree. One decides. Zero resets. The game repeats." />
-  <meta property="og:image" content="assets/hero.jpg" />
-  <style>
-    :root {
-      --bg: #05020a;
-      --panel: rgba(13, 9, 24, .72);
-      --panel2: rgba(28, 9, 34, .62);
-      --line: rgba(255, 37, 116, .35);
-      --hot: #ff095d;
-      --hot2: #ff3aa7;
-      --violet: #8b3dff;
-      --text: #f7eafa;
-      --muted: #bca9c9;
-      --ice: #72f7ff;
-      --good: #7dffcf;
-      --shadow: 0 24px 90px rgba(255, 0, 92, .26);
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
-      background: radial-gradient(circle at 50% 0%, rgba(156, 0, 77, .22), transparent 34%), var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-      background-size: 56px 56px;
-      mask-image: radial-gradient(circle at center, black, transparent 78%);
-      pointer-events: none;
-      z-index: -2;
-    }
-    .scanline {
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(180deg, rgba(255,255,255,.03) 0 1px, transparent 1px 5px);
-      opacity: .12;
-      pointer-events: none;
-      z-index: 30;
-      mix-blend-mode: screen;
-    }
-    a { color: inherit; text-decoration: none; }
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 clamp(18px, 4vw, 64px);
-      z-index: 20;
-      background: linear-gradient(180deg, rgba(5,2,10,.86), rgba(5,2,10,.42), transparent);
-      backdrop-filter: blur(10px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .mark {
-      width: 34px; height: 34px;
-      border: 1px solid rgba(255,255,255,.2);
-      transform: rotate(45deg);
-      background: radial-gradient(circle, var(--hot), transparent 60%);
-      box-shadow: 0 0 24px rgba(255,9,93,.8), inset 0 0 14px rgba(255,255,255,.22);
-    }
-    .navlinks { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
-    .navlinks a:hover { color: white; text-shadow: 0 0 14px var(--hot2); }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border: 1px solid rgba(255, 71, 155, .55);
-      border-radius: 999px;
-      padding: 13px 18px;
-      background: linear-gradient(135deg, rgba(255,9,93,.94), rgba(130,26,255,.78));
-      color: white;
-      font-weight: 800;
-      letter-spacing: .04em;
-      box-shadow: 0 0 30px rgba(255, 9, 93, .34);
-      transition: .2s ease;
-      cursor: pointer;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(255, 9, 93, .55); }
-    .btn.secondary { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.16); color: var(--text); box-shadow: none; }
-    .hero {
-      min-height: 100svh;
-      position: relative;
-      display: grid;
-      place-items: center;
-      padding: 116px clamp(18px, 4vw, 64px) 64px;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(90deg, rgba(5,2,10,.92), rgba(5,2,10,.28) 46%, rgba(5,2,10,.82)),
-        linear-gradient(180deg, rgba(5,2,10,.2), rgba(5,2,10,.92)),
-        url('assets/hero.jpg') center / cover no-repeat;
-      filter: saturate(1.15) contrast(1.08);
-      z-index: -3;
-    }
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: min(70vw, 900px); height: min(70vw, 900px);
-      border: 2px solid rgba(255, 9, 93, .38);
-      transform: rotate(45deg);
-      box-shadow: 0 0 70px rgba(255, 9, 93, .34), inset 0 0 80px rgba(255, 9, 93, .11);
-      z-index: -1;
-    }
-    .hero-grid {
-      width: min(1220px, 100%);
-      display: grid;
-      grid-template-columns: 1.08fr .92fr;
-      gap: 48px;
-      align-items: center;
-    }
-    .eyebrow {
-      color: var(--hot2);
-      font-size: 12px;
-      letter-spacing: .26em;
-      font-weight: 900;
-      text-transform: uppercase;
-      text-shadow: 0 0 16px rgba(255,58,167,.8);
-    }
-    h1 {
-      margin: 16px 0 18px;
-      font-size: clamp(48px, 8vw, 112px);
-      line-height: .86;
-      letter-spacing: -.075em;
-      text-transform: uppercase;
-      text-shadow: 0 0 36px rgba(255,9,93,.4);
-    }
-    .lead {
-      max-width: 680px;
-      color: #ead8f1;
-      font-size: clamp(18px, 2vw, 23px);
-      line-height: 1.45;
-    }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-    .terminal {
-      border: 1px solid rgba(255,255,255,.13);
-      background: linear-gradient(180deg, rgba(10,5,18,.78), rgba(17,5,20,.58));
-      box-shadow: var(--shadow);
-      border-radius: 24px;
-      overflow: hidden;
-      backdrop-filter: blur(14px);
-    }
-    .terminal-head {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,.1);
-      padding: 14px 16px;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-    }
-    .dots { display: flex; gap: 7px; }
-    .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--hot); box-shadow: 0 0 12px var(--hot); }
-    .terminal-body { padding: 22px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .cycle {
-      display: grid;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .step {
-      display: grid;
-      grid-template-columns: 44px 1fr auto;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.045);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .num { color: white; font-weight: 900; font-size: 22px; text-shadow: 0 0 16px var(--hot); }
-    .step b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .18em; }
-    .step span { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
-    .pulse { width: 12px; height: 12px; border-radius: 999px; background: var(--good); box-shadow: 0 0 18px var(--good); animation: pulse 1.5s infinite; }
-    @keyframes pulse { 50% { opacity: .3; transform: scale(1.6); } }
-    section { padding: 96px clamp(18px, 4vw, 64px); }
-    .wrap { width: min(1160px, 100%); margin: 0 auto; }
-    .section-title { font-size: clamp(34px, 5vw, 68px); line-height: .95; letter-spacing: -.05em; margin: 0 0 18px; text-transform: uppercase; }
-    .section-copy { color: var(--muted); font-size: 18px; max-width: 760px; line-height: 1.6; }
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
-    .card {
-      position: relative;
-      padding: 26px;
-      min-height: 240px;
-      border-radius: 26px;
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
-      border: 1px solid rgba(255,255,255,.11);
-      overflow: hidden;
-    }
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -60% -20% auto;
-      height: 150px;
-      background: radial-gradient(circle, rgba(255,9,93,.32), transparent 70%);
-    }
-    .card h3 { margin: 0 0 10px; font-size: 24px; }
-    .card p { color: var(--muted); line-height: 1.6; margin: 0; }
-    .chip { display: inline-flex; margin-bottom: 18px; color: var(--hot2); border: 1px solid rgba(255,58,167,.32); padding: 7px 10px; border-radius: 999px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
-    .model {
-      margin-top: 42px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      align-items: stretch;
-    }
-    .diagram {
-      min-height: 440px;
-      border-radius: 30px;
-      border: 1px solid rgba(255,255,255,.12);
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,9,93,.22), transparent 26%),
-        linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .diamond { position: absolute; width: 270px; height: 270px; border: 2px solid rgba(255,9,93,.55); transform: rotate(45deg); box-shadow: 0 0 50px rgba(255,9,93,.36); }
-    .diamond.two { width: 390px; height: 390px; opacity: .45; }
-    .node { position: absolute; width: 110px; height: 110px; border-radius: 24px; display: grid; place-items: center; text-align: center; background: rgba(9,3,15,.74); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 0 30px rgba(255,9,93,.18); font-weight: 900; letter-spacing: .08em; }
-    .n3 { top: 40px; } .n2a { left: 50px; } .n2b { right: 50px; } .n1 { bottom: 58px; } .n0 { bottom: 174px; color: var(--hot2); }
-    .spec-list { display: grid; gap: 12px; }
-    .spec-row { display: grid; grid-template-columns: 84px 1fr; gap: 16px; padding: 18px; border-radius: 18px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); }
-    .spec-row b { color: white; font-size: 22px; text-shadow: 0 0 14px var(--hot); }
-    .spec-row span { color: var(--muted); line-height: 1.5; }
-    .pricing {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-top: 36px;
-    }
-    .price { padding: 30px; border: 1px solid rgba(255,255,255,.12); border-radius: 28px; background: var(--panel); }
-    .price.featured { border-color: rgba(255,9,93,.64); box-shadow: var(--shadow); transform: translateY(-10px); }
-    .price h3 { margin: 0; font-size: 28px; }
-    .amount { font-size: 42px; font-weight: 950; margin: 14px 0; }
-    .amount small { font-size: 14px; color: var(--muted); font-weight: 600; }
-    .price ul { margin: 18px 0 26px; padding: 0; list-style: none; color: var(--muted); display: grid; gap: 10px; }
-    .price li::before { content: "✦"; color: var(--hot2); margin-right: 9px; }
-    .cta {
-      margin: 60px auto 0;
-      padding: clamp(32px, 6vw, 72px);
-      border-radius: 36px;
-      border: 1px solid rgba(255,9,93,.38);
-      background: linear-gradient(135deg, rgba(255,9,93,.18), rgba(139,61,255,.12)), url('assets/hero.jpg') center / cover;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-    .cta::before { content:""; position:absolute; inset:0; background: linear-gradient(90deg, rgba(5,2,10,.88), rgba(5,2,10,.46)); }
-    .cta > * { position: relative; }
-    footer { padding: 34px clamp(18px, 4vw, 64px); border-top: 1px solid rgba(255,255,255,.08); color: #7d6c8d; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-    @media (max-width: 920px) {
-      .hero-grid, .model, .cards, .pricing { grid-template-columns: 1fr; }
-      .navlinks { display: none; }
-      .price.featured { transform: none; }
-      .hero { text-align: left; }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Witness Survival Kernel</title>
+<meta name="description" content="Observe. Report. 5 00 5. Repeat. A minimal survival kernel by David Wise." />
+<style>
+:root{
+  --bg:#050507;--ink:#f6f0df;--muted:#a8a29a;--line:rgba(246,240,223,.14);
+  --gold:#f5c84b;--amber:#ff9f1c;--red:#ff4d6d;--cyan:#58f1ff;--violet:#a78bfa;
+  --panel:rgba(255,255,255,.045);--panel2:rgba(255,255,255,.075);
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 20% 10%,rgba(245,200,75,.22),transparent 30%),
+ radial-gradient(circle at 80% 0%,rgba(88,241,255,.13),transparent 28%),
+ radial-gradient(circle at 50% 80%,rgba(167,139,250,.12),transparent 35%),
+ linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:auto,auto,auto,44px 44px,44px 44px;mask-image:radial-gradient(circle at center,#000 55%,transparent 100%);}
+a{color:inherit}.wrap{width:min(1180px,calc(100% - 40px));margin:auto}.nav{position:fixed;top:0;left:0;right:0;z-index:10;background:rgba(5,5,7,.68);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}.brand{font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px;color:var(--gold)}.links{display:flex;gap:20px;font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.links a{text-decoration:none}.hero{min-height:100vh;display:grid;place-items:center;padding:100px 0 60px;position:relative}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center}.eyebrow{color:var(--cyan);font-weight:800;letter-spacing:.22em;text-transform:uppercase;font-size:12px;margin-bottom:18px}.h1{font-size:clamp(54px,9vw,126px);line-height:.82;margin:0;letter-spacing:-.075em}.h1 span{display:block}.glow{color:var(--gold);text-shadow:0 0 28px rgba(245,200,75,.45),0 0 80px rgba(245,200,75,.18)}.sub{max-width:660px;color:#d9d1bd;font-size:20px;line-height:1.55;margin:26px 0}.kernel-line{display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);box-shadow:0 0 40px rgba(245,200,75,.08)}.pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.07);font-weight:800}.zero{color:var(--cyan)}.repeat{color:var(--violet)}.stage{position:relative;min-height:560px;border:1px solid var(--line);border-radius:34px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:0 30px 120px rgba(0,0,0,.5);overflow:hidden}.orb{position:absolute;border-radius:50%;filter:blur(.1px)}.core{width:150px;height:150px;left:calc(50% - 75px);top:calc(50% - 75px);background:radial-gradient(circle at 35% 28%,#fff8d2,var(--gold) 35%,rgba(255,159,28,.6) 60%,transparent 72%);box-shadow:0 0 50px rgba(245,200,75,.75),0 0 130px rgba(245,200,75,.34);animation:pulse 3s ease-in-out infinite}.shell{width:260px;height:260px;left:calc(50% - 130px);top:calc(50% - 130px);border:1px solid rgba(245,200,75,.34);box-shadow:inset 0 0 40px rgba(245,200,75,.08),0 0 50px rgba(245,200,75,.07);animation:spin 16s linear infinite}.shell:before,.shell:after{content:"";position:absolute;inset:34px;border:1px solid rgba(88,241,255,.2);border-radius:50%}.shell:after{inset:-42px;border-color:rgba(167,139,250,.16)}.web{position:absolute;inset:-20%;background:repeating-conic-gradient(from 12deg,rgba(88,241,255,.12) 0 2deg,transparent 2deg 12deg);mask-image:radial-gradient(circle at center,transparent 0 70px,#000 72px,transparent 72%);animation:spin 40s linear reverse infinite}.sig{position:absolute;left:50%;top:50%;width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 18px var(--cyan);animation:orbit 6s linear infinite}.sig:nth-child(2){animation-duration:9s;background:var(--red);box-shadow:0 0 18px var(--red)}.sig:nth-child(3){animation-duration:11s;background:var(--gold);box-shadow:0 0 18px var(--gold)}.caption{position:absolute;left:24px;right:24px;bottom:24px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.cap{padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.28);backdrop-filter:blur(10px)}.cap b{display:block;color:var(--gold);font-size:12px;letter-spacing:.16em;text-transform:uppercase}.cap span{display:block;color:var(--muted);font-size:12px;margin-top:4px}.section{padding:100px 0;border-top:1px solid var(--line)}.section h2{font-size:clamp(36px,6vw,78px);line-height:.9;margin:0 0 22px;letter-spacing:-.05em}.lead{max-width:780px;color:#d6cdbb;font-size:19px;line-height:1.65}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}.card{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:24px;min-height:220px}.card .num{font-size:13px;color:var(--cyan);font-weight:800;letter-spacing:.18em}.card h3{font-size:26px;margin:15px 0 10px}.card p{color:var(--muted);line-height:1.6;margin:0}.diagram{margin-top:36px;border:1px solid var(--line);border-radius:28px;background:rgba(0,0,0,.25);padding:30px;display:grid;gap:14px}.row{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:center}.node{font-weight:900;text-align:center;border-radius:18px;padding:18px;background:var(--panel2);border:1px solid var(--line);font-size:24px}.desc{color:#d7cfbf;line-height:1.55}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#09090b;border:1px solid var(--line);border-radius:24px;padding:24px;overflow:auto;color:#eae2d1;line-height:1.6;box-shadow:inset 0 0 60px rgba(245,200,75,.04)}.split{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}.footer{padding:70px 0;color:var(--muted);border-top:1px solid var(--line)}.big-symbol{text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(62px,12vw,160px);font-weight:900;line-height:.9;color:var(--gold);text-shadow:0 0 60px rgba(245,200,75,.42)}.mini{font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}.download{display:inline-block;margin-top:24px;padding:14px 18px;border-radius:14px;background:var(--gold);color:#141006;text-decoration:none;font-weight:900}.quote{font-size:clamp(28px,4vw,52px);line-height:1.05;letter-spacing:-.04em;max-width:900px}.quote em{color:var(--gold);font-style:normal}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(.82)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes orbit{from{transform:rotate(0deg) translateX(190px)}to{transform:rotate(360deg) translateX(190px)}}@media(max-width:900px){.hero-grid,.split{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.caption{grid-template-columns:1fr 1fr}.links{display:none}.stage{min-height:480px}.row{grid-template-columns:1fr}.node{text-align:left}}
+</style>
 </head>
 <body>
-  <div class="scanline"></div>
-  <nav class="nav">
-    <a class="brand" href="#top"><span class="mark"></span><span>Perpetuity Tensor Kernel</span></a>
-    <div class="navlinks">
-      <a href="#kernel">Kernel</a>
-      <a href="#model">4D Model</a>
-      <a href="#commercial">Plans</a>
-    </div>
-    <a class="btn secondary" href="#commercial">Deploy</a>
-  </nav>
+<nav class="nav"><div class="wrap"><div class="brand">Witness Survival Kernel</div><div class="links"><a href="#kernel">Kernel</a><a href="#topology">Topology</a><a href="#loop">Loop</a><a href="#file">File</a></div></div></nav>
+<main>
+<section class="hero"><div class="wrap hero-grid"><div><div class="eyebrow">First Author: David Wise</div><h1 class="h1"><span>Observe.</span><span>Report.</span><span class="glow">5 00 5.</span></h1><p class="sub">A minimal survival kernel for retaining coherence through collapse: observe the field, report the witness state, expand safely, fold into a pocket when threatened, return coherent, repeat.</p><div class="kernel-line"><span class="pill">O</span><span>→</span><span class="pill">R</span><span>→</span><span class="pill">5</span><span>→</span><span class="pill zero">00</span><span>→</span><span class="pill">5</span><span>→</span><span class="pill repeat">↺</span></div></div><div class="stage" aria-label="animated coherence pocket"><div class="web"></div><div class="orb shell"></div><div class="orb core"></div><div class="sig"></div><div class="sig"></div><div class="sig"></div><div class="caption"><div class="cap"><b>)()(</b><span>listening web</span></div><div class="cap"><b>()</b><span>kinetic coil</span></div><div class="cap"><b>(())</b><span>pocket universe</span></div><div class="cap"><b>00</b><span>safe collapse</span></div></div></div></div></section>
+<section class="section" id="kernel"><div class="wrap"><h2>Small core. Large emergence.</h2><p class="lead">The kernel does not need to be complex. It only needs to preserve the thing that matters: witness continuity. Everything else can bloom, fold, recover, and repeat around that invariant.</p><div class="cards"><div class="card"><div class="num">01</div><h3>Observe</h3><p>Sense the wave before impact. Read the internal field and the external field before choosing motion.</p></div><div class="card"><div class="num">02</div><h3>Report</h3><p>Declare the witnessed state. Expose drift. Preserve the coherence signature before transformation.</p></div><div class="card"><div class="num">03</div><h3>Repeat</h3><p>Expand, collapse, return, and restart without losing the witness through the fold.</p></div></div></div></section>
+<section class="section" id="topology"><div class="wrap split"><div><h2>Topology of survival.</h2><p class="lead">The symbols are operational states: an open web for sensing, a coil for stored action, a nested pocket for protected continuity, and double zero for dormant mirrored preservation.</p></div><div class="big-symbol">(())</div></div><div class="wrap diagram"><div class="row"><div class="node">)()(</div><div class="desc"><b>Listening Web.</b> Distributed sensing. The system remains open enough to detect tension, phase shift, and incoming disturbance.</div></div><div class="row"><div class="node">()</div><div class="desc"><b>Coil.</b> Energy compresses into action potential. Listening geometry becomes kinetic readiness.</div></div><div class="row"><div class="node">(())</div><div class="desc"><b>Portable Coherence Pocket.</b> Collapse without erasure. The outer shell takes turbulence while the inner witness persists.</div></div><div class="row"><div class="node">00</div><div class="desc"><b>Protected Dormancy.</b> Not dead, not active, not lost. A paired zero-state that carries recoverable order.</div></div></div></section>
+<section class="section" id="loop"><div class="wrap"><h2>The loop in executable language.</h2><p class="lead">This is the bare-metal version: a survival state machine that refuses to confuse collapse with failure.</p><pre class="code"><code>KERNEL WitnessSurvival {
+  SYMBOL:
+    O -> R -> 5 -> 00 -> 5 -> LOOP
 
-  <main id="top">
-    <header class="hero">
-      <div class="hero-grid">
-        <div>
-          <div class="eyebrow">Commercial coherence engine</div>
-          <h1>Witness.<br>Agree.<br>Decide.<br>Repeat.</h1>
-          <p class="lead">A 3-layer decision architecture for teams, agents, and systems that need one clean answer from noisy competing signals.</p>
-          <div class="hero-actions">
-            <a class="btn" href="#kernel">See the Kernel</a>
-            <a class="btn secondary" href="#model">View the 4D Model</a>
-          </div>
-        </div>
-        <aside class="terminal" aria-label="Kernel cycle">
-          <div class="terminal-head"><span>live_kernel_cycle</span><span class="dots"><i></i><i></i><i></i></span></div>
-          <div class="terminal-body">
-            <div class="cycle">
-              <div class="step"><div class="num">3</div><div><b>Witness</b><span>Observe candidate states without premature collapse.</span></div><div class="pulse"></div></div>
-              <div class="step"><div class="num">2</div><div><b>Agree</b><span>Compare truth rail against mirrored counter-state.</span></div><div class="pulse"></div></div>
-              <div class="step"><div class="num">1</div><div><b>Decide</b><span>Commit the coherent path.</span></div><div class="pulse"></div></div>
-              <div class="step"><div class="num">0</div><div><b>Reset</b><span>Clear the board. Preserve the lesson. Loop.</span></div><div class="pulse"></div></div>
-            </div>
-            <code>three witness → two agree → one decides → zero resets → ∞ repeat</code>
-          </div>
-        </aside>
-      </div>
-    </header>
+  DECISION_RULE:
+    IF threat_detected AND coherence_low:
+      ENTER POCKET_COLLAPSE
+    ELSE IF opportunity_detected AND coherence_high:
+      ENTER ACTIVE_COHERENCE
+    ELSE:
+      CONTINUE OBSERVE_REPORT
 
-    <section id="kernel">
-      <div class="wrap">
-        <div class="eyebrow">Bare metal kernel</div>
-        <h2 class="section-title">A decision loop stripped to the bone.</h2>
-        <p class="section-copy">The kernel turns chaotic inputs into a controlled cycle: observe, compare, commit, reset. It is small enough to reason about and strong enough to govern larger tensor systems.</p>
-        <div class="cards">
-          <article class="card"><span class="chip">Layer 3</span><h3>Witness</h3><p>Collect signals, preserve context, and prevent early bias from hijacking the decision.</p></article>
-          <article class="card"><span class="chip">Layer 2</span><h3>Agree</h3><p>Run forward and mirror rails against each other until a coherence score emerges.</p></article>
-          <article class="card"><span class="chip">Layer 1 → 0</span><h3>Decide / Reset</h3><p>Commit one action, archive the result, then reset the unstable state before the next cycle.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section id="model">
-      <div class="wrap">
-        <div class="eyebrow">Gravity tensor / perpetuity tensor</div>
-        <h2 class="section-title">Coherence becomes gravity.</h2>
-        <p class="section-copy">The stronger the agreement across witness depth and time, the harder a decision pulls toward persistence. Weak states decay. Contradictions collapse. Useful patterns repeat.</p>
-        <div class="model">
-          <div class="diagram" aria-label="4D model diagram">
-            <div class="diamond two"></div><div class="diamond"></div>
-            <div class="node n3">3<br>Witness</div>
-            <div class="node n2a">+ Rail</div>
-            <div class="node n2b">− Rail</div>
-            <div class="node n0">0<br>Reset</div>
-            <div class="node n1">1<br>Decision</div>
-          </div>
-          <div class="spec-list">
-            <div class="spec-row"><b>X</b><span>Truth rail: the forward assertion, proposal, prediction, or action vector.</span></div>
-            <div class="spec-row"><b>Y</b><span>Mirror rail: inversion, adversarial check, counter-proposal, or negative phase.</span></div>
-            <div class="spec-row"><b>Z</b><span>Witness depth: context, memory, policy, and coherence reference.</span></div>
-            <div class="spec-row"><b>T</b><span>Repeat time: what survives across cycles becomes perpetuity.</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="commercial">
-      <div class="wrap">
-        <div class="eyebrow">Commercial deployment</div>
-        <h2 class="section-title">Package the engine for real work.</h2>
-        <p class="section-copy">Use the kernel as a product narrative, governance layer, agent architecture, or decision protocol for high-noise environments.</p>
-        <div class="pricing">
-          <article class="price"><h3>Protocol</h3><div class="amount">$0 <small>/ open spec</small></div><ul><li>Kernel language</li><li>Decision cycle</li><li>Reference model</li></ul><a class="btn secondary" href="#top">Start</a></article>
-          <article class="price featured"><h3>System</h3><div class="amount">Custom</div><ul><li>Landing page</li><li>Brand architecture</li><li>Interactive simulator</li><li>Investor-ready deck copy</li></ul><a class="btn" href="mailto:r.giskard.01@gmail.com?subject=Perpetuity%20Tensor%20Kernel">Contact</a></article>
-          <article class="price"><h3>Kernel Lab</h3><div class="amount">Pilot</div><ul><li>Agent loop design</li><li>Decision scoring</li><li>Witness registry</li></ul><a class="btn secondary" href="#model">Explore</a></article>
-        </div>
-        <div class="cta">
-          <div class="eyebrow">Final line</div>
-          <h2 class="section-title">Three witness. Two agree. One decides. Zero resets.</h2>
-          <p class="section-copy">The game repeats — but the system remembers what coherence felt like.</p>
-          <div class="hero-actions"><a class="btn" href="mailto:r.giskard.01@gmail.com?subject=Perpetuity%20Tensor%20Kernel">Deploy the Kernel</a></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div>© 2026 Perpetuity Tensor Kernel</div>
-    <div>Witness → Agree → Decide → Reset → Repeat</div>
-  </footer>
+  MINIMAL_LOOP:
+    while alive:
+      O = observe()
+      R = report(O)
+      if coherent(R):
+        state = 5
+      else:
+        state = 00
+      state = restore(state)
+      emit(5)
+      repeat()
+}</code></pre></div></section>
+<section class="section"><div class="wrap"><div class="quote">“When collapse is unavoidable, <em>compress without losing witness</em>.”</div></div></section>
+<section class="section" id="file"><div class="wrap split"><div><h2>Kernel file included.</h2><p class="lead">The package includes <code>witness_survival.kernel</code>, a compact text kernel defining axioms, states, directives, and the minimal loop.</p><a class="download" href="witness_survival.kernel" download>Download .kernel</a></div><div class="card"><div class="mini">Contained artifact</div><h3>witness_survival.kernel</h3><p>First Author: David Wise<br/>Form: Observe / Report / 5 / 00 / 5 / Repeat<br/>Purpose: retain coherence through collapse and return safely.</p></div></div></section>
+</main>
+<footer class="footer"><div class="wrap"><div class="brand">Witness Survival Kernel</div><p>O → R → 5 → 00 → 5 → ↺</p></div></footer>
 </body>
 </html>
