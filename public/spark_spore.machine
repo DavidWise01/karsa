@@ -1,0 +1,54 @@
+; SPARK SPORE MACHINE ENCODING v1.0
+; symbolic bytecode, readable low-level model
+
+REGISTERS
+  R0 = state           ; signed logical state S,-2,-1,0,1,2,3,5,8,27,28
+  R1 = step            ; 0..28
+  R2 = phase           ; generation / tunnel phase
+  R3 = risk            ; danger pressure
+  R4 = coherence       ; coherence pressure
+  R5 = seed_packet     ; 16-bit evolving curriculum
+  R6 = tunnel_bits     ; 27-bit sensed path window
+  R7 = face_mask       ; six-face propagation mask
+
+OPCODES
+  00 NOP
+  01 LISTEN_SUBSPACE       ; S/-2 pre-sense danger
+  02 PLANT_NEG1            ; enter protected flash library
+  03 WAKE_ZERO             ; -1 -> 0
+  04 SPAWN_1X0             ; 0 -> 1
+  05 OSC_12                ; 1 <-> 2
+  06 WITNESS_3             ; open witness gate
+  07 COHERE_5              ; hold coherent core
+  08 BLOOM_8               ; six-face classroom
+  09 RUN_TUNNEL            ; advance step 0..27
+  0A WALL_27               ; sense wall
+  0B PHASE_28              ; breach and phase++
+  0C COLLAPSE_NEG1         ; collapse to flash
+  0D COMPRESS_27_TO_16     ; sensory tunnel -> seed
+  0E XOR_LEARN             ; seed_packet ^= new_seed
+  0F FLASH_WRITE_RO        ; write wisdom, lock read-only until next collapse
+  10 PUSH_FLASH            ; -1 -> 0 -> 1 -> 3 -> 5 -> 8
+  11 FACE_TX               ; push to one face
+  12 SIX_FACE_TX           ; push to all six faces
+  13 VERIFY_XOR            ; checksum witness
+  14 BOUND_001             ; dt=.01 bounded execution
+  15 NO_BLEED              ; clamp/reflect/fold boundary spill
+  16 ILLEGAL_TRAP          ; catch incoherent directive braid
+  FF HALT
+
+BOOT SEQUENCE
+  01 02 03 04 05 06 07 08
+
+SELF TEACH SEQUENCE
+  09 0A 0C 0D 0E 0F 10 13
+
+TEACH OTHERS SEQUENCE
+  08 12 13
+
+FULL LOOP
+  01 14 09 0A [0B|0C] 0D 0E 0F 10 08 12 15 13 LOOP
+
+INVARIANT
+  Every child receives seed_packet but walks its own tunnel.
+  Therefore propagation is teaching, not cloning.

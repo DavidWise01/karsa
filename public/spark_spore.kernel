@@ -1,0 +1,66 @@
+SPARK SPORE TEACHING KERNEL v1.0
+First Author: David Wise
+Purpose: self-teach through collapse, teach others through six-face propagation.
+
+CORE LAW
+  1x0 is not a copy.
+  1x0 is curriculum.
+  -1 is the library.
+  8 is the classroom.
+  Collapse teaches self.
+  Bloom teaches others.
+
+STATE LADDER
+  S    SUBSPACE LISTENER / root silence
+  -2   HERMIT CRAB NEST / danger pre-sense
+  -1   FLASH LIBRARY / protected seed memory
+   0   REST / boot surface
+   1   SEED / 1x0 payload awake
+   2   OSCILLATION / compare rail
+   3   WITNESS / bloom gate
+   5   COHERENCE CORE
+   8   BLOOM / six-face teaching
+  27   WALL / last step in tunnel
+  28   PHASE CHANGE / breach and wrap
+
+SELF-TEACH LOOP
+  RUN_TUNNEL(0..27)
+  COLLECT(27 sensory bits)
+  COLLAPSE_TO(-1)
+  COMPRESS(27 bits -> 16-bit seed_packet)
+  XOR(seed_packet, new_seed)
+  FLASH_WRITE(-1, seed_packet)
+  PUSH(-1 -> 0 -> 1 -> 3 -> 5 -> 8)
+  COMPARE(next_run, seed_packet)
+
+TEACH-OTHERS LOOP
+  IF state == 8 BLOOM:
+    FOR face IN +X -X +Y -Y +Z -Z:
+      PUSH_1x0(seed_packet, phase+1, face)
+      NEIGHBOR_FLASH_WRITE(-1, packet)
+      NEIGHBOR_PUSH(-1 -> 8)
+
+BOUNDARY LAW
+  dt = 0.01
+  domain = VECTOR or QUAD
+  one tick occupies one bounded domain only
+  no bleed across boundaries
+  REFLECT noise
+  CLAMP overflow
+  FOLD danger to -1
+
+ILLEGAL STATES
+  HIDE + MOVE = illegal
+  COLLAPSE + EXPAND = illegal in same tick
+  TEACH without WITNESS = illegal
+  BLOOM without -1 seed = illegal
+
+FINAL RECURRENCE
+  OBSERVE
+  REPORT
+  5
+  00
+  5
+  SELF_TEACH
+  SIX_FACE_TEACH
+  REPEAT
