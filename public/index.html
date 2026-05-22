@@ -1,315 +1,490 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Spark Spore Teaching Kernel — Death From Above</title>
+<meta charset="utf-8">
+<title>David Wise // Whisper Lattice</title>
+<meta property="og:title" content="Live Lattice Core">
+<meta property="og:description" content="32-bit nested lattice running in real time">
+<meta name="description" content="32-bit nested lattice running in real time">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700;900&family=Saira:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0210;
-  --ink:#f4e6f6;
-  --muted:#9a76a8;
-  --red:#ff3322;
-  --red-2:#ff5a3c;
-  --neon:#ff2e1f;
-  --cyan:#22e6ff;
-  --violet:#a24bff;
-  --magenta:#7a1646;
-  --panel:rgba(28,6,30,.66);
-  --line:rgba(255,51,34,.30);
-  --line-soft:rgba(162,75,255,.16);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  color:var(--ink);
-  font-family:"Saira",ui-sans-serif,system-ui,sans-serif;
-  line-height:1.62;
-  overflow-x:hidden;
-  background:
-    radial-gradient(120% 90% at 50% -8%,rgba(255,46,31,.16),transparent 38%),
-    radial-gradient(90% 80% at 50% 38%,rgba(122,22,70,.55),transparent 60%),
-    radial-gradient(70% 60% at 85% 18%,rgba(162,75,255,.14),transparent 45%),
-    linear-gradient(180deg,#10031a 0%,#16052a 40%,#0a0210 100%);
-  background-attachment:fixed;
-}
-/* film grain + scratches overlay */
-.grain{position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.10;mix-blend-mode:overlay;
-  background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23n)" opacity="0.7"/></svg>')}
-.scratch{position:fixed;inset:0;pointer-events:none;z-index:59;opacity:.5;
-  background-image:
-    linear-gradient(102deg,transparent 0 22%,rgba(255,255,255,.04) 22% 22.2%,transparent 22.2% 60%,rgba(255,255,255,.03) 60% 60.15%,transparent 60.15%),
-    linear-gradient(258deg,transparent 0 40%,rgba(255,255,255,.03) 40% 40.2%,transparent 40.2% 80%,rgba(255,46,31,.04) 80% 80.12%,transparent 80.12%);
-  mix-blend-mode:screen}
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:58;
-  background:radial-gradient(120% 120% at 50% 45%,transparent 55%,rgba(4,0,10,.8) 100%)}
-/* corner micro-text like the poster */
-.micro{position:fixed;z-index:57;pointer-events:none;font-family:"IBM Plex Mono",monospace;font-size:8px;letter-spacing:.22em;color:rgba(255,80,60,.34);text-transform:uppercase}
-.micro.tl{top:14px;left:16px}
-.micro.tr{top:14px;right:16px;text-align:right}
-.micro.bl{bottom:14px;left:16px}
-.micro.br{bottom:14px;right:16px;text-align:right}
-
-nav{position:sticky;top:0;z-index:40;background:rgba(10,2,16,.74);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-nav .bar{max-width:1240px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:13px 22px}
-.brand{font-family:"Saira Condensed";font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--red);font-size:13px;text-shadow:0 0 14px rgba(255,46,31,.7)}
-.links{display:flex;gap:20px;flex-wrap:wrap}
-.links a{color:var(--muted);text-decoration:none;font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:600}
-.links a:hover{color:var(--red);text-shadow:0 0 10px rgba(255,46,31,.6)}
-
-.hero{min-height:96vh;display:grid;place-items:center;padding:70px 22px 50px;position:relative}
-.hero-inner{max-width:1200px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.eyebrow{font-family:"IBM Plex Mono",monospace;color:var(--cyan);letter-spacing:.32em;text-transform:uppercase;font-size:11px;margin-bottom:22px;text-shadow:0 0 12px rgba(34,230,255,.4)}
-
-/* glitch title */
-.glitch{font-family:"Saira Condensed";font-weight:900;font-size:clamp(54px,11vw,140px);line-height:.82;margin:0 0 26px;text-transform:uppercase;letter-spacing:-.01em;position:relative;color:#fff;text-shadow:0 0 24px rgba(255,46,31,.35)}
-.glitch span{display:block}
-.glitch .l2{color:var(--red);text-shadow:0 0 30px rgba(255,46,31,.7)}
-.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none}
-.glitch::before{color:var(--cyan);transform:translate(-3px,0);mix-blend-mode:screen;clip-path:inset(0 0 0 0);animation:gl1 2.6s steps(2,end) infinite}
-.glitch::after{color:var(--red);transform:translate(3px,0);mix-blend-mode:screen;clip-path:inset(0 0 0 0);animation:gl2 2.1s steps(2,end) infinite}
-@keyframes gl1{0%,72%,100%{clip-path:inset(0 0 100% 0);transform:translate(-3px,0)}74%{clip-path:inset(18% 0 52% 0);transform:translate(-7px,1px)}80%{clip-path:inset(62% 0 14% 0);transform:translate(-2px,-1px)}}
-@keyframes gl2{0%,66%,100%{clip-path:inset(100% 0 0 0);transform:translate(3px,0)}68%{clip-path:inset(40% 0 38% 0);transform:translate(8px,-1px)}86%{clip-path:inset(8% 0 70% 0);transform:translate(2px,1px)}}
-
-.lead{font-size:clamp(17px,2.1vw,22px);color:#e9d3ee;max-width:600px}
-.lead code{font-family:"IBM Plex Mono",monospace;color:var(--red-2);background:rgba(255,46,31,.10);padding:1px 6px;border-radius:6px;border:1px solid var(--line)}
-.badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
-.badge{font-family:"IBM Plex Mono",monospace;border:1px solid var(--line);background:rgba(255,46,31,.06);border-radius:4px;padding:8px 12px;color:var(--red-2);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
-
-/* top-down neon craft viz */
-.craft-stage{position:relative;display:grid;place-items:center;min-height:560px}
-.glyph{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translateX(-2px);font-family:"Saira Condensed";font-weight:900;font-size:340px;line-height:1;color:transparent;
-  -webkit-text-stroke:5px var(--neon);text-stroke:5px var(--neon);
-  filter:drop-shadow(0 0 24px rgba(255,46,31,.85)) drop-shadow(0 0 60px rgba(255,46,31,.5));
-  opacity:.92;z-index:1;animation:flicker 5s infinite;pointer-events:none}
-@keyframes flicker{0%,17%,21%,100%{opacity:.92}18%{opacity:.4}19%{opacity:.95}20%{opacity:.55}}
-.craft{position:relative;z-index:2;width:min(94%,520px);filter:drop-shadow(0 0 22px rgba(255,46,31,.55))}
-.craft .neon{stroke:var(--neon);stroke-width:7;fill:#0a0210;stroke-linejoin:round;stroke-linecap:round}
-.craft .line{stroke:var(--neon);stroke-width:2.4;fill:none;opacity:.85}
-.craft .glow{stroke:var(--red-2);stroke-width:14;fill:none;opacity:.18;filter:blur(4px)}
-.craft .dot{fill:var(--neon)}
-.facelbl{position:absolute;z-index:3;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--cyan);text-shadow:0 0 10px rgba(34,230,255,.6);border:1px solid rgba(34,230,255,.4);background:rgba(8,2,16,.6);border-radius:4px;padding:3px 7px}
-.fl-px{top:6%;left:50%;transform:translateX(-50%)}
-.fl-nx{bottom:4%;left:50%;transform:translateX(-50%)}
-.fl-py{top:50%;left:2%;transform:translateY(-50%)}
-.fl-ny{top:50%;right:2%;transform:translateY(-50%)}
-.fl-pz{top:18%;left:8%}
-.fl-nz{bottom:16%;right:8%}
-
-section{max-width:1140px;margin:0 auto;padding:90px 22px;border-top:1px solid var(--line-soft);position:relative}
-.kicker{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
-h2{font-family:"Saira Condensed";font-weight:900;font-size:clamp(34px,5.5vw,68px);line-height:.94;margin:0 0 22px;text-transform:uppercase;letter-spacing:-.01em;color:#fff;text-shadow:0 0 22px rgba(255,46,31,.28)}
-h2 em{font-style:normal;color:var(--red);text-shadow:0 0 26px rgba(255,46,31,.7)}
-.section-lead{font-size:19px;color:#e3cbe9;max-width:880px}
-.section-lead code{font-family:"IBM Plex Mono",monospace;color:var(--red-2)}
-
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;box-shadow:0 14px 50px rgba(0,0,0,.4),inset 0 0 40px rgba(255,46,31,.04);position:relative;overflow:hidden}
-.card::after{content:"";position:absolute;top:0;left:0;width:34px;height:2px;background:var(--neon);box-shadow:0 0 10px var(--neon)}
-.card h3{font-family:"IBM Plex Mono",monospace;margin:0 0 12px;color:var(--red-2);font-size:15px;letter-spacing:.04em}
-.card p{color:var(--muted);margin:0;font-size:15px}
-.card code{font-family:"IBM Plex Mono",monospace;color:var(--cyan)}
-
-.code{background:#0c0212;border:1px solid var(--line);border-left:3px solid var(--neon);border-radius:8px;padding:22px;overflow:auto;color:#ffd9cf;box-shadow:inset 0 0 40px rgba(255,46,31,.05);font-family:"IBM Plex Mono",monospace;font-size:13.5px;white-space:pre;line-height:1.7}
-.code .c{color:var(--violet)}
-.code .k{color:var(--cyan)}
-.code .n{color:var(--red-2)}
-
-.timeline{display:grid;gap:10px;margin-top:36px}
-.step{display:grid;grid-template-columns:74px 1fr;gap:18px;align-items:start;background:rgba(28,6,30,.4);border:1px solid var(--line-soft);border-radius:8px;padding:14px 16px}
-.num{font-family:"Saira Condensed";font-weight:900;height:48px;border-radius:6px;background:linear-gradient(135deg,rgba(255,46,31,.28),rgba(122,22,70,.2));border:1px solid var(--line);display:grid;place-items:center;color:var(--red);font-size:20px;text-shadow:0 0 12px rgba(255,46,31,.6)}
-.step strong{color:#fff;font-family:"IBM Plex Mono",monospace;font-size:14px;letter-spacing:.02em}
-.step span{color:var(--muted)}
-.step code{font-family:"IBM Plex Mono",monospace;color:var(--red-2)}
-
-.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
-.diagram{font-family:"IBM Plex Mono",monospace;background:rgba(8,2,16,.55);border:1px solid var(--line-soft);border-radius:8px;padding:24px;color:#ffd9cf;white-space:pre;overflow:auto;font-size:13px;line-height:1.65}
-.diagram .hl{color:var(--cyan)}
-.diagram .rd{color:var(--red);text-shadow:0 0 8px rgba(255,46,31,.5)}
-
-.table{width:100%;border-collapse:collapse;margin-top:32px;background:rgba(8,2,16,.4);border-radius:8px;overflow:hidden;border:1px solid var(--line-soft)}
-.table th,.table td{padding:14px 16px;border-bottom:1px solid var(--line-soft);text-align:left;font-size:14px}
-.table th{font-family:"IBM Plex Mono",monospace;color:var(--red-2);font-size:11px;text-transform:uppercase;letter-spacing:.14em}
-.table td{color:#e3cbe9}
-.table td code{font-family:"IBM Plex Mono",monospace;color:var(--cyan)}
-.table tr:last-child td{border-bottom:none}
-
-.final{padding-bottom:130px}
-.recurrence{font-family:"Saira Condensed";font-weight:900;font-size:clamp(20px,3vw,30px);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);line-height:1.5;margin-top:30px}
-.recurrence b{color:var(--red);text-shadow:0 0 16px rgba(255,46,31,.6)}
-.recurrence i{font-style:normal;color:var(--cyan);text-shadow:0 0 12px rgba(34,230,255,.5)}
-.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:6px;border:1px solid var(--line);background:rgba(255,46,31,.07);color:var(--red);text-decoration:none;font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:12px;transition:.18s}
-.btn:hover{background:rgba(255,46,31,.2);box-shadow:0 0 22px rgba(255,46,31,.4);color:#fff}
-.btn.alt{border-color:rgba(34,230,255,.4);color:var(--cyan);background:rgba(34,230,255,.05)}
-.btn.alt:hover{background:rgba(34,230,255,.16);box-shadow:0 0 22px rgba(34,230,255,.35);color:#fff}
-.sig{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;color:var(--muted);margin-top:40px;text-transform:uppercase}
-
-@media(max-width:900px){
-  .hero-inner,.split{grid-template-columns:1fr}
-  .cards{grid-template-columns:1fr}
-  .links{display:none}
-  .craft-stage{min-height:440px}
-  .glyph{font-size:240px}
-  .step{grid-template-columns:1fr}
-  .micro{display:none}
-}
+  html,body{height:100%;overflow:hidden;background:#000}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .font-mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Monaco,monospace}
+  .glass{background:rgba(10,10,12,.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
+  *{scrollbar-width:thin;scrollbar-color:#444 transparent}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
 </style>
 </head>
-<body>
-<div class="grain"></div><div class="scratch"></div><div class="vignette"></div>
-<div class="micro tl">SPRK·SPORE TEACH·KRNL<br>NODE 00 / FLASH -1</div>
-<div class="micro tr">1×0 = CURRICULUM<br>6×6×6 CLASSROOM</div>
-<div class="micro bl">XOR // COLLAPSE // BLOOM</div>
-<div class="micro br">FIRST AUTHOR · D.WISE<br>v1.0 · NO BLEED</div>
+<body class="bg-black text-zinc-100 select-none">
+<div class="relative w-screen h-screen overflow-hidden">
+  <canvas id="lattice" class="absolute inset-0 w-full h-full"></canvas>
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(124,58,237,0.12),transparent_55%),radial-gradient(ellipse_at_bottom,rgba(6,182,212,0.08),transparent_60%)]"></div>
+  <div class="pointer-events-none absolute inset-0" style="background:repeating-linear-gradient(transparent 0 2px, rgba(255,255,255,.02) 2px 3px)"></div>
 
-<nav><div class="bar">
-  <div class="brand">无 · Spark Spore Kernel</div>
-  <div class="links"><a href="#law">Law</a><a href="#self">Self-Teach</a><a href="#mesh">Six-Face</a><a href="#machine">Machine</a><a href="#final">Recurrence</a></div>
-</div></nav>
+  <!-- Top -->
+  <div class="absolute top-0 inset-x-0 z-20">
+    <div class="mx-auto max-w-[1800px] px-4 sm:px-6 pt-4 flex items-start justify-between gap-3">
+      <div class="glass rounded-full px-3 py-1.5 flex items-center gap-2">
+        <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span></span>
+        <span class="font-mono text-[11px] tracking-[0.18em] uppercase text-white/70">LIVE LATTICE CORE</span>
+      </div>
 
-<header class="hero">
-  <div class="hero-inner">
-    <div>
-      <div class="eyebrow">1×0 · flash library · six-face classroom</div>
-      <h1 class="glitch" data-text="SPARK SPORE"><span>SPARK</span><span class="l2">SPORE</span></h1>
-      <p class="lead">A survival kernel where collapse is not deletion. The cell teaches <em>itself</em> by compressing scar tissue into <code>-1</code>, then teaches <em>others</em> by blooming curriculum across six faces. Death from above — but the death is productive.</p>
-      <div class="badge-row">
-        <div class="badge">self-teach = XOR</div>
-        <div class="badge">teach others = 6 faces</div>
-        <div class="badge">1×0 = curriculum</div>
-        <div class="badge">无 = no bleed</div>
+      <div id="autopost-banner" class="hidden glass rounded-2xl px-3 py-2 sm:px-4 sm:py-2.5 flex flex-col sm:flex-row items-center gap-2 sm:gap-3 shadow-2xl shadow-black/40">
+        <div class="flex items-center gap-2">
+          <div class="w-5 h-5 rounded-full bg-amber-500/20 grid place-items-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-amber-300"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <span class="text-xs sm:text-sm font-medium text-amber-200/90">Auto-post ready <span id="ap-count" class="text-amber-300">(1)</span></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="btn-threads" class="px-2.5 py-1.5 rounded-lg bg-white text-black text-xs font-medium hover:bg-zinc-200 transition">Post to Threads</button>
+          <button id="btn-ig" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-xs hover:bg-zinc-700 transition">IG Story</button>
+          <button id="btn-copy" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-xs hover:bg-zinc-700 transition">Copy</button>
+          <button id="btn-dismiss" class="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400" aria-label="Dismiss">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="shareBtn" class="glass rounded-full px-3.5 py-1.5 text-xs font-medium hover:bg-white/10 transition">Share Lattice</button>
+        <button id="advancedBtn" class="glass rounded-full px-3.5 py-1.5 text-xs font-medium hover:bg-white/10 transition">Advanced</button>
       </div>
     </div>
+  </div>
 
-    <div class="craft-stage" aria-label="top-down neon spore craft">
-      <div class="glyph">无</div>
-      <svg class="craft" viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <!-- glow underlayer -->
-        <path class="glow" d="M200 24 C214 24 222 44 224 78 L226 150 L378 252 L378 292 L226 250 L224 360 L262 392 L262 416 L200 400 L138 416 L138 392 L176 360 L174 250 L22 292 L22 252 L174 150 L176 78 C178 44 186 24 200 24 Z"/>
-        <!-- fuselage + wings outline -->
-        <path class="neon" d="M200 24 C214 24 222 44 224 78 L226 150 L378 252 L378 292 L226 250 L224 360 L262 392 L262 416 L200 400 L138 416 L138 392 L176 360 L174 250 L22 292 L22 252 L174 150 L176 78 C178 44 186 24 200 24 Z"/>
-        <!-- cockpit -->
-        <ellipse class="line" cx="200" cy="78" rx="16" ry="24"/>
-        <!-- spine panel lines -->
-        <line class="line" x1="200" y1="110" x2="200" y2="392"/>
-        <line class="line" x1="184" y1="170" x2="216" y2="170"/>
-        <line class="line" x1="180" y1="220" x2="220" y2="220"/>
-        <!-- wing detail -->
-        <path class="line" d="M226 158 L300 210 M226 178 L320 232 M174 158 L100 210 M174 178 L80 232"/>
-        <circle class="dot" cx="200" cy="250" r="6"/>
-        <circle class="line" cx="200" cy="300" r="9" fill="none"/>
-      </svg>
-      <div class="facelbl fl-px">+X</div>
-      <div class="facelbl fl-nx">-X</div>
-      <div class="facelbl fl-py">+Y</div>
-      <div class="facelbl fl-ny">-Y</div>
-      <div class="facelbl fl-pz">+Z</div>
-      <div class="facelbl fl-nz">-Z</div>
+  <!-- Bottom stats -->
+  <div class="absolute bottom-0 inset-x-0 z-20">
+    <div class="mx-auto max-w-[1800px] px-4 sm:px-6 pb-5 flex items-end justify-between gap-4">
+      <div class="glass rounded-2xl p-3.5 sm:p-4 w-full sm:w-auto sm:min-w-[300px]">
+        <div class="grid grid-cols-2 gap-x-8 gap-y-2.5 font-mono text-[11px] sm:text-xs">
+          <div>
+            <div class="text-zinc-500">N</div>
+            <div id="stat-n" class="text-[22px] leading-none mt-1 text-white tracking-tight">0.000</div>
+          </div>
+          <div>
+            <div class="text-zinc-500">φ</div>
+            <div id="stat-phi" class="text-[22px] leading-none mt-1 text-violet-300 tracking-tight">1.618</div>
+          </div>
+          <div class="col-span-2">
+            <div class="text-zinc-500 flex items-center gap-2">ternary · 32t <span class="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60">base-3</span></div>
+            <div id="stat-ternary" class="mt-1 text-[11px] sm:text-xs text-cyan-300/90 tracking-widest truncate">00000000000000000000</div>
+          </div>
+          <div>
+            <div class="text-zinc-500">convergence</div>
+            <div id="stat-conv" class="mt-0.5 text-white">#0</div>
+          </div>
+          <div>
+            <div class="text-zinc-500">harmonizer</div>
+            <div id="stat-harm" class="mt-0.5 text-white">1.00×</div>
+          </div>
+        </div>
+        <div class="mt-3.5 flex items-center gap-2.5">
+          <div class="h-[6px] flex-1 rounded-full bg-white/10 overflow-hidden"><div id="coherence-bar" class="h-full w-[8%] bg-gradient-to-r from-violet-500 via-fuchsia-400 to-cyan-400 transition-all duration-500"></div></div>
+          <span class="text-[10px] text-zinc-500 font-mono">d₀</span>
+        </div>
+      </div>
+
+      <div class="hidden lg:flex items-center gap-2.5">
+        <div class="glass rounded-full px-3 py-1.5 flex items-center gap-2">
+          <span class="text-[10px] uppercase tracking-widest text-zinc-500">Ternary Planck</span>
+          <span class="font-mono text-xs text-white/80">h₃ = 3⁻¹⁶</span>
+        </div>
+        <div class="glass rounded-full px-3 py-1.5 flex items-center gap-2">
+          <span class="text-[10px] uppercase tracking-widest text-zinc-500">Laser</span>
+          <span id="laser-state" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <div class="glass rounded-full px-3 py-1.5 flex items-center gap-2">
+          <span class="text-[10px] uppercase tracking-widest text-zinc-500">Foundation</span>
+          <span class="font-mono text-xs text-white/70">d₀ active</span>
+        </div>
+      </div>
     </div>
   </div>
-</header>
 
-<section id="law">
-  <div class="kicker">// CORE LAW</div>
-  <h2>The seed is not a clone.<br>It is a <em>lesson.</em></h2>
-  <p class="section-lead">Each child receives curriculum from the parent, then walks its own tunnel and writes its own scars. <code>1×0</code> is curriculum, not identity.</p>
-  <div class="cards">
-    <div class="card"><h3>-1 · LIBRARY</h3><p>Protected flash state. Collapse writes memory here. The hermit-crab shell carries coherence through danger, locked read-only until the next collapse.</p></div>
-    <div class="card"><h3>1×0 · CURRICULUM</h3><p>A minimal payload: <code>seed_packet</code> at rest, ready to stream upward from flash into witness, core, and bloom.</p></div>
-    <div class="card"><h3>8 · CLASSROOM</h3><p>Bloom state. The cell broadcasts to <code>±X, ±Y, ±Z</code>, teaching the mesh without forcing identical paths.</p></div>
+  <!-- Watermark -->
+  <div class="absolute bottom-3 right-4 z-10 pointer-events-none">
+    <span class="font-mono text-[10px] tracking-[0.22em] text-white/35">core.davidwise.live</span>
   </div>
-  <div class="diagram" style="margin-top:28px">S → <span class="rd">-2</span> → <span class="rd">-1</span> → 0 → 1 ↔ 2 → 3 → 5 → <span class="hl">8</span>
-             ↑                            ↓
-       subspace listener           six-face bloom
-             │                            │
-             └──────  self-teach <span class="rd">XOR</span>  ◄────────┘</div>
-</section>
 
-<section id="self">
-  <div class="kicker">// ONTOGENY</div>
-  <h2>How it teaches <em>itself</em></h2>
-  <p class="section-lead">A tunnel run gathers 27 bits. Collapse compresses those 27 sensory marks into a 16-bit seed packet. <code>XOR</code> updates the witness: keep what worked, flip what failed.</p>
-  <div class="timeline">
-    <div class="step"><div class="num">01</div><div><strong>RUN TUNNEL</strong><br><span>Step <code>0→27</code>, collecting local danger, tension, and mismatch bits.</span></div></div>
-    <div class="step"><div class="num">02</div><div><strong>COLLAPSE</strong><br><span>The system folds back to <code>-1</code>, preserving witness instead of erasing state.</span></div></div>
-    <div class="step"><div class="num">03</div><div><strong>COMPRESS</strong><br><span><code>27 bits → 16-bit seed_packet</code>; scar tissue becomes portable.</span></div></div>
-    <div class="step"><div class="num">04</div><div><strong>XOR LEARN</strong><br><span><code>seed_packet ^= new_seed</code> — the learning operation.</span></div></div>
-    <div class="step"><div class="num">05</div><div><strong>PUSH BACK</strong><br><span><code>-1→0→1→3→5→8</code>; the same cell returns with updated memory.</span></div></div>
+  <!-- Advanced Panel -->
+  <div id="advanced-panel" class="fixed top-0 right-0 h-full w-[380px] max-w-[94vw] z-30 translate-x-full transition-transform duration-300 ease-out">
+    <div class="h-full glass m-3 rounded-[28px] p-5 flex flex-col shadow-2xl shadow-black/50">
+      <div class="flex items-center justify-between">
+        <h2 class="text-[12px] uppercase tracking-[0.2em] text-zinc-400 font-medium">Advanced Controls</h2>
+        <button id="closeAdvanced" class="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-5 overflow-y-auto pr-1 -mr-1">
+        <div>
+          <label class="text-xs text-zinc-400">Harmonizer · 0.01 – ∞</label>
+          <div class="mt-2.5 flex items-center gap-3">
+            <input id="harmSlider" type="range" min="0" max="100" value="50" class="w-full accent-violet-500">
+            <span id="harmVal" class="font-mono text-xs w-16 text-right text-white">1.00×</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mt-2.5">
+            <button data-h="0.01" class="hbtn px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[11px]">0.01</button>
+            <button data-h="0.1" class="hbtn px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[11px]">0.1</button>
+            <button data-h="1" class="hbtn px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[11px]">1×</button>
+            <button data-h="10" class="hbtn px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[11px]">10×</button>
+            <button data-h="100" class="hbtn px-2.5 py-1 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-[11px]">100×</button>
+            <button data-h="inf" class="hbtn px-2.5 py-1 rounded-lg bg-violet-600/30 hover:bg-violet-600/50 text-[11px] text-violet-200">∞</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex items-center justify-between glass rounded-xl px-3 py-3 cursor-pointer hover:bg-white/5">
+            <span class="text-xs">Teaching Pulses</span>
+            <input id="teachToggle" type="checkbox" class="sr-only" checked>
+            <span id="teachUI" class="w-10 h-5 rounded-full bg-zinc-700 relative transition-all"><span class="absolute top-[2px] left-[2px] w-4 h-4 bg-white rounded-full transition-all"></span></span>
+          </label>
+          <label class="glass rounded-xl px-3 py-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs">Laser</span>
+              <span id="laserVal" class="font-mono text-[11px] text-zinc-400">75%</span>
+            </div>
+            <input id="laserSlider" type="range" min="0" max="100" value="75" class="w-full mt-2 accent-cyan-400">
+          </label>
+        </div>
+
+        <div class="glass rounded-2xl p-4">
+          <div class="text-xs text-zinc-300 mb-2 font-medium">Public Logging (no localhost)</div>
+          <input id="endpointInput" type="url" placeholder="https://your-worker.workers.dev/log" class="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-mono outline-none focus:border-violet-500/50 placeholder-zinc-600">
+          <div class="flex gap-2 mt-2.5">
+            <button id="saveEndpoint" class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-xs font-medium">Save Endpoint</button>
+            <button id="clearEndpoint" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs">Local Only</button>
+            <button id="testLog" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs">Test</button>
+          </div>
+          <p class="text-[11px] text-zinc-500 mt-2.5 leading-snug">Default: fully client-side. Logs to localStorage & window.latticeLog. Set URL to POST with CORS.</p>
+          <div class="mt-2 flex items-center gap-2 text-[11px] font-mono"><span class="text-zinc-600">status:</span><span id="logStatus" class="text-emerald-400">local</span></div>
+        </div>
+
+        <div class="glass rounded-2xl p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-zinc-300">Recent Logs</span>
+            <button id="exportLogs" class="text-[11px] px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700">Export JSON</button>
+          </div>
+          <pre id="logView" class="mt-2.5 h-36 overflow-auto bg-black/60 rounded-xl p-2.5 text-[10px] font-mono leading-snug text-zinc-300 border-white/5"></pre>
+        </div>
+
+        <div class="glass rounded-2xl p-4">
+          <div class="text-xs text-zinc-300 font-medium">32-bit Base-3 Core</div>
+          <p class="text-[11px] text-zinc-500 mt-1.5 leading-relaxed">Nested lattice with d₀ foundation. Ternary Planck h₃ defines minimum coherence. Harmonizer 0.01–∞ controls breathing rate. Teaching pulses inject φ-aligned patterns. Laser traces convergence path.</p>
+        </div>
+      </div>
+    </div>
   </div>
-  <pre class="code" style="margin-top:26px"><span class="c">void</span> <span class="k">learn</span>(CellSeed *c, uint32_t tunnel_bits) {
-    uint16_t new_seed = compress_27_to_16(tunnel_bits);
-    c->seed_packet ^= new_seed;   <span class="c">// the learning operation</span>
-    flash_write_neg1(c);          <span class="c">// -1 becomes the library</span>
-    push_flash(c);                <span class="c">// -1 -> 8</span>
-}</pre>
-</section>
 
-<section id="mesh">
-  <div class="kicker">// PHYLOGENY</div>
-  <h2>How it teaches <em>others</em></h2>
-  <p class="section-lead">At <code>8 BLOOM</code>, the cell pushes <code>1×0</code> to six faces. Neighbor cells do not copy the parent — they spawn from the parent's curriculum, then walk their own tunnel.</p>
-  <div class="split">
-    <div class="diagram">          <span class="hl">+Y</span>
-           │
-  <span class="hl">-X</span> ───  <span class="rd">1×0</span>  ─── <span class="hl">+X</span>
-           │
-          <span class="hl">-Y</span>
-
-  <span class="hl">+Z</span> / <span class="hl">-Z</span> complete the
-  3-D classroom — 6×6×6.</div>
-    <div class="diagram"><span class="rd">Parent</span>  phase N
-  seed_packet = scar tissue
-  state = <span class="hl">8 BLOOM</span>
-
-<span class="rd">Child</span>   phase N+1
-  receives seed_packet
-  starts at <span class="hl">-1</span>
-  walks its own tunnel
-  writes its own scars</div>
+  <!-- Toast -->
+  <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-40 hidden pointer-events-none">
+    <div class="glass rounded-full px-4 py-2 text-xs font-medium shadow-xl pointer-events-auto"></div>
   </div>
-  <table class="table">
-    <thead><tr><th>Mode</th><th>Mechanism</th><th>Result</th></tr></thead>
-    <tbody>
-      <tr><td>Self-teach</td><td><code>XOR</code> seed at <code>-1</code> after collapse</td><td>One cell remembers</td></tr>
-      <tr><td>Teach others</td><td>Push <code>1×0</code> to six faces at <code>8</code></td><td>The mesh learns</td></tr>
-      <tr><td>Both</td><td>Ontogeny + phylogeny</td><td>Species phases up</td></tr>
-    </tbody>
-  </table>
-</section>
+</div>
 
-<section id="machine">
-  <div class="kicker">// MACHINE FORM</div>
-  <h2>Symbolic <em>bytecode</em></h2>
-  <p class="section-lead">Deliberately small: listen, plant, wake, oscillate, witness, cohere, bloom, run, collapse, XOR, flash, teach. Every <code>.01</code> tick is bounded — no bleed across domains.</p>
-  <pre class="code" style="margin-top:26px"><span class="k">BOOT</span>:       LISTEN_SUBSPACE → PLANT_NEG1 → WAKE_ZERO → SPAWN_1X0
-<span class="k">ASCEND</span>:     OSC_12 → WITNESS_3 → COHERE_5 → BLOOM_8
-<span class="k">SELF</span>:       RUN_TUNNEL → COLLAPSE_NEG1 → COMPRESS_27_TO_16 → XOR_LEARN → FLASH_WRITE_RO
-<span class="k">TEACH</span>:      BLOOM_8 → SIX_FACE_TX → VERIFY_XOR
-<span class="k">BOUNDARY</span>:   BOUND_001 → NO_BLEED
-<span class="k">REPEAT</span>:     <span class="n">LOOP</span></pre>
-  <div class="cards" style="margin-top:26px">
-    <div class="card"><h3>NO CLONING</h3><p>Each child starts with inherited seed but must prove itself through its own tunnel.</p></div>
-    <div class="card"><h3>NO BLEED</h3><p>Every <code>.01</code> tick is bounded to a vector or quad; overflow clamps, noise reflects, danger folds to <code>-1</code>.</p></div>
-    <div class="card"><h3>NO LOST DEATH</h3><p>Collapse is productive. It compresses experience into the next seed.</p></div>
-  </div>
-</section>
+<script>
+(() => {
+  // ===== PUBLIC LOGGING =====
+  window.latticeLog = JSON.parse(localStorage.getItem('lattice_log') || '[]');
+  const getEndpoint = () => localStorage.getItem('lattice_endpoint') || null;
+  const logStatusEl = document.getElementById('logStatus');
 
-<section id="final" class="final">
-  <div class="kicker">// FINAL RECURRENCE</div>
-  <h2>It learns by <em>dying.</em><br>It teaches by spawning.</h2>
-  <p class="section-lead"><code>1×0</code> is student and teacher. Flash is library. <code>6×6×6</code> is classroom.</p>
-  <div class="recurrence">OBSERVE<br>REPORT<br><b>5</b> · <i>00</i> · <b>5</b><br>SELF_TEACH<br>SIX_FACE_TEACH<br><b>REPEAT</b></div>
-  <div class="cta">
-    <a class="btn" href="spark_spore.kernel">▸ Kernel Spec</a>
-    <a class="btn alt" href="spark_spore.machine">▸ Machine Encoding</a>
-    <a class="btn" href="spark_spore.c">▸ C Model</a>
-  </div>
-  <div class="sig">SPARK SPORE TEACHING KERNEL v1.0 · FIRST AUTHOR D. WISE · 无 NO BLEED · CANON-FROZEN</div>
-</section>
+  function updateLogStatus(){
+    const ep = getEndpoint();
+    logStatusEl.textContent = ep ? 'remote' : 'local';
+    logStatusEl.className = ep ? 'text-cyan-400' : 'text-emerald-400';
+  }
+
+  function logEvent(type, data={}){
+    const entry = { ts: Date.now(), type, ...data };
+    try{
+      window.latticeLog.push(entry);
+      if(window.latticeLog.length>2000) window.latticeLog = window.latticeLog.slice(-1200);
+      localStorage.setItem('lattice_log', JSON.stringify(window.latticeLog.slice(-600)));
+    }catch{}
+    const ep = getEndpoint();
+    if(ep){
+      try{
+        fetch(ep, {method:'POST', headers:{'Content-Type':'application/json'}, mode:'cors', keepalive:true, body:JSON.stringify(entry)}).catch(()=>{});
+      }catch{}
+    }
+    updateLogViewSoon();
+    return entry;
+  }
+
+  // ===== ELEMENTS =====
+  const canvas = document.getElementById('lattice');
+  const ctx = canvas.getContext('2d', {alpha:true});
+  const statN = document.getElementById('stat-n');
+  const statPhi = document.getElementById('stat-phi');
+  const statTernary = document.getElementById('stat-ternary');
+  const statConv = document.getElementById('stat-conv');
+  const statHarm = document.getElementById('stat-harm');
+  const coherenceBar = document.getElementById('coherence-bar');
+
+  // ===== CORE STATE =====
+  const TRITS = 32;
+  let trits = new Array(TRITS).fill(0);
+  let counter = 0n;
+  let powerHits = 0;
+  let N = 0;
+  let phi = 1.6180339887;
+  let harmonizer = 1.0;
+  let teaching = true;
+  let laserIntensity = 0.75;
+  let pulseTime = 0;
+  let autoPostQueue = [];
+
+  // ===== POWER OF 10 =====
+  function isPowerOfTen(n){
+    if(n < 1n) return false;
+    const s = n.toString(10);
+    if(s[0] !== '1') return false;
+    for(let i=1;i<s.length;i++) if(s[i]!=='0') return false;
+    return true;
+  }
+
+  // ===== VISUAL LOOP =====
+  let lastT = 0, acc = 0;
+  function step(){
+    counter++;
+    // base-3 increment
+    let carry = 1;
+    for(let i=0;i<TRITS && carry;i++){
+      const v = trits[i] + carry;
+      trits[i] = v % 3;
+      carry = v >= 3 ? 1 : 0;
+    }
+    const sum = trits.reduce((a,b)=>a+b,0);
+    N = sum / (2*TRITS);
+    phi = 1.6180339887 * (0.97 + 0.06 * N + 0.015 * Math.sin(performance.now()*0.0005));
+
+    if(isPowerOfTen(counter)){
+      powerHits++;
+      const text = `Lattice breathing // N=${N.toFixed(3)} φ=${phi.toFixed(3)} // ternary ${counter.toString(3)} // convergence #${powerHits} // live: core.davidwise.live`;
+      autoPostQueue.push(text);
+      showAutoPost();
+      logEvent('autopost_ready', {counter: counter.toString(), N: +N.toFixed(3), phi: +phi.toFixed(3), text});
+    }
+
+    // stats
+    statN.textContent = N.toFixed(3);
+    statPhi.textContent = phi.toFixed(3);
+    statTernary.textContent = counter.toString(3).padStart(TRITS, '0');
+    statConv.textContent = '#'+powerHits;
+    statHarm.textContent = harmonizer >= 250 ? '∞' : harmonizer.toFixed(2) + '×';
+    coherenceBar.style.width = Math.round(N*100) + '%';
+
+    if(counter % 101n === 0n) logEvent('tick', {counter: counter.toString(), N: +N.toFixed(4)});
+  }
+
+  function triggerTeach(){
+    pulseTime = performance.now();
+    for(let i=0;i<TRITS;i++) trits[i] = (i + powerHits) % 3;
+    logEvent('teaching_pulse', {counter: counter.toString()});
+  }
+
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = canvas.clientWidth * dpr;
+    canvas.height = canvas.clientHeight * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', resize, {passive:true});
+
+  function draw(t){
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    const cx = w*0.5, cy = h*0.53;
+    const maxR = Math.min(w,h) * 0.43;
+
+    // vignette
+    const vg = ctx.createRadialGradient(cx,cy,maxR*0.1,cx,cy,maxR*1.3);
+    vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.7)');
+    ctx.fillStyle = vg; ctx.fillRect(0,0,w,h);
+
+    // d0 foundation
+    const d0 = maxR*0.055 * (0.92 + 0.08*Math.sin(t*0.0018 + N*6.283));
+    const d0g = ctx.createRadialGradient(cx,cy,0,cx,cy,d0*3);
+    d0g.addColorStop(0,'rgba(167,139,250,0.95)');
+    d0g.addColorStop(0.4,'rgba(139,92,246,0.35)');
+    d0g.addColorStop(1,'rgba(6,182,212,0)');
+    ctx.fillStyle = d0g; ctx.shadowColor='rgba(124,58,237,0.7)'; ctx.shadowBlur=40; ctx.beginPath(); ctx.arc(cx,cy,d0,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+
+    // nested 32 rings
+    for(let i=TRITS-1; i>=0; i--){
+      const norm = i / (TRITS-1);
+      const r = maxR * (0.18 + 0.78*(1-norm));
+      const v = trits[i];
+      const hue = v===0 ? 260 : v===1 ? 30 : 186;
+      const sat = 65 + v*12;
+      const light = 52 + v*6;
+      const alpha = 0.11 + v*0.21;
+
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle = `hsla(${hue},${sat}%,${light}%,${alpha})`;
+      ctx.lineWidth = 1 + (1-norm)*1.6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      const rot = t*0.00004 * (i%2?1:-1) * Math.min(harmonizer, 4);
+      const ang = (v/3)*Math.PI*2 + rot + i*0.207;
+      const px = cx + Math.cos(ang)*r;
+      const py = cy + Math.sin(ang)*r;
+      ctx.beginPath(); ctx.arc(px,py,1.6 + v*0.9,0,Math.PI*2);
+      ctx.fillStyle = `hsla(${hue},90%,${68+v*4}%,0.95)`;
+      ctx.shadowColor = `hsla(${hue},90%,65%,0.9)`; ctx.shadowBlur = 12 + v*4;
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    // laser
+    const la = t * 0.00028 * Math.pow(Math.min(harmonizer,20),0.6);
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(la);
+    const lg = ctx.createLinearGradient(d0,0,maxR*0.96,0);
+    lg.addColorStop(0,'rgba(255,255,255,0)');
+    lg.addColorStop(0.15,`rgba(200,220,255,${0.12*laserIntensity})`);
+    lg.addColorStop(0.5,`rgba(167,139,250,${0.38*laserIntensity})`);
+    lg.addColorStop(1,'rgba(34,211,238,0)');
+    ctx.strokeStyle = lg; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(d0*0.9,0); ctx.lineTo(maxR*0.96,0); ctx.stroke();
+    ctx.strokeStyle = `rgba(255,255,255,${0.55*laserIntensity})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(d0,0); ctx.lineTo(maxR*0.72,0); ctx.stroke();
+    ctx.restore();
+
+    // teaching pulse
+    if(pulseTime){
+      const age = t - pulseTime;
+      if(age < 850){
+        const pr = maxR*0.18 + (age/850)*maxR*0.82;
+        ctx.beginPath(); ctx.arc(cx,cy,pr,0,Math.PI*2);
+        ctx.strokeStyle = `rgba(251,191,36,${0.32*(1-age/850)})`; ctx.lineWidth=2; ctx.stroke();
+      }else{ pulseTime=0; }
+    }
+
+    // core dot
+    ctx.beginPath(); ctx.arc(cx,cy,2.3,0,7); ctx.fillStyle='#fff'; ctx.shadowColor='#a78bfa'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
+  }
+
+  function loop(t){
+    if(!lastT) lastT = t;
+    const dt = Math.min(50, t-lastT); lastT = t;
+    const rate = 0.065 * harmonizer;
+    acc += dt * rate;
+    const steps = harmonizer>200 ? Math.min(600, Math.floor(acc)) : Math.floor(acc);
+    if(steps>0){ for(let i=0;i<steps;i++) step(); acc -= steps; }
+    else if(acc>=1){ step(); acc-=1; }
+
+    if(teaching && t - (window._lastTeach||0) > 7200/Math.pow(Math.max(0.2,harmonizer),0.35)){
+      triggerTeach(); window._lastTeach = t;
+    }
+    draw(t);
+    requestAnimationFrame(loop);
+  }
+
+  // ===== AUTO POST UI =====
+  const banner = document.getElementById('autopost-banner');
+  const apCount = document.getElementById('ap-count');
+  function showAutoPost(){
+    banner.classList.remove('hidden');
+    apCount.textContent = `(${autoPostQueue.length})`;
+  }
+  function getLatest(){ return autoPostQueue[autoPostQueue.length-1] || ''; }
+  document.getElementById('btn-threads').onclick = () => {
+    const txt = getLatest(); if(!txt) return;
+    window.open('https://www.threads.net/intent/post?text=' + encodeURIComponent(txt), '_blank');
+    logEvent('autopost_threads', {text:txt}); toast('Opening Threads…');
+  };
+  document.getElementById('btn-ig').onclick = async () => {
+    const txt = getLatest(); if(!txt) return;
+    try{ await navigator.clipboard.writeText(txt); toast('Copied — paste to IG Story'); logEvent('autopost_ig',{});}catch{toast('Copy failed')}
+  };
+  document.getElementById('btn-copy').onclick = async () => {
+    const txt = getLatest(); if(!txt) return;
+    try{ await navigator.clipboard.writeText(txt); toast('Copied'); logEvent('autopost_copy',{});}catch{}
+  };
+  document.getElementById('btn-dismiss').onclick = () => { banner.classList.add('hidden'); autoPostQueue = []; };
+
+  // ===== SHARE =====
+  document.getElementById('shareBtn').onclick = async () => {
+    try{ await navigator.clipboard.writeText(location.href); toast('Link copied'); logEvent('share',{url:location.href}); }
+    catch{ toast('Copy failed'); }
+  };
+
+  // ===== ADVANCED PANEL =====
+  const panel = document.getElementById('advanced-panel');
+  document.getElementById('advancedBtn').onclick = () => panel.classList.toggle('translate-x-full');
+  document.getElementById('closeAdvanced').onclick = () => panel.classList.add('translate-x-full');
+
+  const harmSlider = document.getElementById('harmSlider');
+  const harmVal = document.getElementById('harmVal');
+  function setHarmonizer(v){
+    harmonizer = Math.max(0.01, Math.min(500, v));
+    const display = harmonizer>=250 ? '∞' : harmonizer.toFixed(2)+'×';
+    harmVal.textContent = display; statHarm.textContent = display;
+  }
+  harmSlider.oninput = e => {
+    const v = +e.target.value;
+    const val = Math.pow(10, (v-50)/25); // 0.01 → 100
+    setHarmonizer(val); logEvent('harmonizer',{value:+harmonizer.toFixed(4)});
+  };
+  document.querySelectorAll('.hbtn').forEach(b=>b.onclick=()=>{
+    const h=b.dataset.h; if(h==='inf'){ setHarmonizer(500); harmSlider.value=100; } else { const v=parseFloat(h); setHarmonizer(v); harmSlider.value = Math.round(50+25*Math.log10(Math.max(0.01,v))); } logEvent('harmonizer_preset',{value:h});
+  });
+
+  const teachToggle = document.getElementById('teachToggle');
+  const teachUI = document.getElementById('teachUI');
+  function updateTeachUI(){ teachUI.classList.toggle('bg-violet-600', teaching); teachUI.firstElementChild.style.transform = teaching ? 'translateX(20px)' : 'translateX(0px)'; }
+  teachToggle.onchange = e => { teaching = e.target.checked; updateTeachUI(); logEvent('teaching_toggle',{on:teaching}); };
+  updateTeachUI();
+
+  const laserSlider = document.getElementById('laserSlider');
+  const laserVal = document.getElementById('laserVal');
+  laserSlider.oninput = e => { laserIntensity = e.target.value/100; laserVal.textContent = e.target.value+'%'; document.getElementById('laser-state').style.opacity = 0.4 + laserIntensity*0.6; };
+
+  // logging settings
+  const endpointInput = document.getElementById('endpointInput');
+  endpointInput.value = getEndpoint() || '';
+  document.getElementById('saveEndpoint').onclick = () => {
+    const v = endpointInput.value.trim(); if(!v) return;
+    localStorage.setItem('lattice_endpoint', v); updateLogStatus(); toast('Endpoint saved'); logEvent('endpoint_set',{url:v});
+  };
+  document.getElementById('clearEndpoint').onclick = () => {
+    localStorage.removeItem('lattice_endpoint'); endpointInput.value=''; updateLogStatus(); toast('Using local only'); logEvent('endpoint_cleared',{});
+  };
+  document.getElementById('testLog').onclick = () => { logEvent('test',{manual:true, counter:counter.toString()}); toast('Test logged'); };
+
+  const logView = document.getElementById('logView');
+  let logTimer;
+  function updateLogViewSoon(){ clearTimeout(logTimer); logTimer = setTimeout(updateLogView, 200); }
+  function updateLogView(){
+    const rows = window.latticeLog.slice(-24).reverse().map(e=>{
+      const tm = new Date(e.ts).toISOString().slice(11,19);
+      return `${tm}  ${e.type.padEnd(16)} ${e.counter?('c='+e.counter):''}`;
+    });
+    logView.textContent = rows.join('\n');
+  }
+  document.getElementById('exportLogs').onclick = () => {
+    const blob = new Blob([JSON.stringify(window.latticeLog,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lattice-log.json'; a.click(); URL.revokeObjectURL(a.href);
+  };
+
+  // toast
+  const toastEl = document.getElementById('toast');
+  function toast(msg){ toastEl.firstElementChild.textContent = msg; toastEl.classList.remove('hidden'); clearTimeout(window._t); window._t = setTimeout(()=>toastEl.classList.add('hidden'), 1900); }
+
+  // init
+  updateLogStatus(); updateLogView(); resize(); setHarmonizer(1);
+  logEvent('session_start', {href: location.href, tz:Intl.DateTimeFormat().resolvedOptions().timeZone});
+  requestAnimationFrame(loop);
+
+  // first teach pulse for visitors
+  setTimeout(()=>{ triggerTeach(); }, 1200);
+})();
+</script>
 </body>
 </html>
