@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>!))!((! — REACTIVE ARMOR</title>
+<style>
+:root{
+  --bg:#06040a;--ink:#ffe9d6;--dim:#7a5a48;--dimmer:#3a261b;
+  --witness:#34e0ff;--armed:#ffae3b;--armed-d:#b8690f;--deton:#fff3d0;--spent:#7a1422;--threat:#ff8a2e;--breach:#ff2e4d;
+  --line:rgba(255,174,59,.16);--panel:rgba(20,8,5,.78);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:
+   radial-gradient(120% 70% at 50% -8%,rgba(255,174,59,.08),transparent 48%),
+   radial-gradient(50% 45% at 50% 46%,rgba(52,224,255,.04),transparent 55%),
+   linear-gradient(180deg,#0a0604,#160a06 58%,#06040a);}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.26;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px);mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:89;background:radial-gradient(130% 120% at 50% 44%,transparent 50%,rgba(3,1,1,.88) 100%)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.045;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(6,4,10,.95),rgba(6,4,10,.72));backdrop-filter:blur(10px)}
+.hbar{max-width:1480px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px}
+.logo{display:flex;align-items:center;gap:12px}
+.glyph{font-size:22px;font-weight:700;color:var(--armed);text-shadow:0 0 16px rgba(255,174,59,.7),0 0 40px rgba(255,174,59,.3);letter-spacing:.04em}
+.title-l{letter-spacing:.3em;font-size:11px;text-transform:uppercase}
+.title-s{letter-spacing:.2em;font-size:9px;text-transform:uppercase;color:var(--dim)}
+.hstat{display:flex;gap:16px;flex-wrap:wrap;font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.hstat b{color:var(--armed);font-weight:600}
+.seal{border:1px solid var(--witness);color:var(--witness);border-radius:3px;padding:3px 8px;font-size:9px;letter-spacing:.18em;background:rgba(52,224,255,.06)}
+
+.deck{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:18px;align-items:start}
+.stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(70% 70% at 50% 48%,rgba(30,14,8,.5),rgba(4,2,1,.97));box-shadow:inset 0 0 110px rgba(0,0,0,.72);min-height:600px;cursor:crosshair}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .lab{position:absolute;top:12px;left:14px;font-size:9px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;pointer-events:none}
+.bigb{position:absolute;top:10px;right:16px;font-size:18px;letter-spacing:.12em;color:var(--armed);text-shadow:0 0 14px rgba(255,174,59,.7);pointer-events:none}
+.legend{position:absolute;bottom:12px;left:14px;display:flex;gap:12px;flex-wrap:wrap;font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;pointer-events:none;max-width:88%}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-shadow:0 0 8px currentColor}
+.hint{position:absolute;bottom:12px;right:14px;font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase;pointer-events:none}
+
+aside{display:grid;gap:13px}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:14px 15px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;width:32px;height:2px;background:var(--armed);box-shadow:0 0 8px var(--armed)}
+.card h3{margin:0 0 11px;font-size:9px;letter-spacing:.24em;color:var(--dim);text-transform:uppercase;font-weight:600}
+.lyt{width:100%;border-collapse:collapse;font-size:11px}
+.lyt th{text-align:left;color:var(--dim);font-size:8px;letter-spacing:.14em;text-transform:uppercase;padding:0 0 6px;font-weight:600}
+.lyt td{padding:4px 0;border-top:1px dashed rgba(255,174,59,.08)}
+.lyt .sym{font-size:14px;width:34px}
+.lyt .sym.w{color:var(--witness)}.lyt .sym.c{color:var(--armed)}
+.lyt .fn{color:var(--ink)}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed rgba(255,174,59,.08)}
+.kv:last-child{border-bottom:none}.kv span{color:var(--dim)}.kv b{font-weight:600}
+.kv b.a{color:var(--armed)}.kv b.w{color:var(--witness)}.kv b.x{color:var(--breach)}.kv b.t{color:var(--threat)}
+
+/* tile bank readout */
+.bank{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:8px}
+.bank.lab{font-size:8px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:6px;display:block}
+.tcell{aspect-ratio:1;border-radius:2px;border:1px solid rgba(255,174,59,.2);transition:.1s}
+.tcell.armed{background:var(--armed);box-shadow:0 0 6px var(--armed)}
+.tcell.reload{background:var(--armed-d);opacity:.5}
+.tcell.spent{background:var(--spent)}
+
+.log{height:108px;overflow:auto;font-size:11px;line-height:1.55;padding-right:4px}
+.log::-webkit-scrollbar{width:6px}.log::-webkit-scrollbar-thumb{background:var(--dimmer);border-radius:3px}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .w{color:var(--witness)}.log .a{color:var(--armed)}.log .x{color:var(--breach)}.log .t{color:var(--threat)}.log .d{color:var(--dim)}
+
+.controls{max-width:1480px;margin:0 auto;padding:0 18px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--armed);background:rgba(255,174,59,.06);border:1px solid var(--armed);border-radius:5px;padding:9px 15px;cursor:pointer;transition:.15s}
+button:hover{background:rgba(255,174,59,.16);box-shadow:0 0 16px rgba(255,174,59,.3);color:#fff3e0}
+button.threat{color:var(--threat);border-color:var(--threat);background:rgba(255,138,46,.06)}
+button.threat:hover{background:rgba(255,138,46,.16);box-shadow:0 0 16px rgba(255,138,46,.3)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.ctl input{width:96px;accent-color:var(--armed)}
+
+main{max-width:1100px;margin:0 auto;padding:26px 18px 110px}
+section{padding:50px 0;border-top:1px solid rgba(255,174,59,.08)}
+.kick{font-size:10px;letter-spacing:.34em;color:var(--witness);text-transform:uppercase;margin-bottom:13px}
+h2{font-size:clamp(26px,4.4vw,46px);line-height:.98;margin:0 0 16px;letter-spacing:-.01em;font-weight:700;text-shadow:0 0 24px rgba(255,174,59,.18)}
+h2 em{font-style:normal;color:var(--armed)}
+.lead{font-size:16px;color:#d6a888;max-width:780px;line-height:1.7}.lead code{color:var(--witness)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:26px}
+.tile{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:18px}
+.tile h4{margin:0 0 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.tile.w h4{color:var(--witness)}.tile.c h4{color:var(--armed)}.tile.x h4{color:var(--breach)}
+.tile p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}.tile code{color:var(--witness)}
+pre{background:#080402;border:1px solid var(--line);border-left:3px solid var(--armed);border-radius:7px;padding:18px;overflow:auto;font-size:12.5px;line-height:1.7;color:#f1d6b8;margin-top:22px}
+pre .c{color:var(--dim)}pre .w{color:var(--witness)}pre .a{color:var(--armed)}pre .k{color:var(--threat)}
+.recur{font-size:clamp(17px,2.5vw,24px);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);line-height:1.7;margin-top:22px}
+.recur b{color:var(--witness)}.recur i{font-style:normal;color:var(--armed)}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px}
+.cta a{text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--armed);border:1px solid var(--armed);background:rgba(255,174,59,.06);border-radius:5px;padding:11px 17px;transition:.15s}
+.cta a:hover{background:rgba(255,174,59,.16);box-shadow:0 0 16px rgba(255,174,59,.3);color:#fff3e0}
+.sig{font-size:10px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase;margin-top:40px}
+@media(max-width:980px){.deck{grid-template-columns:1fr}aside{order:2}.stage{min-height:460px}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="vig"></div><div class="grain"></div>
+
+<header><div class="hbar">
+  <div class="logo"><div class="glyph">!))!((!</div><div>
+    <div class="title-l">Reactive Armor</div>
+    <div class="title-s">witness · charge · witness · charge · witness — detect then detonate</div>
+  </div></div>
+  <div class="hstat">
+    <div>Detonations <b id="hs-det">0</b></div>
+    <div>Armed <b id="hs-armed">32</b></div>
+    <div>Spent <b id="hs-spent">0</b></div>
+    <div>Breaches <b id="hs-br">0</b></div>
+    <div class="seal" id="seal">CORE · −1 HOLDS</div>
+  </div>
+</div></header>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="lab">// click to fire · armed tiles detonate outward · spent tiles recharge</div>
+    <div class="bigb" id="bigb">! )) ! (( !</div>
+    <canvas id="cv"></canvas>
+    <div class="legend">
+      <span><i style="color:var(--witness)"></i>witness sensor</span>
+      <span><i style="color:var(--armed)"></i>armed charge</span>
+      <span><i style="color:var(--spent)"></i>spent / reload</span>
+      <span><i style="color:var(--deton)"></i>detonation</span>
+      <span><i style="color:var(--threat)"></i>threat</span>
+    </div>
+    <div class="hint" id="hint">core integrity 100%</div>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h3>Layer order · outside → in</h3>
+      <table class="lyt"><thead><tr><th>L</th><th>sym</th><th>tensor</th><th>fn</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td class="sym w">!</td><td>G3·WAIT</td><td class="fn">outer witness · detect</td></tr>
+        <tr><td>1</td><td class="sym c">))</td><td>G2·MOVE</td><td class="fn">charge · detonate out</td></tr>
+        <tr><td>2</td><td class="sym w">!</td><td>G3·WAIT</td><td class="fn">mid witness · confirm</td></tr>
+        <tr><td>3</td><td class="sym c">((</td><td>G2·MOVE</td><td class="fn">charge · detonate out</td></tr>
+        <tr><td>4</td><td class="sym w">!</td><td>G3·WAIT</td><td class="fn">core witness · −1 flash</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="card">
+      <h3>Charge banks · 16 sectors ×2</h3>
+      <span class="bank lab">)) outer bank</span>
+      <div class="bank" id="bank-outer"></div>
+      <span class="bank lab" style="margin-top:9px">(( inner bank</span>
+      <div class="bank" id="bank-inner"></div>
+    </div>
+
+    <div class="card">
+      <h3>Telemetry</h3>
+      <div class="kv"><span>core integrity</span><b class="w" id="t-core">100%</b></div>
+      <div class="kv"><span>incoming</span><b class="t" id="t-in">0</b></div>
+      <div class="kv"><span>armed / 32</span><b class="a" id="t-armed">32</b></div>
+      <div class="kv"><span>last sector</span><b class="a" id="t-sec">—</b></div>
+      <div class="kv"><span>kill layer</span><b class="w" id="t-layer">—</b></div>
+    </div>
+
+    <div class="card">
+      <h3>Event stream</h3>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="controls">
+  <button class="threat" id="b-bomb">▸ bombard ∞</button>
+  <button class="threat" id="b-focus">⤇ focus-fire 1 sector</button>
+  <button class="threat" id="b-666">⤇ launch 6×6×6</button>
+  <button id="b-reset">↺ rearm all</button>
+  <div class="ctl">recharge <input type="range" id="reload" min="0" max="100" value="55"></div>
+  <div class="ctl">sim&nbsp;<b id="ss" style="color:var(--armed)">1.0×</b><input type="range" id="speed" min="40" max="180" value="100"></div>
+</div>
+
+<main>
+  <section style="border-top:none">
+    <div class="kick">// the inversion</div>
+    <h2>The sensors come <em>out.</em><br>The charges sit between.</h2>
+    <p class="lead">Where the passive shield buried its witness in the core, reactive armor puts witnesses on the outside: <code>!</code> <code>))</code> <code>!</code> <code>((</code> <code>!</code>. The outer <code>!</code> detects an incoming vector and predicts its sector. The <code>))</code> charge in that sector detonates <em>outward</em> to meet it before contact. A mid <code>!</code> confirms survivors for the inner <code>((</code> bank. The core <code>!</code> is the last line — and it can't be flipped.</p>
+    <div class="row">
+      <div class="tile w"><h4>! detect</h4><p>G3 WAIT. Three witness layers, redundant. The outer ring fingerprints the threat and arms the matching sector before impact.</p></div>
+      <div class="tile c"><h4>)) (( detonate</h4><p>G2 latent → MOVE. On trigger the tile fires a counter-pulse <code>attack ^ charge</code> outward. Consumed in one shot, then it recharges.</p></div>
+      <div class="tile x"><h4>deplete</h4><p>Each tile fires once. Concentrate fire on one sector and it goes spent — a window opens until the recharge completes. Spread the defense, or fall.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick">// mechanics</div>
+    <h2>Detect. Predict. <em>Detonate.</em></h2>
+    <p class="lead">Try <strong>focus-fire</strong>: hammer one sector and watch its outer then inner tile go spent, then a breach slips through to the core before recharge. Then raise <strong>recharge</strong> and the same assault is shrugged off. Set recharge to <code>0</code> for true one-shot armor — finite tiles, no second chance.</p>
+    <pre><span class="c">// on threat crossing the outer witness</span>
+sector = bearing_to_sector(threat);     <span class="w">// ! detect + predict</span>
+arm(outer[sector]);
+
+<span class="c">// on threat reaching the )) charge radius</span>
+<span class="k">if</span> (outer[sector].armed){
+    counter = threat ^ outer[sector].charge;  <span class="a">// detonate OUTWARD</span>
+    kill(threat);
+    outer[sector] = SPENT;                <span class="a">// one shot, then recharge</span>
+} <span class="k">else if</span> (inner[sector].armed){      <span class="w">// mid ! confirms</span>
+    kill(threat); inner[sector]=SPENT;
+} <span class="k">else</span> breach(core);               <span class="k">// both banks down in this sector</span></pre>
+  </section>
+
+  <section>
+    <div class="kick">// the family</div>
+    <h2>Four answers to one <em>impact.</em></h2>
+    <p class="lead">Aegis reflects and folds. The witness shield absorbs and remembers. The pulsar sweeps life·death·spark. Reactive armor pre-empts: it spends itself to throw the hit back before it lands — fast, finite, and brutal on a focused assault.</p>
+    <div class="recur"><b>!</b> detect<br><i>))</i> detonate out<br><b>!</b> confirm<br><i>((</i> detonate out<br><b>! NOTHING REACHES THE CORE</b></div>
+    <div class="cta">
+      <a href="trinity.html">▸ trinity shell</a>
+      <a href="pulsar_shield.html">▸ pulsar v2.1</a>
+      <a href="aegis_0.html">▸ aegis-0</a>
+    </div>
+    <div class="sig">!))!((! reactive armor · detect → detonate → recharge · 无 nothing reaches the core · canon-frozen</div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ===== !))!((! REACTIVE ARMOR — sector tiles, detect-then-detonate ===== */
+const VW=900, VH=620, CX=VW/2, CY=VH/2, TAU=Math.PI*2, N=16;
+const R_CORE=28, R_INNER=95, R_MID=122, R_OUTER=156, R_WITNESS=205, R_SPAWN=400;
+const SECT=TAU/N;
+
+let seed=0x0000, detons=0, breaches=0, core=100;
+let outer=[], inner=[];
+let attacks=[], blasts=[], rings=[], sprays=[], frost=[];
+let bombard=false, bombTimer=0, simScale=1, reloadBase=55, focusSector=-1;
+let lastSector=-1, lastLayer="—", shake=0, coreFlash=0;
+let campaign=0x6363;
+
+function initBanks(){
+  outer=[];inner=[];
+  for(let i=0;i<N;i++){
+    outer.push({state:"armed",reload:0,charge:0x5555,flash:0});
+    inner.push({state:"armed",reload:0,charge:0xAAAA,flash:0});
+  }
+}
+const hx=v=>(v&0xFFFF).toString(16).padStart(4,"0");
+const pc16=v=>{let c=0;for(let i=0;i<16;i++)c+=(v>>>i)&1;return c;};
+function sectorOf(ang){return ((Math.floor(((ang%TAU)+TAU)%TAU/SECT))%N+N)%N;}
+
+function spawnAttack(val,ang){
+  if(ang===undefined)ang=Math.random()*TAU;
+  if(val===undefined)val=(Math.random()*0x10000)|0;
+  const x=CX+Math.cos(ang)*R_SPAWN,y=CY+Math.sin(ang)*R_SPAWN;
+  const sp=2.0+Math.random()*1.1;
+  attacks.push({x,y,vx:-Math.cos(ang)*sp,vy:-Math.sin(ang)*sp,val:val&0xFFFF,
+    r:R_SPAWN,sector:sectorOf(ang),dead:false,detected:false,passedOuter:false,passedInner:false});
+}
+function detonate(tile,sector,a,radius,layerName){
+  const counter=(a.val ^ tile.charge)&0xFFFF;
+  seed=(seed ^ (a.val>>8))&0xFFFF;            // core witness still learns
+  tile.state="spent"; tile.reload= reloadBase>0 ? (260 - reloadBase*1.8) : Infinity;
+  tile.flash=1;
+  detons++; lastSector=sector; lastLayer=layerName;
+  a.dead=true; coreFlash=Math.max(coreFlash,0.4); shake=Math.min(7,shake+2.5);
+  const cx=CX+Math.cos((sector+0.5)*SECT)*radius, cy=CY+Math.sin((sector+0.5)*SECT)*radius;
+  rings.push({x:cx,y:cy,r:6,max:46,a:1,col:"rgba(255,243,208,"});
+  const bearing=(sector+0.5)*SECT;
+  for(let i=0;i<16;i++){const sa=bearing+(Math.random()-.5)*1.0,ss=4+Math.random()*5;
+    blasts.push({x:cx,y:cy,vx:Math.cos(sa)*ss,vy:Math.sin(sa)*ss,life:1,col:"#fff3d0"});}
+  log("DETONATE","a",layerName+" S"+sector+" · counter 0x"+hx(counter)+" · OUTWARD");
+}
+function breach(a){
+  a.dead=true; breaches++; core=Math.max(0,core-9); shake=8; coreFlash=1;
+  for(let i=0;i<18;i++){const sa=Math.random()*TAU,ss=2+Math.random()*4;
+    blasts.push({x:CX,y:CY,vx:Math.cos(sa)*ss,vy:Math.sin(sa)*ss,life:1,col:"#ff2e4d"});}
+  log("BREACH","x","sector "+a.sector+" both banks down · core "+core+"%");
+}
+
+function step(){
+  // recharge
+  for(const t of [...outer,...inner]){
+    if(t.state==="spent"){ if(t.reload!==Infinity){ t.reload-=simScale;
+      if(t.reload<=0){t.state="armed";} else if(t.reload< (260-reloadBase*1.8)*0.6) t.state="reload"; } }
+    else if(t.state==="reload"){ t.reload-=simScale; if(t.reload<=0)t.state="armed"; }
+    if(t.flash>0)t.flash-=0.06*simScale;
+  }
+  if(bombard){bombTimer-=16*simScale;
+    if(bombTimer<=0){
+      if(focusSector>=0) spawnAttack(campaign, focusSector*SECT+SECT/2+(Math.random()-.5)*SECT*0.6);
+      else spawnAttack();
+      bombTimer=130+Math.random()*150;}}
+  for(const a of attacks){
+    if(a.dead)continue;
+    a.x+=a.vx*simScale;a.y+=a.vy*simScale;a.r=Math.hypot(a.x-CX,a.y-CY);
+    a.sector=sectorOf(Math.atan2(a.y-CY,a.x-CX));
+    if(!a.detected && a.r<=R_WITNESS){a.detected=true;
+      log("DETECT","w","vector 0x"+hx(a.val)+" · bearing S"+a.sector); }
+    if(!a.passedOuter && a.r<=R_OUTER){a.passedOuter=true;
+      const t=outer[a.sector];
+      if(t.state==="armed"){ detonate(t,a.sector,a,R_OUTER,"))"); continue; }
+    }
+    if(a.dead)continue;
+    if(!a.passedInner && a.r<=R_INNER){a.passedInner=true;
+      const t=inner[a.sector];
+      if(t.state==="armed"){ detonate(t,a.sector,a,R_INNER,"(("); continue; }
+    }
+    if(a.dead)continue;
+    if(a.r<=R_CORE){ breach(a); }
+  }
+  attacks=attacks.filter(a=>!a.dead && a.r<R_SPAWN+60);
+  blasts.forEach(p=>{p.x+=p.vx*simScale;p.y+=p.vy*simScale;p.vx*=0.94;p.vy*=0.94;p.life-=0.03*simScale;});
+  blasts=blasts.filter(p=>p.life>0);
+  rings.forEach(r=>{r.r+=(r.max-r.r)*0.14*simScale;r.a-=0.05*simScale;});rings=rings.filter(r=>r.a>0);
+  if(Math.random()<0.4){const fa=Math.random()*TAU,fr=R_CORE+Math.random()*18;
+    frost.push({x:CX+Math.cos(fa)*fr,y:CY+Math.sin(fa)*fr,vy:-0.2-Math.random()*0.25,life:1});}
+  frost.forEach(f=>{f.y+=f.vy;f.life-=0.014;});frost=frost.filter(f=>f.life>0);
+  coreFlash*=0.9; if(shake>0)shake*=0.84;
+}
+
+/* ===== render ===== */
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+let DPR=Math.min(window.devicePixelRatio||1,2),W=0,H=0,sc=1,ox=0,oy=0;
+function layout(){const r=cv.parentElement.getBoundingClientRect();W=r.width;H=r.height;
+  cv.width=W*DPR;cv.height=H*DPR;sc=Math.min(W/VW,H/VH);ox=(W-VW*sc)/2;oy=(H-VH*sc)/2;
+  ctx.setTransform(DPR*sc,0,0,DPR*sc,ox*DPR,oy*DPR);draw();}
+function tileColor(t){
+  if(t.state==="armed")return["rgba(255,174,59,","#ffae3b"];
+  if(t.state==="reload")return["rgba(184,105,15,","#b8690f"];
+  return["rgba(122,20,34,","#7a1422"];
+}
+function drawBank(bank,rIn,rOut){
+  for(let i=0;i<N;i++){const t=bank[i];const a0=i*SECT+0.04,a1=(i+1)*SECT-0.04;
+    const [rgba,solid]=tileColor(t);
+    ctx.beginPath();ctx.arc(CX,CY,rOut,a0,a1);ctx.arc(CX,CY,rIn,a1,a0,true);ctx.closePath();
+    const baseA=t.state==="armed"?0.5:t.state==="reload"?0.3:0.4;
+    ctx.fillStyle=rgba+(baseA+t.flash*0.5)+")";ctx.fill();
+    ctx.strokeStyle=rgba+(0.7+t.flash*0.3)+")";ctx.lineWidth=1.2;
+    if(t.flash>0){ctx.shadowColor="#fff3d0";ctx.shadowBlur=18*t.flash;}
+    ctx.stroke();ctx.shadowBlur=0;
+  }
+}
+function witnessRing(r,sweep){
+  ctx.beginPath();ctx.arc(CX,CY,r,0,TAU);
+  ctx.setLineDash([3,6]);ctx.strokeStyle="rgba(52,224,255,0.28)";ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);
+  // sweep blip
+  ctx.fillStyle="rgba(52,224,255,0.5)";
+  ctx.beginPath();ctx.arc(CX+Math.cos(sweep)*r,CY+Math.sin(sweep)*r,2.5,0,TAU);ctx.fill();
+}
+function draw(){
+  const sx=shake>0.3?(Math.random()-.5)*shake:0,sy=shake>0.3?(Math.random()-.5)*shake:0;
+  ctx.save();ctx.translate(sx,sy);
+  ctx.clearRect(-ox/sc-60,-oy/sc-60,VW+240,VH+240);
+  const sweep=(performance.now()*0.0014)%TAU, sweep2=(-performance.now()*0.001)%TAU;
+  witnessRing(R_WITNESS,sweep);       // outer !
+  // outer charge bank ))
+  drawBank(outer,R_OUTER-20,R_OUTER);
+  witnessRing(R_MID,sweep2);          // mid !
+  // inner charge bank ((
+  drawBank(inner,R_INNER-20,R_INNER);
+  // focus marker
+  if(focusSector>=0){const a=(focusSector+0.5)*SECT;
+    ctx.strokeStyle="rgba(255,46,77,0.5)";ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+Math.cos(a)*R_WITNESS,CY+Math.sin(a)*R_WITNESS);ctx.stroke();ctx.setLineDash([]);}
+  // core witness !
+  const pulse=0.5+0.5*Math.sin(performance.now()*0.004);
+  const fg=ctx.createRadialGradient(CX,CY,R_CORE*0.4,CX,CY,R_CORE*2.4);
+  const breached=core<40;
+  fg.addColorStop(0,(breached?"rgba(255,46,77,":"rgba(52,224,255,")+(0.5+coreFlash*0.4)+")");
+  fg.addColorStop(0.5,(breached?"rgba(255,46,77,":"rgba(52,224,255,")+"0.14)");
+  fg.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=fg;ctx.beginPath();ctx.arc(CX,CY,R_CORE*2.4,0,TAU);ctx.fill();
+  ctx.save();ctx.translate(CX,CY);ctx.rotate(performance.now()*0.0003);
+  const rr=R_CORE*(0.82+pulse*0.1+coreFlash*0.14);
+  ctx.beginPath();for(let i=0;i<6;i++){const an=i/6*TAU,px=Math.cos(an)*rr,py=Math.sin(an)*rr;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();
+  const cg=ctx.createRadialGradient(-rr*.3,-rr*.3,1,0,0,rr);
+  cg.addColorStop(0,"#fff");cg.addColorStop(.45,breached?"#ff6b85":"#9fe9ff");cg.addColorStop(1,breached?"#5a0a16":"#0a3a4a");
+  ctx.fillStyle=cg;ctx.shadowColor=breached?"#ff2e4d":"#34e0ff";ctx.shadowBlur=20+coreFlash*20;ctx.fill();ctx.shadowBlur=0;
+  ctx.restore();
+  ctx.fillStyle=breached?"#ff2e4d":"#02141c";ctx.font="700 16px monospace";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("!",CX,CY+1);
+  // frost
+  frost.forEach(f=>{ctx.globalAlpha=f.life*0.6;ctx.fillStyle="#cdfaff";
+    ctx.beginPath();ctx.arc(f.x,f.y,1.2,0,TAU);ctx.fill();});ctx.globalAlpha=1;
+  // attacks
+  for(const a of attacks){if(a.dead)continue;const sp=Math.hypot(a.vx,a.vy)||1;
+    ctx.strokeStyle=a.detected?"rgba(255,138,46,0.7)":"rgba(255,138,46,0.4)";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x-a.vx/sp*15,a.y-a.vy/sp*15);ctx.stroke();
+    ctx.fillStyle="#ff8a2e";ctx.shadowColor="#ff8a2e";ctx.shadowBlur=8;
+    ctx.beginPath();ctx.arc(a.x,a.y,4.5,0,TAU);ctx.fill();ctx.shadowBlur=0;}
+  // blasts + rings
+  blasts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;
+    ctx.shadowColor=p.col;ctx.shadowBlur=6;ctx.beginPath();ctx.arc(p.x,p.y,2.4,0,TAU);ctx.fill();});
+  ctx.shadowBlur=0;ctx.globalAlpha=1;
+  rings.forEach(r=>{ctx.strokeStyle=r.col+r.a+")";ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,TAU);ctx.stroke();});
+  ctx.restore();
+}
+
+/* ===== panels ===== */
+const $=id=>document.getElementById(id);
+const boEl=$("bank-outer"),biEl=$("bank-inner"),boC=[],biC=[];
+for(let i=0;i<N;i++){const a=document.createElement("div");a.className="tcell armed";boEl.appendChild(a);boC.push(a);
+  const b=document.createElement("div");b.className="tcell armed";biEl.appendChild(b);biC.push(b);}
+function sync(){
+  let armed=0;for(const t of [...outer,...inner])if(t.state==="armed")armed++;
+  $("hs-det").textContent=detons;$("hs-armed").textContent=armed;
+  $("hs-spent").textContent=32-armed;$("hs-br").textContent=breaches;
+  $("t-core").textContent=Math.round(core)+"%";$("t-core").style.color=core<40?"var(--breach)":"var(--witness)";
+  $("t-in").textContent=attacks.filter(a=>!a.dead).length;
+  $("t-armed").textContent=armed;
+  $("t-sec").textContent=lastSector<0?"—":"S"+lastSector;
+  $("t-layer").textContent=lastLayer;
+  $("hint").textContent="core integrity "+Math.round(core)+"%";
+  for(let i=0;i<N;i++){boC[i].className="tcell "+outer[i].state;biC[i].className="tcell "+inner[i].state;}
+  const seal=$("seal");
+  if(core<=0){seal.textContent="CORE · DOWN";seal.style.color="var(--breach)";seal.style.borderColor="var(--breach)";}
+  else if(core<40){seal.textContent="CORE · STRESSED";seal.style.color="var(--threat)";seal.style.borderColor="var(--threat)";}
+  else{seal.textContent="CORE · −1 HOLDS";seal.style.color="var(--witness)";seal.style.borderColor="var(--witness)";}
+}
+const logEl=$("log");let logN=0;
+function log(tag,cls,msg){const d=document.createElement("div");
+  d.innerHTML=`<span class="d">${String(logN++).padStart(3,"0")}</span> <span class="${cls}">${tag}</span> <span class="d">${msg}</span>`;
+  logEl.prepend(d);while(logEl.childNodes.length>50)logEl.removeChild(logEl.lastChild);}
+
+/* ===== controls ===== */
+$("b-bomb").onclick=e=>{bombard=!bombard;e.target.textContent=bombard?"▮ cease fire":"▸ bombard ∞";
+  log("BOMBARD",bombard?"t":"d",bombard?"infinite incoming":"halted");};
+$("b-focus").onclick=()=>{focusSector=focusSector>=0?-1:Math.floor(Math.random()*N);
+  if(focusSector>=0){bombard=true;$("b-bomb").textContent="▮ cease fire";
+    log("FOCUS","t","concentrating fire on S"+focusSector+" — watch it deplete");}
+  else log("FOCUS","d","focus released");};
+$("b-666").onclick=()=>{const base=Math.random()*TAU;
+  for(let i=0;i<6;i++)setTimeout(()=>spawnAttack(0x6363^(i*0x0249),base+i*0.28),i*70);
+  log("6×6×6","t","6-round salvo inbound");};
+$("b-reset").onclick=()=>{initBanks();core=100;detons=breaches=0;attacks=[];blasts=[];rings=[];
+  focusSector=-1;bombard=false;$("b-bomb").textContent="▸ bombard ∞";log("REARM","a","all 32 tiles armed · core restored");};
+$("reload").oninput=e=>{reloadBase=+e.target.value;};
+$("speed").oninput=e=>{simScale=+e.target.value/100;$("ss").textContent=simScale.toFixed(1)+"×";};
+$("stage").addEventListener("click",e=>{const r=cv.getBoundingClientRect();
+  const mx=(e.clientX-r.left-ox)/sc,my=(e.clientY-r.top-oy)/sc;
+  const ang=Math.atan2(my-CY,mx-CX);spawnAttack((Math.random()*0x10000)|0,ang);
+  log("FIRE","t","vector inbound · S"+sectorOf(ang));});
+window.addEventListener("resize",layout);
+
+/* ===== loop ===== */
+let lastT=performance.now(),acc=0;
+function frame(now){const dt=Math.min(now-lastT,50);lastT=now;acc+=dt;
+  while(acc>=16){step();acc-=16;}sync();draw();requestAnimationFrame(frame);}
+initBanks();log("ARM","a","reactive armor online · 32 tiles · 3 witness layers");
+layout();requestAnimationFrame(frame);
+</script>
+</body>
+</html>

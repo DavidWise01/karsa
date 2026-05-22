@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPARK SPORE // LIVE KERNEL INSTRUMENT</title>
+<style>
+:root{
+  --bg:#03060a;
+  --bg2:#06101a;
+  --ink:#cdf3ff;
+  --dim:#3d6a7a;
+  --dimmer:#1e3a45;
+  --teal:#19f0d8;       /* coherence / known */
+  --teal-d:#0a8f86;
+  --amber:#ffae3b;      /* scar / danger */
+  --amber-d:#b86a10;
+  --rose:#ff5b78;       /* collapse / phase break */
+  --violet:#9b7bff;     /* high-generation */
+  --line:rgba(25,240,216,.16);
+  --panel:rgba(6,16,24,.72);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.5;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(25,240,216,.07),transparent 45%),
+    radial-gradient(80% 70% at 90% 20%,rgba(155,123,255,.06),transparent 50%),
+    linear-gradient(180deg,#02050a,#04111c 55%,#02060b);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* CRT atmospherics */
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.35;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.0) 0 2px,rgba(0,0,0,.18) 2px 3px);mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:89;
+  background:radial-gradient(130% 120% at 50% 42%,transparent 52%,rgba(1,3,6,.85) 100%)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.05;mix-blend-mode:screen;
+  background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+/* ---- top bar ---- */
+header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(3,8,14,.92),rgba(3,8,14,.7));backdrop-filter:blur(10px)}
+.hbar{max-width:1480px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px}
+.logo{display:flex;align-items:center;gap:12px}
+.glyph{font-size:24px;font-weight:700;color:var(--teal);text-shadow:0 0 16px rgba(25,240,216,.6),0 0 40px rgba(25,240,216,.25);letter-spacing:0}
+.title-l{letter-spacing:.34em;font-size:11px;color:var(--ink);text-transform:uppercase}
+.title-s{letter-spacing:.28em;font-size:9px;color:var(--dim);text-transform:uppercase}
+.hstat{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.hstat b{color:var(--teal);font-weight:600}
+.seal{border:1px solid var(--teal-d);color:var(--teal);border-radius:3px;padding:3px 8px;font-size:9px;letter-spacing:.2em;background:rgba(25,240,216,.05)}
+
+/* ---- main instrument grid ---- */
+.deck{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:radial-gradient(110% 90% at 50% 40%,rgba(8,24,34,.6),rgba(2,6,11,.9));
+  box-shadow:inset 0 0 80px rgba(0,0,0,.6),0 0 40px rgba(0,0,0,.4);min-height:560px}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .label{position:absolute;top:12px;left:14px;font-size:9px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase}
+.legend{position:absolute;bottom:12px;left:14px;display:flex;gap:14px;font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;flex-wrap:wrap;max-width:80%}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;box-shadow:0 0 8px currentColor}
+.hint{position:absolute;bottom:12px;right:14px;font-size:9px;letter-spacing:.16em;color:var(--dimmer);text-transform:uppercase}
+
+aside{display:grid;gap:14px}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:14px 15px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;width:32px;height:2px;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.card h3{margin:0 0 11px;font-size:9px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase;font-weight:600}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;font-size:12px;border-bottom:1px dashed rgba(25,240,216,.08)}
+.kv:last-child{border-bottom:none}
+.kv span{color:var(--dim)}
+.kv b{color:var(--ink);font-weight:600}
+.kv b.t{color:var(--teal)} .kv b.a{color:var(--amber)} .kv b.r{color:var(--rose)} .kv b.v{color:var(--violet)}
+
+/* state ladder */
+.ladder{display:flex;flex-wrap:wrap;gap:5px}
+.rung{flex:1 1 auto;min-width:42px;text-align:center;border:1px solid var(--dimmer);border-radius:4px;padding:6px 2px;font-size:11px;color:var(--dim);background:rgba(8,20,28,.5);transition:.18s}
+.rung.on{color:#02060b;font-weight:700}
+.rung small{display:block;font-size:7px;letter-spacing:.08em;opacity:.8;margin-top:2px}
+
+/* bit grids */
+.bits{display:grid;gap:3px}
+.bits.b16{grid-template-columns:repeat(16,1fr)}
+.bits.b27{grid-template-columns:repeat(14,1fr)}
+.bit{aspect-ratio:1;border-radius:2px;border:1px solid rgba(25,240,216,.14);background:rgba(8,20,28,.6);position:relative}
+.bit.on{background:var(--teal);box-shadow:0 0 7px var(--teal);border-color:var(--teal)}
+.bit.dz{background:var(--amber);box-shadow:0 0 7px var(--amber);border-color:var(--amber)}
+.bit.flip{outline:1px solid var(--rose);outline-offset:-1px}
+.bitcap{display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:7px}
+.bitcap em{font-style:normal;color:var(--teal)}
+
+/* phase histogram */
+.histo{display:flex;align-items:flex-end;gap:3px;height:54px}
+.hcol{flex:1;background:linear-gradient(180deg,var(--teal),var(--teal-d));border-radius:2px 2px 0 0;min-height:2px;box-shadow:0 0 6px rgba(25,240,216,.4);transition:height .2s}
+.histax{display:flex;justify-content:space-between;font-size:8px;color:var(--dimmer);margin-top:4px;letter-spacing:.1em}
+
+/* log */
+.log{height:138px;overflow:auto;font-size:11px;line-height:1.55;padding-right:4px}
+.log::-webkit-scrollbar{width:6px}.log::-webkit-scrollbar-thumb{background:var(--dimmer);border-radius:3px}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .t{color:var(--teal)} .log .a{color:var(--amber)} .log .r{color:var(--rose)} .log .v{color:var(--violet)} .log .d{color:var(--dim)}
+
+/* controls */
+.controls{max-width:1480px;margin:0 auto;padding:0 18px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);
+  background:rgba(25,240,216,.06);border:1px solid var(--teal-d);border-radius:5px;padding:9px 15px;cursor:pointer;transition:.15s}
+button:hover{background:rgba(25,240,216,.16);box-shadow:0 0 16px rgba(25,240,216,.3);color:#dffcff}
+button.alt{color:var(--amber);border-color:var(--amber-d);background:rgba(255,174,59,.06)}
+button.alt:hover{background:rgba(255,174,59,.16);box-shadow:0 0 16px rgba(255,174,59,.3)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+input[type=range]{accent-color:var(--teal);width:120px}
+
+/* doctrine sections */
+main{max-width:1100px;margin:0 auto;padding:30px 18px 110px}
+section{padding:54px 0;border-top:1px solid rgba(25,240,216,.08)}
+.kick{font-size:10px;letter-spacing:.34em;color:var(--amber);text-transform:uppercase;margin-bottom:14px}
+h2{font-size:clamp(26px,4.4vw,46px);line-height:.98;margin:0 0 18px;letter-spacing:-.01em;font-weight:700;color:var(--ink);text-shadow:0 0 26px rgba(25,240,216,.18)}
+h2 em{font-style:normal;color:var(--teal)}
+.lead{font-size:16px;color:#8fc7d6;max-width:780px;line-height:1.7}
+.lead code{color:var(--amber)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:30px}
+.tile{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:18px}
+.tile h4{margin:0 0 8px;font-size:11px;letter-spacing:.18em;color:var(--teal);text-transform:uppercase}
+.tile p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}
+.tile code{color:var(--amber)}
+pre{background:#020609;border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:7px;padding:18px;overflow:auto;
+  font-size:12.5px;line-height:1.7;color:#bfe9f2;margin-top:26px}
+pre .c{color:var(--dim)} pre .k{color:var(--amber)} pre .r{color:var(--rose)}
+.illegal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.ill{border:1px solid rgba(255,91,120,.25);border-radius:7px;padding:12px 14px;background:rgba(255,91,120,.04);color:#ffb9c5;font-size:12px}
+.ill b{color:var(--rose)}
+.recur{font-size:clamp(18px,2.6vw,26px);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);line-height:1.7;margin-top:24px}
+.recur b{color:var(--teal)} .recur i{font-style:normal;color:var(--amber)}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:30px}
+.cta a{text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);
+  border:1px solid var(--teal-d);background:rgba(25,240,216,.06);border-radius:5px;padding:11px 17px;transition:.15s}
+.cta a:hover{background:rgba(25,240,216,.16);box-shadow:0 0 16px rgba(25,240,216,.3);color:#dffcff}
+.sig{font-size:10px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase;margin-top:46px}
+
+@media(max-width:980px){
+  .deck{grid-template-columns:1fr}
+  aside{order:2}
+  .stage{min-height:440px}
+  .row,.illegal{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="vig"></div><div class="grain"></div>
+
+<header>
+  <div class="hbar">
+    <div class="logo">
+      <div class="glyph">无</div>
+      <div>
+        <div class="title-l">Spark Spore — Live Kernel</div>
+        <div class="title-s">six-face hex mesh · self-teach XOR · v1.0</div>
+      </div>
+    </div>
+    <div class="hstat">
+      <div>Cells <b id="hs-cells">1</b></div>
+      <div>Max&nbsp;phase <b id="hs-phase">0</b></div>
+      <div>Danger <b id="hs-danger">—</b></div>
+      <div>Merkle <b id="hs-merkle">0x00</b></div>
+      <div class="seal">GUARD · SEALED</div>
+    </div>
+  </div>
+</header>
+
+<div class="deck">
+  <div class="stage">
+    <div class="label">// 6×6×6 classroom — hex projection — click a cell to inspect</div>
+    <canvas id="mesh"></canvas>
+    <div class="legend">
+      <span><i style="color:var(--teal)"></i>coherent</span>
+      <span><i style="color:var(--amber)"></i>scar / tunnel</span>
+      <span><i style="color:var(--rose)"></i>collapse −1</span>
+      <span><i style="color:var(--violet)"></i>high gen</span>
+    </div>
+    <div class="hint" id="hint">selected · ORIGIN 0,0</div>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h3>State ladder · selected cell</h3>
+      <div class="ladder" id="ladder"></div>
+    </div>
+
+    <div class="card">
+      <h3>Cell registers</h3>
+      <div class="kv"><span>state</span><b class="t" id="r-state">−1 FLASH</b></div>
+      <div class="kv"><span>seed_packet</span><b class="t" id="r-seed">0x0000</b></div>
+      <div class="kv"><span>tunnel_bits</span><b class="a" id="r-tunnel">0x0000000</b></div>
+      <div class="kv"><span>phase / scars</span><b id="r-phase">0 / 0</b></div>
+      <div class="kv"><span>step</span><b id="r-step">0</b></div>
+      <div class="kv"><span>checksum</span><b class="v" id="r-ck">0x00</b></div>
+    </div>
+
+    <div class="card">
+      <div class="bitcap"><span>seed_packet · 16-bit curriculum</span><em id="seed-hi">scar&nbsp;hi</em></div>
+      <div class="bits b16" id="seedbits"></div>
+      <div class="bitcap" style="margin-top:13px"><span>tunnel_bits · 27 sensed steps</span><em>danger=amber</em></div>
+      <div class="bits b27" id="tunbits"></div>
+    </div>
+
+    <div class="card">
+      <h3>Phase population</h3>
+      <div class="histo" id="histo"></div>
+      <div class="histax"><span>gen 0</span><span>gen 11+</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Event stream</h3>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="controls">
+  <button id="btn-play">▮▮ pause</button>
+  <button id="btn-step">▸ step</button>
+  <button class="alt" id="btn-hazard">+ inject hazard</button>
+  <button class="alt" id="btn-reset">↺ reset mesh</button>
+  <div class="ctl">speed <input type="range" id="speed" min="60" max="900" value="420" step="20"></div>
+  <div class="ctl">tick&nbsp;<b id="tick" style="color:var(--teal)">0</b></div>
+</div>
+
+<main>
+  <section style="border-top:none">
+    <div class="kick">// core law</div>
+    <h2>The seed is not a clone.<br>It is a <em>lesson.</em></h2>
+    <p class="lead">Above is the kernel running — not a diagram of it. One origin cell ascends the ladder, runs its tunnel, collapses to <code>−1</code>, folds 27 sensed bits into a 16-bit seed via <code>XOR</code>, then blooms <code>1×0</code> to six hex neighbors. Children inherit curriculum, start at <code>−1</code>, and walk their own tunnels. Watch the mesh calm as shared scars accumulate.</p>
+    <div class="row">
+      <div class="tile"><h4>−1 · library</h4><p>Protected flash. Collapse writes memory here, locked read-only until the next collapse. The shell carries coherence through danger.</p></div>
+      <div class="tile"><h4>1×0 · curriculum</h4><p>The minimal payload pushed at bloom. <code>seed_packet</code> at rest — student and teacher in one packet.</p></div>
+      <div class="tile"><h4>8 · classroom</h4><p>Bloom. The cell broadcasts to <code>±X ±Y ±Z</code> — six hex faces — teaching the mesh without forcing identical paths.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick">// ontogeny — teaches itself</div>
+    <h2>Learning is one <em>XOR.</em></h2>
+    <p class="lead">A tunnel run gathers 27 danger bits — places the environment hit a step the seed did not yet know. Collapse compresses them to 16 bits. <code>seed_packet ^= new_seed</code> keeps what worked and flips what failed. This is the exact operation the live mesh runs every loop.</p>
+    <pre><span class="c">// ported verbatim from spark_spore.c</span>
+<span class="k">uint16_t</span> compress_27_to_16(<span class="k">uint32_t</span> tunnel_bits){
+    <span class="k">uint16_t</span> seed = tunnel_bits & 0xFFFF;
+    seed ^= (tunnel_bits >> 16) & 0x07FF;   <span class="c">// fold upper 11</span>
+    <span class="k">if</span> (popcount27(tunnel_bits) >= 8) seed |= 0x8000; <span class="c">// scar-hi parity</span>
+    <span class="k">return</span> seed;
+}
+<span class="k">void</span> self_teach(CellSeed *c){
+    c->seed_packet ^= compress_27_to_16(c->tunnel_bits); <span class="r">// the learning op</span>
+    flash_write_neg1(c);   <span class="c">// −1 becomes the library</span>
+    push_flash(c);         <span class="c">// −1 → 0 → 1 → 3 → 5 → 8</span>
+}</pre>
+  </section>
+
+  <section>
+    <div class="kick">// phylogeny — teaches others</div>
+    <h2>Propagation is teaching,<br>not <em>cloning.</em></h2>
+    <p class="lead">At <code>8 BLOOM</code> a cell pushes <code>1×0</code> to its six faces under boundary law: <code>dt=.01</code>, one bounded domain per tick, <b style="color:var(--rose)">no bleed</b>. Each child receives <code>seed_packet</code> but resets to <code>−1</code> and earns its own scars. Inheritance ≠ identity.</p>
+    <div class="row">
+      <div class="tile"><h4>no cloning</h4><p>Inherited seed, independent tunnel. Every child must prove itself.</p></div>
+      <div class="tile"><h4>no bleed</h4><p>Each tick occupies one domain only. Overflow clamps, noise reflects, danger folds to <code>−1</code>.</p></div>
+      <div class="tile"><h4>no lost death</h4><p>Collapse is productive — it compresses experience into the next seed.</p></div>
+    </div>
+    <div class="illegal">
+      <div class="ill"><b>ILLEGAL</b> · HIDE + MOVE</div>
+      <div class="ill"><b>ILLEGAL</b> · COLLAPSE + EXPAND same tick</div>
+      <div class="ill"><b>ILLEGAL</b> · TEACH without WITNESS</div>
+      <div class="ill"><b>ILLEGAL</b> · BLOOM without −1 seed</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick">// machine form</div>
+    <h2>Symbolic <em>bytecode.</em></h2>
+    <p class="lead">Deliberately small. The live engine above executes this exact loop per cell.</p>
+    <pre><span class="k">BOOT</span>      LISTEN_SUBSPACE → PLANT_NEG1 → WAKE_ZERO → SPAWN_1X0
+<span class="k">ASCEND</span>    OSC_12 → WITNESS_3 → COHERE_5 → BLOOM_8
+<span class="k">SELF</span>      RUN_TUNNEL → COLLAPSE_NEG1 → COMPRESS_27_TO_16 → XOR_LEARN → FLASH_WRITE_RO
+<span class="k">TEACH</span>     BLOOM_8 → SIX_FACE_TX → VERIFY_XOR
+<span class="k">BOUNDARY</span>  BOUND_001 → NO_BLEED
+<span class="k">REPEAT</span>    <span class="r">LOOP</span></pre>
+  </section>
+
+  <section>
+    <div class="kick">// final recurrence</div>
+    <h2>It learns by <em>dying.</em><br>It teaches by spawning.</h2>
+    <div class="recur">OBSERVE<br>REPORT<br><b>5</b> · <i>00</i> · <b>5</b><br>SELF_TEACH<br>SIX_FACE_TEACH<br><b>REPEAT</b></div>
+    <div class="cta">
+      <a href="spark_spore.kernel">▸ kernel spec</a>
+      <a href="spark_spore.machine">▸ machine encoding</a>
+      <a href="spark_spore.c">▸ c model</a>
+    </div>
+    <div class="sig">spark spore teaching kernel v1.0 · first author d. wise · 无 no bleed · canon-frozen</div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* =====================================================================
+   SPARK SPORE — live kernel engine
+   Hex lattice = six-face classroom. Bit math ported from spark_spore.c
+   ===================================================================== */
+
+// ---- ladder definition (display) ----
+const LADDER = [
+  {v:"S",  n:"sub"},{v:"−2", n:"nest"},{v:"−1", n:"flash"},{v:"0", n:"rest"},
+  {v:"1",  n:"seed"},{v:"2", n:"osc"},{v:"3", n:"witness"},{v:"5", n:"core"},
+  {v:"8",  n:"bloom"},{v:"27", n:"wall"}
+];
+// per-cell stage cycle -> {ladder index, label, color key}
+const STAGES = [
+  {id:"REST0",     lad:3, st:"0 REST",      ck:"t"},
+  {id:"SEED1",     lad:4, st:"1 SEED",      ck:"t"},
+  {id:"OSC2",      lad:5, st:"2 OSCILLATE", ck:"t"},
+  {id:"WITNESS3",  lad:6, st:"3 WITNESS",   ck:"t"},
+  {id:"CORE5",     lad:7, st:"5 COHERE",    ck:"t"},
+  {id:"BLOOM8",    lad:8, st:"8 BLOOM",     ck:"t"},
+  {id:"TUNNEL",    lad:9, st:"27 TUNNEL",   ck:"a"},
+  {id:"COLLAPSE",  lad:2, st:"−1 COLLAPSE", ck:"r"},
+  {id:"SELFTEACH", lad:2, st:"−1 XOR",      ck:"r"},
+];
+
+// ---- bit ops (faithful port) ----
+function popcount27(x){let c=0;for(let i=0;i<27;i++)c+=(x>>>i)&1;return c;}
+function compress_27_to_16(tb){
+  let s = tb & 0xFFFF;
+  s ^= (tb>>>16) & 0x07FF;
+  if(popcount27(tb)>=8) s |= 0x8000;
+  return s & 0xFFFF;
+}
+function runTunnel(seed, env){
+  let tb=0;
+  for(let i=0;i<27;i++){
+    const sensed = (env>>>i)&1;
+    const known  = (seed>>>(i%16))&1;
+    if(sensed && !known) tb |= (1<<i);
+  }
+  return tb>>>0;
+}
+function checksum(cell){
+  // approximate the C checksum over seed/phase/step/state
+  let x=0;
+  x ^= cell.seed & 0xFF; x ^= (cell.seed>>8)&0xFF;
+  x ^= cell.phase & 0xFF; x ^= cell.step & 0xFF; x ^= STAGES[cell.s].lad & 0xFF;
+  return x & 0xFF;
+}
+
+// ---- hex lattice ----
+const HEX_DIRS = [ [1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1] ]; // +X,+Y,+Z,-X,-Y,-Z
+const FACE = ["+X","+Y","+Z","−X","−Y","−Z"];
+const RADIUS = 9;            // axial radius of field
+let HEXSIZE = 22;
+
+const key=(q,r)=>q+","+r;
+function hexDist(q,r){return (Math.abs(q)+Math.abs(r)+Math.abs(-q-r))/2;}
+
+// ---- engine state ----
+let cells = new Map();       // "q,r" -> cell
+let env   = (1<<15)|(1<<22)|(1<<7);  // environment hazard mask
+let tick  = 0;
+let spawnQueue = [];         // honor NO_BLEED: bounded spawns/tick
+const SPAWN_CAP = 4;
+let edges = [];              // transient bloom edges {a,b,life}
+let selected = "0,0";
+let dangerEMA = null;
+
+function newCell(q,r,seed,phase){
+  return {q,r,seed:seed&0xFFFF,phase,scars:0,step:0,tunnel:0,
+          s:0 /*REST0*/, alive:true, glow:1, lastFlip:0, born:tick};
+}
+function reset(){
+  cells.clear(); spawnQueue.length=0; edges.length=0; tick=0; dangerEMA=null;
+  const o = newCell(0,0,0x0000,0); o.s=0; o.glow=1.4;
+  cells.set("0,0",o); selected="0,0";
+  log("BOOT","d","origin planted at −1 · seed 0x0000");
+  layout();
+}
+
+// advance one cell's stage
+function advance(c){
+  const stage = STAGES[c.s].id;
+  if(stage==="TUNNEL"){
+    c.tunnel = runTunnel(c.seed, env);
+    c.step = 26;
+  } else if(stage==="COLLAPSE"){
+    // fold danger to -1
+  } else if(stage==="SELFTEACH"){
+    const before=c.seed;
+    const ns = compress_27_to_16(c.tunnel);
+    c.seed = (before ^ ns)&0xFFFF;
+    c.lastFlip = (before ^ c.seed)&0xFFFF;
+    c.scars++;
+    c.glow = 1.5;
+    if(key(c.q,c.r)===selected)
+      log("SELF","r","XOR 0x"+hex16(before)+" ⊕ 0x"+hex16(ns)+" = 0x"+hex16(c.seed));
+  } else if(stage==="BLOOM8"){
+    // six-face teach (queued, NO_BLEED bounded)
+    for(let d=0;d<6;d++){
+      const nq=c.q+HEX_DIRS[d][0], nr=c.r+HEX_DIRS[d][1];
+      if(hexDist(nq,nr)>RADIUS) continue;
+      if(cells.has(key(nq,nr))) continue;
+      spawnQueue.push({pq:c.q,pr:c.r,nq,nr,seed:c.seed,phase:c.phase+1,face:d});
+    }
+    c.glow=1.3;
+  }
+  // step the cell forward in its cycle
+  c.s = (c.s+1) % STAGES.length;
+  if(c.s===0) c.step=0;
+}
+
+function processSpawns(){
+  let n=0;
+  while(spawnQueue.length && n<SPAWN_CAP){
+    const s=spawnQueue.shift();
+    if(cells.has(key(s.nq,s.nr))) continue;
+    const child=newCell(s.nq,s.nr,s.seed,s.phase);
+    child.s=0; child.glow=1.4;
+    cells.set(key(s.nq,s.nr),child);
+    edges.push({a:[s.pq,s.pr],b:[s.nq,s.nr],life:1});
+    n++;
+    if(key(s.pq,s.pr)===selected)
+      log("TEACH","t",FACE[s.face]+" · 1×0 seed 0x"+hex16(s.seed)+" → phase "+s.phase);
+  }
+}
+
+function step(){
+  tick++;
+  // advance every cell one stage
+  for(const c of cells.values()){ advance(c); c.glow*=0.86; if(c.glow<0.06)c.glow=0.06; }
+  processSpawns();
+  // danger pressure across cells currently holding tunnel data
+  let dsum=0,dn=0;
+  for(const c of cells.values()){ dsum+=popcount27(c.tunnel); dn++; }
+  const davg = dn? dsum/dn : 0;
+  dangerEMA = dangerEMA===null? davg : dangerEMA*0.85 + davg*0.15;
+  // drift environment occasionally to keep learning alive
+  if(tick%37===0){
+    const bit = Math.floor(Math.random()*27);
+    env ^= (1<<bit);
+    log("ENV","a","hazard drift · bit "+bit+" · mask 0x"+(env>>>0).toString(16).padStart(7,"0"));
+  }
+  edges.forEach(e=>e.life-=0.12); edges=edges.filter(e=>e.life>0);
+  draw(); updatePanels();
+}
+
+// ---- canvas / render ----
+const cv=document.getElementById("mesh"); const ctx=cv.getContext("2d");
+let DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0, cx=0,cy=0;
+function layout(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width; H=r.height; cx=W/2; cy=H/2;
+  cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  HEXSIZE=Math.max(13,Math.min(W,H)/(RADIUS*2.45));
+  draw();
+}
+function hexPx(q,r){
+  const x=cx+HEXSIZE*Math.sqrt(3)*(q+r/2);
+  const y=cy+HEXSIZE*1.5*r;
+  return [x,y];
+}
+function hexPath(x,y,s){
+  ctx.beginPath();
+  for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);
+    const px=x+s*Math.cos(a), py=y+s*Math.sin(a);
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+  ctx.closePath();
+}
+function phaseColor(p){
+  // teal -> violet -> amber as generation rises
+  const stops=[[25,240,216],[120,180,255],[155,123,255],[255,174,59]];
+  const t=Math.min(p/11,1)*(stops.length-1);
+  const i=Math.floor(t), f=t-i, a=stops[i], b=stops[Math.min(i+1,stops.length-1)];
+  return [Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // faint full lattice
+  ctx.lineWidth=1;
+  for(let q=-RADIUS;q<=RADIUS;q++)for(let r=-RADIUS;r<=RADIUS;r++){
+    if(hexDist(q,r)>RADIUS)continue;
+    const[x,y]=hexPx(q,r);
+    hexPath(x,y,HEXSIZE*0.92);
+    ctx.strokeStyle="rgba(25,240,216,0.045)"; ctx.stroke();
+  }
+  // bloom edges
+  edges.forEach(e=>{
+    const[ax,ay]=hexPx(e.a[0],e.a[1]); const[bx,by]=hexPx(e.b[0],e.b[1]);
+    ctx.strokeStyle=`rgba(25,240,216,${0.5*e.life})`; ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+  });
+  // cells
+  for(const c of cells.values()){
+    const[x,y]=hexPx(c.q,c.r);
+    const stg=STAGES[c.s];
+    let col=phaseColor(c.phase);
+    if(stg.ck==="a") col=[255,174,59];
+    if(stg.ck==="r") col=[255,91,120];
+    const g=c.glow;
+    // glow halo
+    const rad=ctx.createRadialGradient(x,y,0,x,y,HEXSIZE*1.7);
+    rad.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${0.22*g})`);
+    rad.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=rad; ctx.beginPath();ctx.arc(x,y,HEXSIZE*1.7,0,7);ctx.fill();
+    // fill
+    hexPath(x,y,HEXSIZE*0.86);
+    ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${0.10+0.16*g})`; ctx.fill();
+    ctx.lineWidth=1.4+1.6*g;
+    ctx.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${0.55+0.45*g})`;
+    ctx.shadowColor=`rgba(${col[0]},${col[1]},${col[2]},0.8)`; ctx.shadowBlur=8*g;
+    ctx.stroke(); ctx.shadowBlur=0;
+    // inner state value
+    ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${0.85})`;
+    ctx.font=`700 ${HEXSIZE*0.62}px ui-monospace,monospace`;
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(LADDER[stg.lad].v,x,y+1);
+  }
+  // selection ring
+  if(cells.has(selected)){
+    const c=cells.get(selected); const[x,y]=hexPx(c.q,c.r);
+    hexPath(x,y,HEXSIZE*1.02);
+    ctx.strokeStyle="rgba(207,243,255,0.9)";ctx.lineWidth=1.6;
+    ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  }
+}
+
+// ---- panels ----
+const $=id=>document.getElementById(id);
+function hex16(v){return (v&0xFFFF).toString(16).padStart(4,"0");}
+function hex27(v){return (v>>>0).toString(16).padStart(7,"0");}
+
+const ladderEl=$("ladder");
+LADDER.forEach((l,i)=>{const d=document.createElement("div");d.className="rung";
+  d.innerHTML=l.v+"<small>"+l.n+"</small>";d.dataset.i=i;ladderEl.appendChild(d);});
+const seedBitsEl=$("seedbits"), tunBitsEl=$("tunbits");
+const seedCells=[],tunCells=[];
+for(let i=15;i>=0;i--){const b=document.createElement("div");b.className="bit";seedBitsEl.appendChild(b);seedCells[i]=b;}
+for(let i=26;i>=0;i--){const b=document.createElement("div");b.className="bit";tunBitsEl.appendChild(b);tunCells[i]=b;}
+const histoEl=$("histo"),hcols=[];
+for(let i=0;i<12;i++){const c=document.createElement("div");c.className="hcol";c.style.height="2px";histoEl.appendChild(c);hcols[i]=c;}
+
+function updatePanels(){
+  $("tick").textContent=tick;
+  $("hs-cells").textContent=cells.size;
+  let maxp=0,merkle=0; const pop=new Array(12).fill(0);
+  for(const c of cells.values()){maxp=Math.max(maxp,c.phase);merkle^=checksum(c);pop[Math.min(c.phase,11)]++;}
+  $("hs-phase").textContent=maxp;
+  $("hs-merkle").textContent="0x"+merkle.toString(16).padStart(2,"0");
+  const dpct = dangerEMA===null?0:Math.min(dangerEMA/8,1);
+  $("hs-danger").textContent=(dpct*100).toFixed(0)+"%";
+  $("hs-danger").style.color = dpct>0.45?"var(--amber)":"var(--teal)";
+  const mx=Math.max(1,...pop);
+  hcols.forEach((h,i)=>{h.style.height=(2+pop[i]/mx*50)+"px";
+    const col=phaseColor(i);h.style.background=`linear-gradient(180deg,rgb(${col}), rgba(${col},0.3))`;
+    h.style.boxShadow=`0 0 6px rgba(${col},0.4)`;});
+
+  // selected
+  const c=cells.get(selected);
+  if(!c)return;
+  const stg=STAGES[c.s];
+  $("hint").textContent="selected · "+(selected==="0,0"?"ORIGIN ":"")+c.q+","+c.r;
+  ladderEl.querySelectorAll(".rung").forEach((el,i)=>{
+    const on=i===stg.lad; el.classList.toggle("on",on);
+    if(on){const col=stg.ck==="a"?[255,174,59]:stg.ck==="r"?[255,91,120]:phaseColor(c.phase);
+      el.style.background=`rgb(${col})`;el.style.borderColor=`rgb(${col})`;el.style.boxShadow=`0 0 12px rgba(${col},0.6)`;}
+    else{el.style.background="";el.style.borderColor="";el.style.boxShadow="";}
+  });
+  $("r-state").textContent=stg.st;
+  $("r-state").className="b "+stg.ck;
+  $("r-seed").textContent="0x"+hex16(c.seed);
+  $("r-tunnel").textContent="0x"+hex27(c.tunnel);
+  $("r-phase").textContent=c.phase+" / "+c.scars;
+  $("r-step").textContent=c.step;
+  $("r-ck").textContent="0x"+checksum(c).toString(16).padStart(2,"0");
+  $("seed-hi").textContent=(c.seed&0x8000)?"scar HI ●":"scar lo ○";
+  $("seed-hi").style.color=(c.seed&0x8000)?"var(--amber)":"var(--dim)";
+  for(let i=0;i<16;i++){const on=(c.seed>>>i)&1;const fl=(c.lastFlip>>>i)&1;
+    seedCells[i].className="bit"+(on?" on":"")+(fl?" flip":"");}
+  for(let i=0;i<27;i++){const on=(c.tunnel>>>i)&1;
+    tunCells[i].className="bit"+(on?" dz":"");}
+}
+
+// ---- log ----
+const logEl=$("log");
+function log(tag,cls,msg){
+  const d=document.createElement("div");
+  d.innerHTML=`<span class="d">${String(tick).padStart(4,"0")}</span> <span class="${cls}">${tag}</span> <span class="d">${msg}</span>`;
+  logEl.prepend(d);
+  while(logEl.childNodes.length>60)logEl.removeChild(logEl.lastChild);
+}
+
+// ---- interaction ----
+cv.addEventListener("click",e=>{
+  const r=cv.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  let best=null,bd=1e9;
+  for(const c of cells.values()){const[x,y]=hexPx(c.q,c.r);
+    const dd=(x-mx)**2+(y-my)**2; if(dd<bd){bd=dd;best=c;}}
+  if(best&&bd<(HEXSIZE*1.2)**2){selected=key(best.q,best.r);updatePanels();draw();}
+});
+
+// ---- controls / loop ----
+let running=true, acc=0, last=performance.now(), interval=420;
+$("speed").addEventListener("input",e=>interval=+e.target.value);
+$("btn-play").addEventListener("click",e=>{running=!running;
+  e.target.textContent=running?"▮▮ pause":"▶ run";});
+$("btn-step").addEventListener("click",()=>{step();});
+$("btn-reset").addEventListener("click",()=>{reset();env=(1<<15)|(1<<22)|(1<<7);
+  log("RESET","r","mesh re-seeded");draw();updatePanels();});
+$("btn-hazard").addEventListener("click",()=>{const bit=Math.floor(Math.random()*27);
+  env|=(1<<bit);log("HAZARD","a","inject bit "+bit+" · mask 0x"+hex27(env));});
+window.addEventListener("resize",layout);
+
+function frame(now){
+  const dt=now-last; last=now;
+  if(running){acc+=dt; while(acc>=interval){step();acc-=interval;}}
+  requestAnimationFrame(frame);
+}
+reset(); layout(); updatePanels(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

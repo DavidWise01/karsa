@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>From Metaphor to Mechanism — A Detection-Theory Companion</title>
+<style>
+:root{
+  --bg:#04060c;--ink:#e9eef6;--body:#b9c4d4;--dim:#6a7993;--dimmer:#2a3650;
+  --cyan:#34e0ff;--good:#2effa6;--bad:#ff7a3c;--alarm:#ff3b5e;--violet:#9b7bff;--gold:#ffce5e;
+  --line:rgba(52,224,255,.14);--panel:rgba(10,18,30,.7);--panel2:rgba(8,14,24,.85);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:var(--sans);line-height:1.65;
+  background:
+   radial-gradient(120% 60% at 50% -8%,rgba(155,123,255,.08),transparent 50%),
+   radial-gradient(60% 50% at 85% 12%,rgba(52,224,255,.05),transparent 55%),
+   linear-gradient(180deg,#06091a,#080c1c 55%,#04060c);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.18;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px);mix-blend-mode:multiply}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.04;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+nav{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:rgba(4,6,12,.85);backdrop-filter:blur(12px)}
+.nbar{max-width:1080px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 22px}
+.brand{font-family:var(--mono);font-weight:700;letter-spacing:.14em;font-size:12px;color:var(--cyan);text-transform:uppercase}
+.nlinks{display:flex;gap:16px;flex-wrap:wrap}
+.nlinks a{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);text-decoration:none}
+.nlinks a:hover{color:var(--cyan)}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+header.hero{padding:78px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--violet);margin-bottom:18px}
+h1{font-size:clamp(34px,6vw,62px);line-height:1.02;margin:0 0 20px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--cyan)}
+.sub{font-size:19px;color:var(--body);max-width:760px}
+.thesis{margin-top:26px;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:8px;background:var(--panel);font-size:15px;color:var(--body)}
+.thesis b{color:var(--ink)}
+
+section{padding:64px 0;border-top:1px solid rgba(52,224,255,.08)}
+.kick{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:13px}
+h2{font-size:clamp(26px,4vw,40px);line-height:1.04;margin:0 0 16px;letter-spacing:-.01em;font-weight:800}
+h2 em{font-style:normal;color:var(--cyan)}
+h3{font-size:18px;margin:30px 0 10px;font-weight:700;color:var(--ink)}
+p{color:var(--body);max-width:780px}
+p code,li code,td code{font-family:var(--mono);font-size:.9em;color:var(--gold);background:rgba(255,206,94,.08);padding:1px 5px;border-radius:4px}
+.note{font-size:13px;color:var(--dim)}
+
+.tbl{width:100%;border-collapse:collapse;margin-top:22px;font-size:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(52,224,255,.08);vertical-align:top}
+.tbl th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);background:rgba(52,224,255,.04)}
+.tbl td:first-child{font-family:var(--mono);color:var(--violet);white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .real{color:var(--good)}
+
+/* widget shell */
+.widget{margin-top:26px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden}
+.whead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(52,224,255,.03)}
+.wtitle{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan)}
+.wtag{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border:1px solid var(--dimmer);border-radius:3px;padding:3px 7px}
+.wbody{padding:18px 16px}
+.wgrid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+@media(max-width:820px){.wgrid{grid-template-columns:1fr}}
+canvas{display:block;width:100%;border-radius:8px;background:rgba(4,8,16,.6)}
+.ctrls{display:grid;gap:14px}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.ctl label b{color:var(--cyan)}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.readout{border:1px solid var(--line);border-radius:8px;padding:12px;background:rgba(4,8,16,.5);font-family:var(--mono);font-size:12px}
+.readout .r{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed rgba(52,224,255,.08)}
+.readout .r:last-child{border-bottom:none}
+.readout .r span{color:var(--dim)}.readout .r b{font-weight:600}
+.readout .r b.g{color:var(--good)}.readout .r b.b{color:var(--bad)}.readout .r b.a{color:var(--alarm)}.readout .r b.c{color:var(--cyan)}
+
+/* confusion matrix */
+.cmx{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-top:6px}
+.cmx div{border-radius:6px;padding:9px;text-align:center;font-family:var(--mono)}
+.cmx .lab{font-size:8px;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.cmx .val{font-size:17px;font-weight:700;margin-top:2px}
+.cmx .tp{background:rgba(46,255,166,.14);color:var(--good)}
+.cmx .fp{background:rgba(255,59,94,.14);color:var(--alarm)}
+.cmx .fn{background:rgba(255,122,60,.14);color:var(--bad)}
+.cmx .tn{background:rgba(52,224,255,.1);color:var(--cyan)}
+
+/* base-rate visceral bar */
+.population{margin-top:8px;height:26px;border-radius:6px;overflow:hidden;display:flex;border:1px solid var(--line)}
+.population i{height:100%}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px}
+.legend2 i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* bloom grid */
+.bloomgrid{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin-top:6px}
+.bcell{aspect-ratio:1;border-radius:2px;background:rgba(52,224,255,.07);border:1px solid rgba(52,224,255,.12);transition:.12s}
+.bcell.set{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.bcell.lit{outline:2px solid var(--gold);outline-offset:-1px}
+.inrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.inrow input[type=text]{flex:1;min-width:120px;font-family:var(--mono);font-size:12px;background:rgba(4,8,16,.6);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:8px 10px}
+.inrow button,.btnrow button{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);background:rgba(52,224,255,.06);border:1px solid var(--cyan);border-radius:6px;padding:8px 12px;cursor:pointer}
+.inrow button:hover,.btnrow button:hover{background:rgba(52,224,255,.16)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.verdict{margin-top:10px;font-family:var(--mono);font-size:13px;padding:9px 12px;border-radius:6px}
+.verdict.absent{background:rgba(52,224,255,.08);color:var(--cyan)}
+.verdict.present{background:rgba(46,255,166,.12);color:var(--good)}
+.verdict.fp{background:rgba(255,59,94,.12);color:var(--alarm)}
+
+ul.clean{list-style:none;padding:0;margin:18px 0}
+ul.clean li{padding:10px 0 10px 22px;position:relative;color:var(--body);border-bottom:1px solid rgba(52,224,255,.06)}
+ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--cyan)}
+ul.clean li b{color:var(--ink)}
+
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+@media(max-width:760px){.split2{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--panel)}
+.box.metaphor{border-left:3px solid var(--violet)}
+.box.real{border-left:3px solid var(--good)}
+.box h4{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.box.metaphor h4{color:var(--violet)}.box.real h4{color:var(--good)}
+.box p{font-size:13.5px;margin:0 0 8px}
+
+.refs{font-family:var(--mono);font-size:12px;color:var(--dim);line-height:1.9}
+.refs li{margin-bottom:8px}
+.refs b{color:var(--body)}
+
+footer{padding:50px 0 90px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dimmer);letter-spacing:.08em;text-transform:uppercase}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin:22px 0}
+.cta a{text-decoration:none;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);border:1px solid var(--cyan);background:rgba(52,224,255,.06);border-radius:6px;padding:11px 16px}
+.cta a:hover{background:rgba(52,224,255,.16)}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="grain"></div>
+
+<nav><div class="nbar">
+  <div class="brand">无 · Metaphor → Mechanism</div>
+  <div class="nlinks">
+    <a href="#map">Mapping</a><a href="#roc">Threshold</a><a href="#base">Base Rate</a>
+    <a href="#bloom">Signatures</a><a href="#honest">Honesty</a><a href="#refs">Sources</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">cybersecurity capstone · detection theory companion</div>
+  <h1>From a glowing well<br>to a real <em>detector.</em></h1>
+  <p class="sub">The instruments in this series — the shield, the pulsar, the reactive armor, the singularity well — are visual metaphors for defensive postures. This companion does the unglamorous, defensible work: it maps each metaphor onto established intrusion-detection theory and lets you operate the three ideas that actually matter, with correct math you can check.</p>
+  <div class="thesis"><b>Claim under test:</b> a defender's hardest problem is not stopping a known attack — it is deciding, under a flood of mostly-benign events, <b>which alarms to believe.</b> Every instrument in the series is a different answer to that one problem, and the math below shows why no single answer wins.</div>
+</div></header>
+
+<section id="map"><div class="wrap">
+  <div class="kick">// the bridge</div>
+  <h2>Each instrument is a real <em>defensive posture.</em></h2>
+  <p>Strip the sci-fi skin and every device in the series corresponds to a recognized class of defensive control. The metaphor is the teaching aid; the right-hand column is the actual computer science a reviewer can check against the literature.</p>
+  <table class="tbl">
+    <thead><tr><th>Instrument</th><th>Metaphor action</th><th>Real defensive concept</th><th>Core tradeoff</th></tr></thead>
+    <tbody>
+      <tr><td>Aegis-0</td><td>reflect · clamp · fold</td><td class="real">Layered filtering / defense-in-depth — input rejection, rate-limiting, quarantine</td><td>Cheap, but only stops what each rule anticipates</td></tr>
+      <tr><td>Witness Shield</td><td>absorb known · learn the rest</td><td class="real">Signature (misuse) detection + online feature learning</td><td>Near-zero false positives on known threats; blind to novel ones</td></tr>
+      <tr><td>Pulsar v2.1</td><td>life · death · spark sweep</td><td class="real">Continuous monitoring + active response + self-repair (heal/block/regenerate)</td><td>High coverage, high operational cost</td></tr>
+      <tr><td>Reactive Armor</td><td>detect → detonate → deplete</td><td class="real">Active response / IPS with finite capacity (rate-limited blocking, honeypots)</td><td>Effective until a focused load exhausts it</td></tr>
+      <tr><td>Singularity Well</td><td>capture → spiral → swallow</td><td class="real">Sinkholing / tarpitting / blackhole routing — containment, nothing returns</td><td>Contains everything it catches — including benign traffic</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The well's defining trait — it swallows <em>everything</em> that crosses the horizon — is exactly the property that makes containment dangerous in practice: capacity is not the same as judgment. The next three sections are the judgment.</p>
+</div></section>
+
+<section id="roc"><div class="wrap">
+  <div class="kick">// idea 1 — separability &amp; threshold</div>
+  <h2>A detector is two overlapping <em>distributions.</em></h2>
+  <p>Benign and malicious events both produce a score (anomaly score, model confidence, rule weight). If the distributions were perfectly separated, detection would be trivial. They never are. You choose a <b>threshold</b>; everything above it fires an alarm. Move it and you trade missed attacks against false alarms — there is no setting that escapes the trade. The locus of all those trades is the <b>ROC curve</b>.</p>
+
+  <div class="widget">
+    <div class="whead"><div class="wtitle">Threshold &amp; ROC explorer</div><div class="wtag">live · normal model</div></div>
+    <div class="wbody"><div class="wgrid">
+      <div>
+        <canvas id="dist" height="200"></canvas>
+        <canvas id="roc" height="200" style="margin-top:10px"></canvas>
+      </div>
+      <div class="ctrls">
+        <div class="ctl"><label>separability d′ <b id="v-d">2.0</b></label><input type="range" id="s-d" min="2" max="40" value="20"></div>
+        <div class="ctl"><label>alarm threshold <b id="v-t">+0.0σ</b></label><input type="range" id="s-t" min="-20" max="60" value="20"></div>
+        <div class="readout">
+          <div class="r"><span>TPR (recall / hit)</span><b class="g" id="o-tpr">—</b></div>
+          <div class="r"><span>FPR (false alarm)</span><b class="a" id="o-fpr">—</b></div>
+          <div class="r"><span>AUC (area under ROC)</span><b class="c" id="o-auc">—</b></div>
+        </div>
+        <div class="cmx">
+          <div class="tp"><div class="lab">true positive</div><div class="val" id="m-tp">—</div></div>
+          <div class="fp"><div class="lab">false positive</div><div class="val" id="m-fp">—</div></div>
+          <div class="fn"><div class="lab">false negative</div><div class="val" id="m-fn">—</div></div>
+          <div class="tn"><div class="lab">true negative</div><div class="val" id="m-tn">—</div></div>
+        </div>
+        <p class="note" style="margin:0">Per 1,000 events at 50/50 mix. The shaded tails on the upper chart are exactly these four cells.</p>
+      </div>
+    </div></div>
+  </div>
+  <p class="note">Mapping back: raising the threshold is the Aegis <code>clamp</code> tightening; AUC is how good the underlying sensor is before you pick any operating point. A perfect well has AUC near 1; a coin flip is 0.5.</p>
+</div></section>
+
+<section id="base"><div class="wrap">
+  <div class="kick">// idea 2 — the base-rate fallacy</div>
+  <h2>A 99%-accurate alarm can still be <em>99% wrong.</em></h2>
+  <p>This is the result every security analyst learns the hard way, formalized by Axelsson (2000): when genuine attacks are <b>rare</b>, even an excellent detector produces alarms that are mostly false — because the vast benign population generates more false positives than the tiny malicious population generates true ones. It's just Bayes' theorem, but it governs whether an alerting system is usable at all.</p>
+
+  <div class="widget">
+    <div class="whead"><div class="wtitle">Base-rate / precision calculator</div><div class="wtag">live · Bayes</div></div>
+    <div class="wbody"><div class="wgrid">
+      <div>
+        <div class="readout" style="font-size:13px">
+          <div class="r"><span>population of events</span><b class="c">100,000</b></div>
+          <div class="r"><span>actual attacks (prevalence)</span><b class="b" id="b-att">—</b></div>
+          <div class="r"><span>true alarms (caught)</span><b class="g" id="b-true">—</b></div>
+          <div class="r"><span>false alarms (noise)</span><b class="a" id="b-false">—</b></div>
+          <div class="r"><span>missed attacks</span><b class="b" id="b-miss">—</b></div>
+        </div>
+        <div class="population" id="b-pop"></div>
+        <div class="legend2">
+          <span><i style="background:var(--good)"></i>true alarm</span>
+          <span><i style="background:var(--alarm)"></i>false alarm</span>
+          <span><i style="background:var(--bad)"></i>missed attack</span>
+          <span><i style="background:#1a2740"></i>correctly ignored</span>
+        </div>
+        <div class="readout" style="margin-top:12px;text-align:center;padding:16px">
+          <div style="font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase">Precision — chance an alarm is real</div>
+          <div style="font-size:34px;font-weight:700;margin-top:4px" id="b-prec">—</div>
+        </div>
+      </div>
+      <div class="ctrls">
+        <div class="ctl"><label>detector TPR (sensitivity) <b id="v-tpr">99%</b></label><input type="range" id="s-tpr" min="50" max="100" value="99"></div>
+        <div class="ctl"><label>detector FPR (false-alarm rate) <b id="v-fpr">1.0%</b></label><input type="range" id="s-fpr" min="1" max="200" value="100"></div>
+        <div class="ctl"><label>attack prevalence <b id="v-prev">1 in 100</b></label><input type="range" id="s-prev" min="0" max="100" value="40"></div>
+        <p class="note" style="margin:0">Drag prevalence toward realistic intrusion rates (1 in 10,000+) and watch precision collapse even with a near-perfect detector. This is why raw alerting drowns analysts — and why containment tools like the well must pair capture with triage.</p>
+      </div>
+    </div></div>
+  </div>
+</div></section>
+
+<section id="bloom"><div class="wrap">
+  <div class="kick">// idea 3 — signatures as a probabilistic set</div>
+  <h2>The <code>seed_packet</code> is a <em>Bloom filter.</em></h2>
+  <p>Throughout the series the core "learns" by folding an attack into a 16-bit <code>seed_packet</code> with XOR, then "absorbs" a future hit if it matches. That is a real data structure: a <b>Bloom filter</b> (Bloom, 1970) — a bit array with several hash functions that answers set membership in constant time and constant space. Its bargain is precise: it can say <b>"definitely never seen"</b> or <b>"probably seen"</b> — it never misses a known signature, but as it fills it produces false positives. Add known-bad tokens below and probe it.</p>
+
+  <div class="widget">
+    <div class="whead"><div class="wtitle">Signature memory — live Bloom filter</div><div class="wtag">k=3 · m=256 bits</div></div>
+    <div class="wbody"><div class="wgrid">
+      <div>
+        <div class="bloomgrid" id="bgrid"></div>
+        <div class="inrow">
+          <input type="text" id="b-add" placeholder="add known-bad signature (e.g. evil.exe)…">
+          <button id="b-addbtn">absorb</button>
+        </div>
+        <div class="inrow">
+          <input type="text" id="b-test" placeholder="probe an unknown event…">
+          <button id="b-testbtn">query</button>
+        </div>
+        <div class="verdict absent" id="b-verdict">add a few signatures, then probe — known ones always match; novel ones may false-positive as the array fills.</div>
+        <div class="btnrow">
+          <button id="b-seed">load 12 sample signatures</button>
+          <button id="b-clear">clear</button>
+        </div>
+      </div>
+      <div class="ctrls">
+        <div class="readout">
+          <div class="r"><span>signatures stored</span><b class="c" id="bf-n">0</b></div>
+          <div class="r"><span>bits set</span><b class="c" id="bf-bits">0 / 256</b></div>
+          <div class="r"><span>fill ratio</span><b class="c" id="bf-fill">0%</b></div>
+          <div class="r"><span>false-positive rate</span><b class="a" id="bf-fp">0%</b></div>
+        </div>
+        <p class="note" style="margin:0">Predicted FP rate uses (1−e^(−kn/m))^k. The lit (gold-outlined) cells after a query are the <code>k</code> bits that signature hashes to. All set ⇒ "probably present." Any clear ⇒ "definitely absent."</p>
+        <p class="note" style="margin:0">Tradeoff: this is the Witness Shield's strength (instant, tiny, never misses a known threat) and its limit (false alarms rise with memory load, and it is blind to anything never absorbed).</p>
+      </div>
+    </div></div>
+  </div>
+</div></section>
+
+<section id="honest"><div class="wrap">
+  <div class="kick">// defensibility</div>
+  <h2>What is metaphor, what is <em>mechanism.</em></h2>
+  <p>A capstone artifact has to be honest about its own model. Here is the clean separation, so nothing above is mistaken for a literal claim about how production systems work.</p>
+  <div class="split2">
+    <div class="box metaphor">
+      <h4>Metaphor — illustrative only</h4>
+      <p>Reflecting an attack as <code>attack ^ 0xFFFF</code>, energy "splashing" off shells, gravitational capture, the trinity beam, six-face bloom. These are intuition pumps. No firewall literally inverts a packet's bits to bounce it.</p>
+      <p>The <code>−1</code> flash core, "nothing escapes," and the witness that "cannot be flipped" are framing devices for <em>immutability</em> and <em>containment</em> — real goals, dramatized.</p>
+    </div>
+    <div class="box real">
+      <h4>Mechanism — actually computed here</h4>
+      <p>The ROC curve, TPR/FPR from two Gaussians, and AUC = Φ(d′/√2). The confusion matrix. Bayesian precision under varying base rate. The Bloom filter's hashing, true-positive guarantee, and rising false-positive rate. All of this runs live and matches the closed-form theory.</p>
+      <p>The taxonomy mapping each instrument to a defensive control class (filtering, signature detection, anomaly detection, active response, sinkholing) reflects standard categorization in the literature.</p>
+    </div>
+  </div>
+  <h3>Where this could be falsified or extended</h3>
+  <ul class="clean">
+    <li><b>Distribution shape.</b> Real anomaly scores are rarely Gaussian or equal-variance; the ROC widget assumes both. A stronger version would use empirical score distributions from a labeled dataset (e.g., NSL-KDD, CIC-IDS2017).</li>
+    <li><b>Independence.</b> The Bloom filter assumes independent hashes; the base-rate model assumes events are i.i.d. Correlated attacks (campaigns) break both and would need sequence models.</li>
+    <li><b>Cost asymmetry.</b> A missed intrusion and a false alarm are not equally costly; a defensible deployment optimizes expected cost, not raw accuracy — which shifts the chosen threshold off the ROC's geometric "best" point.</li>
+  </ul>
+</div></section>
+
+<section id="refs"><div class="wrap">
+  <div class="kick">// sources</div>
+  <h2>Where the theory comes <em>from.</em></h2>
+  <ul class="refs">
+    <li><b>Denning, D. (1987).</b> "An Intrusion-Detection Model." <i>IEEE Transactions on Software Engineering.</i> — the foundational signature-vs-anomaly framing.</li>
+    <li><b>Axelsson, S. (2000).</b> "The Base-Rate Fallacy and the Difficulty of Intrusion Detection." <i>ACM TISSEC.</i> — the precision-collapse result modeled in Idea 2.</li>
+    <li><b>Bloom, B. H. (1970).</b> "Space/Time Trade-offs in Hash Coding with Allowable Errors." <i>Communications of the ACM.</i> — the signature-memory structure in Idea 3.</li>
+    <li><b>Fawcett, T. (2006).</b> "An Introduction to ROC Analysis." <i>Pattern Recognition Letters.</i> — TPR/FPR, AUC, operating points.</li>
+    <li><b>Sommer, R. &amp; Paxson, V. (2010).</b> "Outside the Closed World: On Using Machine Learning for Network Intrusion Detection." <i>IEEE S&amp;P.</i> — why anomaly detection is hard in practice.</li>
+  </ul>
+  <p class="note">Verification artifact: the ROC/AUC, Bayesian precision, and Bloom false-positive rate in this page were checked against their closed-form expressions before publication (AUC at d′=2 → 0.9214; precision at TPR .99 / FPR .01 / prevalence 1e-4 → ~0.98%).</p>
+  <div class="cta">
+    <a href="trinity.html">▸ the instrument series</a>
+    <a href="singularity_well.html">▸ singularity well</a>
+    <a href="witness_shield.html">▸ witness shield</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  metaphor → mechanism · detection-theory companion · 无 · prepared as a cybersecurity capstone artifact · all widgets compute live, verified against closed-form theory
+</div></footer>
+
+<script>
+"use strict";
+/* ============ shared math ============ */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const Phi=z=>0.5*(1+erf(z/Math.SQRT2));
+const $=id=>document.getElementById(id);
+
+/* ============ Widget 1: ROC / threshold ============ */
+(function(){
+  const dist=$("dist"),dc=dist.getContext("2d");
+  const roc=$("roc"),rc=roc.getContext("2d");
+  const SIG=1;            // fixed sigma; d' set by mu separation
+  function fit(c){const DPR=Math.min(devicePixelRatio||1,2);const w=c.clientWidth;
+    c.width=w*DPR;c.height=c.height*DPR;c.getContext("2d").setTransform(DPR,0,0,DPR,0,0);return {w,h:c.height/DPR};}
+  function read(){
+    const d=(+$("s-d").value)/10;                 // d' 0.2..4.0
+    const t=(+$("s-t").value)/10;                 // threshold in sigma, -2..6
+    const mu0=0, mu1=d, sigma=SIG;
+    const TPR=1-Phi((t-mu1)/sigma), FPR=1-Phi((t-mu0)/sigma);
+    const AUC=Phi(d/Math.SQRT2);
+    return {d,t,mu0,mu1,sigma,TPR,FPR,AUC};
+  }
+  function drawDist(s){
+    const {w,h}=fit(dist);dc.clearRect(0,0,w,h);
+    const x0=-3, x1=Math.max(6,s.d+3), span=x1-x0;
+    const X=v=>(v-x0)/span*w, peak=0.4;
+    const Y=p=>h-12 - p/peak*(h-30);
+    const g=v=>Math.exp(-0.5*v*v)/Math.sqrt(2*Math.PI);
+    // shade regions relative to threshold
+    function curve(mu,col,fillRight,fillCol){
+      dc.beginPath();
+      for(let px=0;px<=w;px++){const xv=x0+px/w*span;dc.lineTo(X(xv),Y(g(xv-mu)));}
+      dc.strokeStyle=col;dc.lineWidth=2;dc.stroke();
+      // fill the alarm/no-alarm tail
+      dc.beginPath();dc.moveTo(X(s.t),h-12);
+      const lo=fillRight?s.t:x0, hi=fillRight?x1:s.t;
+      for(let xv=lo;xv<=hi;xv+=span/240){dc.lineTo(X(xv),Y(g(xv-mu)));}
+      dc.lineTo(X(hi),h-12);dc.closePath();dc.fillStyle=fillCol;dc.fill();
+    }
+    // benign (mu0): left of t = TN (cyan), right = FP (alarm)
+    curve(s.mu0,"#34e0ff",true,"rgba(255,59,94,.22)");   // FP tail
+    curve(s.mu0,"#34e0ff",false,"rgba(52,224,255,.14)"); // TN
+    // malicious (mu1): right of t = TP (good), left = FN (bad)
+    curve(s.mu1,"#2effa6",true,"rgba(46,255,166,.22)");  // TP
+    curve(s.mu1,"#2effa6",false,"rgba(255,122,60,.18)"); // FN
+    // threshold line
+    dc.strokeStyle="#ffce5e";dc.lineWidth=1.5;dc.setLineDash([4,4]);
+    dc.beginPath();dc.moveTo(X(s.t),6);dc.lineTo(X(s.t),h-12);dc.stroke();dc.setLineDash([]);
+    dc.fillStyle="#ffce5e";dc.font="10px ui-monospace,monospace";dc.fillText("threshold",X(s.t)+5,16);
+    dc.fillStyle="#34e0ff";dc.fillText("benign",X(s.mu0)-18,h-2);
+    dc.fillStyle="#2effa6";dc.fillText("malicious",X(s.mu1)-22,h-2);
+  }
+  function drawROC(s){
+    const {w,h}=fit(roc);rc.clearRect(0,0,w,h);const pad=22;
+    const X=f=>pad+f*(w-2*pad), Y=t=>h-pad-t*(h-2*pad);
+    // axes
+    rc.strokeStyle="rgba(52,224,255,.18)";rc.lineWidth=1;
+    rc.strokeRect(pad,pad,w-2*pad,h-2*pad);
+    rc.strokeStyle="rgba(255,255,255,.12)";rc.setLineDash([3,4]);
+    rc.beginPath();rc.moveTo(X(0),Y(0));rc.lineTo(X(1),Y(1));rc.stroke();rc.setLineDash([]);
+    // curve
+    rc.beginPath();
+    for(let i=0;i<=200;i++){const tt=-3+i/200*(s.d+6);
+      const fpr=1-Phi((tt-s.mu0)/s.sigma), tpr=1-Phi((tt-s.mu1)/s.sigma);
+      i?rc.lineTo(X(fpr),Y(tpr)):rc.moveTo(X(fpr),Y(tpr));}
+    rc.strokeStyle="#9b7bff";rc.lineWidth=2;rc.stroke();
+    // operating point
+    rc.fillStyle="#ffce5e";rc.beginPath();rc.arc(X(s.FPR),Y(s.TPR),5,0,7);rc.fill();
+    rc.shadowColor="#ffce5e";rc.shadowBlur=10;rc.fill();rc.shadowBlur=0;
+    rc.fillStyle="#6a7993";rc.font="9px ui-monospace,monospace";
+    rc.fillText("FPR →",w-pad-34,h-pad+14);
+    rc.save();rc.translate(pad-8,pad+30);rc.rotate(-Math.PI/2);rc.fillText("TPR →",0,0);rc.restore();
+    rc.fillStyle="#9b7bff";rc.fillText("AUC "+s.AUC.toFixed(3),X(0.5),Y(0.18));
+  }
+  function update(){
+    const s=read();
+    $("v-d").textContent=s.d.toFixed(1);
+    $("v-t").textContent=(s.t>=0?"+":"")+s.t.toFixed(1)+"σ";
+    $("o-tpr").textContent=(s.TPR*100).toFixed(1)+"%";
+    $("o-fpr").textContent=(s.FPR*100).toFixed(1)+"%";
+    $("o-auc").textContent=s.AUC.toFixed(3);
+    const TP=Math.round(s.TPR*500),FN=500-TP,FP=Math.round(s.FPR*500),TN=500-FP;
+    $("m-tp").textContent=TP;$("m-fn").textContent=FN;$("m-fp").textContent=FP;$("m-tn").textContent=TN;
+    drawDist(s);drawROC(s);
+  }
+  ["s-d","s-t"].forEach(id=>$(id).addEventListener("input",update));
+  addEventListener("resize",update);update();
+})();
+
+/* ============ Widget 2: base-rate / precision ============ */
+(function(){
+  function prevFromSlider(v){ // 0..100 maps log-ish: 1 in 2 .. 1 in 1,000,000
+    const t=v/100;            // 0..1
+    const exp=0.301 + t*(6-0.301); // log10 of "1 in N": N=2 (0.301) .. 1e6
+    return 1/Math.pow(10,exp);
+  }
+  function update(){
+    const TPR=(+$("s-tpr").value)/100;
+    const FPR=(+$("s-fpr").value)/1000;        // 1..200 -> 0.001..0.200
+    const prev=prevFromSlider(+$("s-prev").value);
+    const N=100000;
+    const attacks=prev*N, benign=N-attacks;
+    const truePos=TPR*attacks, falsePos=FPR*benign, missed=attacks-truePos;
+    const precision=(truePos)/((truePos+falsePos)||1);
+    $("v-tpr").textContent=(TPR*100).toFixed(0)+"%";
+    $("v-fpr").textContent=(FPR*100).toFixed(1)+"%";
+    const oneIn=Math.round(1/prev);
+    $("v-prev").textContent="1 in "+oneIn.toLocaleString();
+    $("b-att").textContent=Math.round(attacks).toLocaleString();
+    $("b-true").textContent=Math.round(truePos).toLocaleString();
+    $("b-false").textContent=Math.round(falsePos).toLocaleString();
+    $("b-miss").textContent=Math.round(missed).toLocaleString();
+    $("b-prec").textContent=(precision*100).toFixed(precision<0.1?2:1)+"%";
+    $("b-prec").style.color=precision<0.25?"var(--alarm)":precision<0.7?"var(--bad)":"var(--good)";
+    // population bar (alarms vs misses vs ignored), scaled to alarms+misses for visibility
+    const totalAlarms=truePos+falsePos;
+    const segs=[
+      [truePos,"var(--good)"],[falsePos,"var(--alarm)"],[missed,"var(--bad)"],
+      [benign-falsePos,"#1a2740"]
+    ];
+    const sum=segs.reduce((a,s)=>a+s[0],0)||1;
+    $("b-pop").innerHTML=segs.map(s=>`<i style="width:${(s[0]/sum*100)}%;background:${s[1]}"></i>`).join("");
+  }
+  ["s-tpr","s-fpr","s-prev"].forEach(id=>$(id).addEventListener("input",update));
+  update();
+})();
+
+/* ============ Widget 3: Bloom filter ============ */
+(function(){
+  const M=256,K=3;
+  let bits=new Uint8Array(M), stored=new Set();
+  const grid=$("bgrid"),cells=[];
+  for(let i=0;i<M;i++){const d=document.createElement("div");d.className="bcell";
+    // show only 256 in a 16-wide grid -> 16 rows; keep compact by showing all
+    grid.appendChild(d);cells.push(d);}
+  function fnv(str,seed){let h=(2166136261^seed)>>>0;
+    for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;}
+  const idx=(tok,i)=>fnv(tok.toLowerCase().trim(),(i+1)*0x9e3779b1>>>0)%M;
+  function setBitsView(lit){
+    for(let i=0;i<M;i++){cells[i].className="bcell"+(bits[i]?" set":"")+(lit&&lit.has(i)?" lit":"");}
+  }
+  function stats(){
+    const n=stored.size;let set=0;for(let i=0;i<M;i++)set+=bits[i];
+    const fill=set/M;
+    const fp=n?Math.pow(1-Math.exp(-K*n/M),K):0;
+    $("bf-n").textContent=n;$("bf-bits").textContent=set+" / "+M;
+    $("bf-fill").textContent=(fill*100).toFixed(1)+"%";
+    $("bf-fp").textContent=(fp*100).toFixed(2)+"%";
+  }
+  function add(tok){tok=tok.trim();if(!tok)return;
+    for(let i=0;i<K;i++)bits[idx(tok,i)]=1;stored.add(tok.toLowerCase());setBitsView();stats();}
+  function query(tok){tok=tok.trim();if(!tok)return;
+    const lit=new Set();let all=true;
+    for(let i=0;i<K;i++){const b=idx(tok,i);lit.add(b);if(!bits[b])all=false;}
+    setBitsView(lit);
+    const v=$("b-verdict");
+    if(!all){v.className="verdict absent";v.textContent='"'+tok+'" → DEFINITELY ABSENT — never absorbed. (no false negatives possible)';}
+    else if(stored.has(tok.toLowerCase())){v.className="verdict present";v.textContent='"'+tok+'" → MATCH — a stored signature. True positive.';}
+    else{v.className="verdict fp";v.textContent='"'+tok+'" → "probably present" but was never added — FALSE POSITIVE. This is the Bloom tradeoff.';}
+  }
+  $("b-addbtn").onclick=()=>{add($("b-add").value);$("b-add").value="";};
+  $("b-add").addEventListener("keydown",e=>{if(e.key==="Enter"){add($("b-add").value);$("b-add").value="";}});
+  $("b-testbtn").onclick=()=>query($("b-test").value);
+  $("b-test").addEventListener("keydown",e=>{if(e.key==="Enter")query($("b-test").value);});
+  $("b-seed").onclick=()=>{["mimikatz","evil.exe","powershell -enc","cmd.exe /c","../../etc/passwd",
+    "DROP TABLE","<script>alert","nc -lvp 4444","base64 -d","wget http://","rm -rf /","union select"]
+    .forEach(add);};
+  $("b-clear").onclick=()=>{bits=new Uint8Array(M);stored.clear();setBitsView();stats();
+    $("b-verdict").className="verdict absent";$("b-verdict").textContent="cleared — array empty.";};
+  setBitsView();stats();
+})();
+</script>
+</body>
+</html>

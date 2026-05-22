@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Bell Test — Proving the Dot's Light Is Entangled</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05060d;--ink:#edf1f9;--body:#a8b4ca;--dim:#64728c;--dimmer:#27344a;
+  --alice:#46e6ff;--bob:#ff8a3c;--coinc:#7cffb0;--violate:#7cffb0;--classical:#ff5d8f;--gold:#ffd166;--src:#b888ff;
+  --line:rgba(124,255,176,.13);--panel:rgba(10,14,26,.82);
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --sans:"Spline Sans",ui-sans-serif,system-ui,sans-serif;
+  --serif:"Fraunces",Georgia,serif;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:var(--sans);line-height:1.62;
+  background:
+   radial-gradient(120% 60% at 50% -10%,rgba(124,255,176,.06),transparent 50%),
+   radial-gradient(50% 50% at 84% 10%,rgba(70,230,255,.06),transparent 55%),
+   radial-gradient(55% 50% at 14% 92%,rgba(255,138,60,.05),transparent 55%),
+   linear-gradient(180deg,#06080f,#05060d 60%,#03040a);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.05;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+nav{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:rgba(5,6,13,.86);backdrop-filter:blur(12px)}
+.nbar{max-width:1180px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px}
+.brand{font-family:var(--mono);font-weight:600;letter-spacing:.1em;font-size:12px;color:var(--coinc);text-transform:uppercase}
+.nlinks{display:flex;gap:18px;flex-wrap:wrap}
+.nlinks a{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-decoration:none}
+.nlinks a:hover{color:var(--coinc)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+header.hero{padding:74px 0 46px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--src);margin-bottom:16px}
+h1{font-family:var(--serif);font-size:clamp(34px,6.2vw,70px);line-height:1.0;margin:0 0 18px;letter-spacing:-.02em;font-weight:600}
+h1 em{font-style:italic;color:var(--coinc)}
+.sub{font-size:18px;color:var(--body);max-width:780px}
+.disc{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--dim);border-left:2px solid var(--dimmer);padding-left:12px;max-width:780px;line-height:1.7}
+
+section{padding:60px 0;border-top:1px solid rgba(124,255,176,.08)}
+.kick{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+h2{font-family:var(--serif);font-size:clamp(26px,4vw,42px);line-height:1.04;margin:0 0 14px;letter-spacing:-.01em;font-weight:600}
+h2 em{font-style:italic;color:var(--coinc)}
+p{color:var(--body);max-width:780px}
+p code,td code,li code{font-family:var(--mono);font-size:.88em;color:var(--gold);background:rgba(255,209,102,.08);padding:1px 5px;border-radius:4px}
+.note{font-size:13px;color:var(--dim)}
+
+.bench{margin-top:24px;border:1px solid var(--line);border-radius:16px;background:var(--panel);overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.bhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);background:rgba(124,255,176,.03)}
+.btitle{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--coinc)}
+.btag{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--dimmer);border-radius:3px;padding:3px 8px}
+.viz{padding:10px;border-bottom:1px solid var(--line)}
+#scene{display:block;width:100%;border-radius:12px;background:radial-gradient(70% 80% at 50% 50%,rgba(16,22,40,.6),rgba(3,5,12,.97))}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+@media(max-width:820px){.controls{grid-template-columns:1fr}}
+.cpanel{padding:18px;border-right:1px solid var(--line)}
+.cpanel:last-child{border-right:none}
+@media(max-width:820px){.cpanel{border-right:none;border-bottom:1px solid var(--line)}}
+.cpanel h4{margin:0 0 12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.cpanel.alice h4{color:var(--alice)}.cpanel.bob h4{color:var(--bob)}.cpanel.src h4{color:var(--src)}
+.ctl{margin-bottom:14px}
+.ctl label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.ctl label b{color:var(--ink);font-size:12px}
+input[type=range]{width:100%;height:4px}
+.alice input{accent-color:var(--alice)}.bob input{accent-color:var(--bob)}.src input{accent-color:var(--src)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--line);border-radius:16px;padding:5px 9px;cursor:pointer;color:var(--coinc);background:rgba(124,255,176,.05)}
+.chip:hover{background:rgba(124,255,176,.16)}
+.chip.run{color:var(--gold);border-color:rgba(255,209,102,.4);background:rgba(255,209,102,.07)}
+
+.meters{display:grid;grid-template-columns:1.3fr 1fr;gap:0;border-top:1px solid var(--line)}
+@media(max-width:820px){.meters{grid-template-columns:1fr}}
+.mleft{padding:18px;border-right:1px solid var(--line)}
+@media(max-width:820px){.mleft{border-right:none;border-bottom:1px solid var(--line)}}
+.mright{padding:18px;display:flex;flex-direction:column;gap:12px}
+#chsh-canvas,#corr-canvas{display:block;width:100%;border-radius:10px;background:rgba(6,9,18,.5);border:1px solid var(--line)}
+.bignum{text-align:center;padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(6,9,18,.6)}
+.bignum .lab{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.bignum .val{font-family:var(--mono);font-size:40px;font-weight:700;margin-top:2px;line-height:1}
+.bignum .verdict{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+.readout{border:1px solid var(--line);border-radius:10px;background:rgba(6,9,18,.6);overflow:hidden}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;border-bottom:1px solid rgba(124,255,176,.07);font-family:var(--mono);font-size:12px}
+.rrow:last-child{border-bottom:none}
+.rrow span{color:var(--dim);font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+.rrow b{font-weight:600;font-size:13px}
+.rrow b.a{color:var(--alice)}.rrow b.bo{color:var(--bob)}.rrow b.c{color:var(--coinc)}
+
+.eq{font-family:var(--mono);background:rgba(6,9,18,.6);border:1px solid var(--line);border-left:3px solid var(--coinc);border-radius:8px;padding:18px;margin-top:18px;font-size:13px;line-height:2;color:var(--body);overflow-x:auto}
+.eq b{color:var(--gold)}.eq .v{color:var(--coinc)}.eq .c{color:var(--classical)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+@media(max-width:760px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:20px}
+.card h4{margin:0 0 9px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--coinc)}
+.card p{font-size:13.5px;margin:0;color:var(--body)}
+ul.clean{list-style:none;padding:0;margin:18px 0;max-width:780px}
+ul.clean li{padding:9px 0 9px 22px;position:relative;color:var(--body);border-bottom:1px solid rgba(124,255,176,.06)}
+ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--coinc)}
+ul.clean li b{color:var(--ink)}
+footer{padding:46px 0 80px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dimmer);letter-spacing:.06em;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<nav><div class="nbar">
+  <div class="brand">⟨ψ| Bell Test |ψ⟩</div>
+  <div class="nlinks"><a href="#bench">Instrument</a><a href="#why">CHSH</a><a href="#read">Reading it</a><a href="#uses">Why it matters</a><a href="#honest">Caveats</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">closing the loop · measuring the entanglement</div>
+  <h1>Stop trusting<br>the <em>ribbon.</em> Measure it.</h1>
+  <p class="sub">The biexciton bench drew a green ribbon and said "entangled." This proves it. Send the dot's two photons to two distant detectors — Alice and Bob — each with a rotatable polarizer. Count how often they agree. A local, classical universe can only correlate so much: the CHSH number can't exceed <strong>2</strong>. Quantum entanglement breaks that wall, all the way to <strong>2√2 ≈ 2.83</strong>. Run the experiment and watch the number cross.</p>
+  <p class="disc">Real physics: CHSH inequality with correlation E(a,b)=cos 2(a−b) for the (|HH⟩+|VV⟩)/√2 state; visibility washout from fine-structure splitting; live Monte-Carlo coincidence counting. Verified against the closed form (ideal S = 2.8284). Idealized model; limits at the end.</p>
+</div></header>
+
+<section id="bench"><div class="wrap">
+  <div class="kick">// instrument</div>
+  <h2>Two detectors, one <em>verdict</em></h2>
+
+  <div class="bench">
+    <div class="bhead"><div class="btitle">source → Alice &amp; Bob → coincidence → CHSH</div><div class="btag">live Monte-Carlo</div></div>
+    <div class="viz"><canvas id="scene" height="240"></canvas></div>
+    <div class="controls">
+      <div class="cpanel alice">
+        <h4>● Alice — analyzer a</h4>
+        <div class="ctl"><label>angle a <b id="v-a">0°</b></label><input type="range" id="s-a" min="0" max="90" value="0"></div>
+        <div class="ctl"><label>angle a′ <b id="v-ap">45°</b></label><input type="range" id="s-ap" min="0" max="90" value="45"></div>
+      </div>
+      <div class="cpanel bob">
+        <h4>● Bob — analyzer b</h4>
+        <div class="ctl"><label>angle b <b id="v-b">22.5°</b></label><input type="range" id="s-b" min="0" max="90" value="22"></div>
+        <div class="ctl"><label>angle b′ <b id="v-bp">67.5°</b></label><input type="range" id="s-bp" min="0" max="90" value="67"></div>
+      </div>
+      <div class="cpanel src">
+        <h4>● Source — the dot</h4>
+        <div class="ctl"><label>fine-structure splitting <b id="v-fss">0 µeV</b></label><input type="range" id="s-fss" min="0" max="40" value="0"></div>
+        <div class="chips">
+          <span class="chip run" id="run">▸ run / pause</span>
+          <span class="chip" id="optimal">set optimal angles</span>
+          <span class="chip" id="reset">reset counts</span>
+        </div>
+      </div>
+    </div>
+    <div class="meters">
+      <div class="mleft">
+        <canvas id="chsh-canvas" height="150"></canvas>
+        <canvas id="corr-canvas" height="120" style="margin-top:10px"></canvas>
+      </div>
+      <div class="mright">
+        <div class="bignum">
+          <div class="lab">CHSH parameter S</div>
+          <div class="val" id="o-S">—</div>
+          <div class="verdict" id="o-verdict">—</div>
+        </div>
+        <div class="readout">
+          <div class="rrow"><span>pairs measured</span><b class="c" id="o-N">0</b></div>
+          <div class="rrow"><span>visibility (FSS)</span><b id="o-vis">1.00</b></div>
+          <div class="rrow"><span>E(a,b)</span><b id="o-eab">—</b></div>
+          <div class="rrow"><span>E(a,b′)</span><b id="o-eabp">—</b></div>
+          <div class="rrow"><span>E(a′,b)</span><b id="o-eapb">—</b></div>
+          <div class="rrow"><span>E(a′,b′)</span><b id="o-eapbp">—</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:14px">Each photon pair is measured at one of Alice's two angles and one of Bob's two — chosen randomly per pair, as a real test does. The four correlation values <code>E</code> accumulate from actual simulated detections (not the formula), and <code>S = E(a,b) − E(a,b′) + E(a′,b) + E(a′,b′)</code>. Above 2, no local hidden-variable theory can explain the data: the light is entangled.</p>
+</div></section>
+
+<section id="why"><div class="wrap">
+  <div class="kick">// the inequality</div>
+  <h2>The wall at <em>2</em></h2>
+  <p>In 1964 John Bell proved something startling: if the world were <em>local</em> (no faster-than-light influence) and <em>realist</em> (measurement outcomes are predetermined), then certain correlations are mathematically capped. The CHSH form of his result says a particular combination of four correlation measurements satisfies <code>|S| ≤ 2</code> — always, for any classical mechanism, hidden variables included. Quantum mechanics predicts entangled particles can reach <code>S = 2√2</code>. Experiments agree with quantum mechanics. The wall is real, and entanglement goes through it.</p>
+  <div class="eq">
+correlation for (|HH⟩+|VV⟩)/√2 :   E(a,b) = <b>cos 2(a−b)</b> · V
+
+  <b>S</b> = E(a,b) − E(a,b′) + E(a′,b) + E(a′,b′)
+
+  <span class="c">classical bound      |S| ≤ 2</span>      ← local hidden variables
+  <span class="v">quantum maximum      |S| = 2√2 ≈ 2.828</span>  ← Tsirelson's bound
+  optimal angles:  a=0°, a′=45°, b=22.5°, b′=67.5°
+
+  visibility from fine-structure splitting:  V = 1 / (1 + (FSS/Γ)²)
+  S crosses below 2 once V drops under 1/√2 ≈ 0.707
+  </div>
+  <p class="note">The simulation draws real random outcomes weighted by quantum probabilities, so the displayed S fluctuates and converges with more pairs — exactly like a real coincidence-counting experiment accumulating statistics.</p>
+</div></section>
+
+<section id="read"><div class="wrap">
+  <div class="kick">// reading the bench</div>
+  <h2>What the numbers <em>say</em></h2>
+  <div class="cards">
+    <div class="card"><h4>S > 2 (green)</h4><p>The classical wall is broken. No local-realist theory can produce this data. The dot's photons are genuinely entangled — proof, not assertion.</p></div>
+    <div class="card"><h4>S → 2.83</h4><p>At optimal angles with perfect visibility you approach Tsirelson's bound, the maximum quantum mechanics itself allows. The ribbon, quantified.</p></div>
+    <div class="card"><h4>FSS opens → S falls</h4><p>Raise the fine-structure splitting and which-path information leaks in; visibility drops, S sinks back below 2, and the proof evaporates. Same physics as the previous bench, now on a meter.</p></div>
+  </div>
+</div></section>
+
+<section id="uses"><div class="wrap">
+  <div class="kick">// why anyone cares</div>
+  <h2>The most consequential <em>inequality</em></h2>
+  <ul class="clean">
+    <li><b>It settled the Einstein–Bohr debate empirically.</b> Bell turned a philosophical argument about whether quantum mechanics is "complete" into a measurable number. Nature chose quantum.</li>
+    <li><b>2022 Nobel Prize in Physics.</b> Aspect, Clauser, and Zeilinger won for experimental Bell tests and entanglement — the experiment this bench simulates.</li>
+    <li><b>Device-independent security.</b> A Bell violation certifies entanglement <em>without trusting the hardware</em> — the foundation of the strongest quantum-cryptography protocols.</li>
+    <li><b>The dot as a certified source.</b> Showing S > 2 from quantum-dot photons (Stevenson, Akopian, 2006) proved a semiconductor can emit genuinely entangled light — the whole point of the previous tool, now verified.</li>
+  </ul>
+</div></section>
+
+<section id="honest"><div class="wrap">
+  <div class="kick">// honesty about the model</div>
+  <h2>Where this <em>simplifies</em></h2>
+  <ul class="clean">
+    <li><b>Loophole-free is hard.</b> Real landmark tests had to close detection and locality loopholes with fast switching and distant detectors; this simulation assumes ideal detection.</li>
+    <li><b>Visibility model is schematic.</b> The <code>V = 1/(1+(FSS/Γ)²)</code> washout captures the right trend (which-path → decoherence) but real fidelity also depends on timing, spin scattering, and re-excitation.</li>
+    <li><b>Perfect analyzers.</b> Ideal polarizers and unit detector efficiency; real optics add loss and misalignment that lower the measured S.</li>
+    <li><b>Statistics are simulated.</b> Counts are Monte-Carlo draws from the quantum probabilities, illustrating convergence — not data from a physical dot.</li>
+  </ul>
+  <p class="note">Background: J. S. Bell (1964); Clauser–Horne–Shimony–Holt (CHSH, 1969); Aspect et al. (1982); Nobel Prize in Physics 2022 (Aspect, Clauser, Zeilinger). Quantum-dot entangled-pair Bell tests: Stevenson et al., Akopian et al. (2006).</p>
+</div></section>
+
+<footer><div class="wrap">
+  The Bell Test · CHSH from quantum-dot photons · live coincidence Monte-Carlo, S vs. classical bound 2 and quantum bound 2√2 · teaching instrument, not lab data
+</div></footer>
+
+<script>
+"use strict";
+const D=Math.PI/180, $=id=>document.getElementById(id);
+let a=0,ap=45,b=22.5,bp=67.5, fss=0;
+let running=true;
+// accumulators: counts[setting] = {pp,pm,mp,mm} for ++,+-,-+,-- outcomes
+const KEYS=["ab","abp","apb","apbp"];
+let counts={}, Npairs=0;
+function resetCounts(){counts={};KEYS.forEach(k=>counts[k]={pp:0,pm:0,mp:0,mm:0});Npairs=0;}
+resetCounts();
+
+function visibility(){ return 1/(1+(fss/1.0)**2); }   // Γ=1 µeV scale
+
+// quantum joint probabilities for (|HH>+|VV>)/sqrt2 with analyzers alpha,beta:
+// P(++)=P(--)=½cos²(α−β)·... actually for this state:
+// P(same)= ½ (1+ V cos2(α−β))/... use standard: P(++)=¼(1+Vcos2(α−β)) etc? 
+// Correlation E=Vcos2(α−β); with marginals random:
+// P(++)=P(--)=¼(1+E), P(+-)=P(-+)=¼(1-E)
+function probs(alpha,beta){
+  const E=visibility()*Math.cos(2*(alpha-beta)*D);
+  return {pp:0.25*(1+E),mm:0.25*(1+E),pm:0.25*(1-E),mp:0.25*(1-E)};
+}
+function drawPair(){
+  // randomly pick Alice setting (a or a') and Bob setting (b or b')
+  const aSet=Math.random()<0.5, bSet=Math.random()<0.5;
+  const alpha=aSet?a:ap, beta=bSet?b:bp;
+  const key = (aSet?"a":"ap")+(bSet?"b":"bp");
+  const P=probs(alpha,beta);
+  const r=Math.random();
+  let o;
+  if(r<P.pp)o="pp"; else if(r<P.pp+P.mm)o="mm"; else if(r<P.pp+P.mm+P.pm)o="pm"; else o="mp";
+  counts[key][o]++; Npairs++;
+  return {aSet,bSet,o};
+}
+function corr(key){
+  const c=counts[key], n=c.pp+c.pm+c.mp+c.mm;
+  if(n===0)return 0;
+  return (c.pp+c.mm-c.pm-c.mp)/n;
+}
+function S(){ return corr("ab")-corr("abp")+corr("apb")+corr("apbp"); }
+
+/* ---- scene: source + two arms + detectors ---- */
+const sc=$("scene"), x=sc.getContext("2d");
+let W=0,H=0,DPR=Math.min(devicePixelRatio||1,2);
+function fit(){W=sc.clientWidth;H=240;sc.width=W*DPR;sc.height=H*DPR;x.setTransform(DPR,0,0,DPR,0,0);}
+let flyers=[]; // photons in flight {t, aSet,bSet,o}
+function draw(){
+  x.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+  // source dot
+  const sg=x.createRadialGradient(cx,cy,2,cx,cy,26);
+  sg.addColorStop(0,"#fff");sg.addColorStop(.4,"#b888ff");sg.addColorStop(1,"rgba(8,12,22,.8)");
+  x.fillStyle=sg;x.shadowColor="#b888ff";x.shadowBlur=18;x.beginPath();x.arc(cx,cy,18,0,7);x.fill();x.shadowBlur=0;
+  x.fillStyle="#64728c";x.font="10px 'IBM Plex Mono',monospace";x.textAlign="center";
+  x.fillText("dot source",cx,cy+34);
+  // arms
+  x.strokeStyle="rgba(124,255,176,.12)";x.lineWidth=1;
+  x.beginPath();x.moveTo(cx,cy);x.lineTo(70,cy);x.moveTo(cx,cy);x.lineTo(W-70,cy);x.stroke();
+  // detector stations
+  function station(px,col,name,ang1,ang2){
+    x.save();x.translate(px,cy);
+    // polarizer (oriented at current 'a' for alice / 'b' for bob — show the unprimed)
+    x.strokeStyle=col;x.lineWidth=2.5;x.shadowColor=col;x.shadowBlur=8;
+    const ang=(name==="Alice"?a:b)*D;
+    x.beginPath();x.moveTo(-16*Math.cos(ang),-16*Math.sin(ang));x.lineTo(16*Math.cos(ang),16*Math.sin(ang));x.stroke();
+    x.shadowBlur=0;
+    x.strokeStyle=col;x.lineWidth=1.5;x.strokeRect(-22,-22,44,44);
+    x.fillStyle=col;x.font="bold 11px 'IBM Plex Mono',monospace";x.textAlign="center";
+    x.fillText(name,0,40);
+    x.restore();
+  }
+  station(64,"#46e6ff","Alice");
+  station(W-64,"#ff8a3c","Bob");
+  // flying photons
+  flyers.forEach(f=>{
+    const prog=f.t/30;
+    const ax=cx-(cx-64)*prog, bx=cx+(W-64-cx)*prog;
+    x.fillStyle="#46e6ff";x.shadowColor="#46e6ff";x.shadowBlur=8;
+    x.beginPath();x.arc(ax,cy,3.5,0,7);x.fill();
+    x.fillStyle="#ff8a3c";x.shadowColor="#ff8a3c";
+    x.beginPath();x.arc(bx,cy,3.5,0,7);x.fill();x.shadowBlur=0;
+    if(f.t>=30){ // flash detectors with click result
+      const aClick=(f.o==="pp"||f.o==="pm");  // Alice + ?
+      const bClick=(f.o==="pp"||f.o==="mp");
+      x.fillStyle=aClick?"#7cffb0":"#ff5d8f";x.beginPath();x.arc(64,cy,6,0,7);x.fill();
+      x.fillStyle=bClick?"#7cffb0":"#ff5d8f";x.beginPath();x.arc(W-64,cy,6,0,7);x.fill();
+    }
+  });
+  // entanglement shimmer between arms
+  x.strokeStyle="rgba(124,255,176,.18)";x.setLineDash([2,6]);x.lineWidth=1;
+  x.beginPath();x.moveTo(70,cy-16);x.quadraticCurveTo(cx,cy-40,W-70,cy-16);x.stroke();x.setLineDash([]);
+  x.textAlign="left";
+}
+
+/* ---- CHSH meter ---- */
+const cc=$("chsh-canvas"), cx2=cc.getContext("2d");
+function drawCHSH(){
+  const w=cc.clientWidth||420,hh=150;cc.width=w*DPR;cc.height=hh*DPR;cx2.setTransform(DPR,0,0,DPR,0,0);
+  cx2.clearRect(0,0,w,hh);
+  const padL=30,padR=14,padT=14,padB=22;
+  const sMax=3;
+  const Y=s=>hh-padB-(s/sMax)*(hh-padT-padB);
+  const X0=padL, X1=w-padR;
+  // zones
+  cx2.fillStyle="rgba(255,93,143,.08)";cx2.fillRect(X0,Y(2),X1-X0,hh-padB-Y(2)); // classical region 0..2
+  cx2.fillStyle="rgba(124,255,176,.08)";cx2.fillRect(X0,Y(2*Math.sqrt(2)),X1-X0,Y(2)-Y(2*Math.sqrt(2))); // quantum 2..2.83
+  // lines
+  cx2.strokeStyle="rgba(255,93,143,.7)";cx2.setLineDash([5,4]);cx2.lineWidth=1.5;
+  cx2.beginPath();cx2.moveTo(X0,Y(2));cx2.lineTo(X1,Y(2));cx2.stroke();
+  cx2.strokeStyle="rgba(124,255,176,.6)";cx2.beginPath();cx2.moveTo(X0,Y(2*Math.sqrt(2)));cx2.lineTo(X1,Y(2*Math.sqrt(2)));cx2.stroke();
+  cx2.setLineDash([]);
+  cx2.fillStyle="#ff5d8f";cx2.font="9px 'IBM Plex Mono',monospace";cx2.fillText("classical wall  S=2",X0+4,Y(2)-4);
+  cx2.fillStyle="#7cffb0";cx2.fillText("quantum max  2√2",X0+4,Y(2*Math.sqrt(2))-4);
+  // current S bar
+  const s=Math.abs(S());
+  const bx=w*0.5, bw=40;
+  const col = s>2?"#7cffb0":"#ff5d8f";
+  cx2.fillStyle=col;cx2.shadowColor=col;cx2.shadowBlur=12;
+  cx2.fillRect(bx-bw/2,Y(s),bw,hh-padB-Y(s));cx2.shadowBlur=0;
+  cx2.fillStyle="#edf1f9";cx2.font="bold 13px 'IBM Plex Mono',monospace";cx2.textAlign="center";
+  cx2.fillText(s.toFixed(3),bx,Y(s)-6);cx2.textAlign="left";
+}
+
+/* ---- correlation curve E vs (a-b) ---- */
+const corC=$("corr-canvas"), cx3=corC.getContext("2d");
+function drawCorr(){
+  const w=corC.clientWidth||420,hh=120;corC.width=w*DPR;corC.height=hh*DPR;cx3.setTransform(DPR,0,0,DPR,0,0);
+  cx3.clearRect(0,0,w,hh);
+  const padL=28,padR=12,padT=12,padB=20;
+  const X=ang=>padL+ang/90*(w-padL-padR);          // 0..90 deg
+  const Y=E=>padT+(1-(E+1)/2)*(hh-padT-padB);       // -1..1
+  cx3.strokeStyle="rgba(124,255,176,.15)";cx3.lineWidth=1;
+  cx3.strokeRect(padL,padT,w-padL-padR,hh-padT-padB);
+  cx3.beginPath();cx3.moveTo(padL,Y(0));cx3.lineTo(w-padR,Y(0));cx3.stroke();
+  cx3.fillStyle="#64728c";cx3.font="8px 'IBM Plex Mono',monospace";
+  cx3.fillText("E",4,Y(1)+4);cx3.fillText("+1",padL-22,Y(1)+3);cx3.fillText("−1",padL-22,Y(-1)+3);
+  cx3.fillText("|a−b| (deg)",w-padR-58,hh-6);
+  // theory curve E = V cos 2(da)
+  const V=visibility();
+  cx3.strokeStyle="rgba(124,255,176,.5)";cx3.lineWidth=2;cx3.beginPath();
+  for(let da=0;da<=90;da+=1){const E=V*Math.cos(2*da*D);da===0?cx3.moveTo(X(da),Y(E)):cx3.lineTo(X(da),Y(E));}
+  cx3.stroke();
+  // measured points
+  const pts=[["ab",Math.abs(a-b)],["abp",Math.abs(a-bp)],["apb",Math.abs(ap-b)],["apbp",Math.abs(ap-bp)]];
+  pts.forEach(([k,da])=>{const E=corr(k);if(counts[k].pp+counts[k].pm+counts[k].mp+counts[k].mm>0){
+    cx3.fillStyle="#ffd166";cx3.beginPath();cx3.arc(X(Math.min(90,da)),Y(E),3.5,0,7);cx3.fill();}});
+}
+
+function sync(){
+  $("v-a").textContent=a+"°";$("v-ap").textContent=ap+"°";
+  $("v-b").textContent=b+"°";$("v-bp").textContent=bp+"°";
+  $("v-fss").textContent=fss+" µeV";
+  $("o-N").textContent=Npairs.toLocaleString();
+  $("o-vis").textContent=visibility().toFixed(2);
+  $("o-eab").textContent=corr("ab").toFixed(3);
+  $("o-eabp").textContent=corr("abp").toFixed(3);
+  $("o-eapb").textContent=corr("apb").toFixed(3);
+  $("o-eapbp").textContent=corr("apbp").toFixed(3);
+  const s=Math.abs(S());
+  $("o-S").textContent=Npairs>40?s.toFixed(3):"…";
+  $("o-S").style.color=s>2?"#7cffb0":"#ff5d8f";
+  const v=$("o-verdict");
+  if(Npairs<=40){v.textContent="accumulating…";v.style.color="#64728c";}
+  else if(s>2){v.textContent="VIOLATES — entangled";v.style.color="#7cffb0";}
+  else{v.textContent="within classical bound";v.style.color="#ff5d8f";}
+}
+
+let frame=0;
+function loop(){
+  frame++;
+  if(running){
+    // draw a batch of pairs each frame for fast convergence
+    for(let i=0;i<6;i++){const f=drawPair();if(i===0)flyers.push({t:0,...f});}
+  }
+  flyers.forEach(f=>f.t++);flyers=flyers.filter(f=>f.t<40);
+  draw();
+  if(frame%3===0){drawCHSH();drawCorr();sync();}
+  requestAnimationFrame(loop);
+}
+
+$("s-a").addEventListener("input",e=>{a=+e.target.value;resetCounts();});
+$("s-ap").addEventListener("input",e=>{ap=+e.target.value;resetCounts();});
+$("s-b").addEventListener("input",e=>{b=+e.target.value;resetCounts();});
+$("s-bp").addEventListener("input",e=>{bp=+e.target.value;resetCounts();});
+$("s-fss").addEventListener("input",e=>{fss=+e.target.value;resetCounts();});
+$("run").addEventListener("click",e=>{running=!running;e.target.textContent=running?"▮ pause":"▸ run";});
+$("optimal").addEventListener("click",()=>{a=0;ap=45;b=22;bp=67;
+  $("s-a").value=0;$("s-ap").value=45;$("s-b").value=22;$("s-bp").value=67;resetCounts();});
+$("reset").addEventListener("click",resetCounts);
+addEventListener("resize",()=>{fit();});
+fit();sync();loop();
+</script>
+</body>
+</html>

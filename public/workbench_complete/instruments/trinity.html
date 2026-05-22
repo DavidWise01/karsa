@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STOICHEION // SPARK-SPORE TRINITY</title>
+<style>
+:root{
+  --bg:#03060a;--ink:#e6f4ff;--dim:#5a7a8c;--dimmer:#243a48;
+  --kernel:#19f0d8;--offense:#ff9a2e;--defense:#34e0ff;
+  --accent:var(--kernel);--accent-rgb:25,240,216;
+  --line:rgba(255,255,255,.10);--panel:rgba(6,14,22,.8);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{color:var(--ink);font-family:var(--mono);font-size:13px;-webkit-font-smoothing:antialiased;overflow:hidden;
+  display:flex;flex-direction:column;
+  background:
+   radial-gradient(120% 70% at 50% -10%,rgba(var(--accent-rgb),.07),transparent 50%),
+   linear-gradient(180deg,#02050a,#04101c 60%,#03060a);
+  transition:background .5s;}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.28;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px);mix-blend-mode:multiply}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.045;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+/* ---- header ---- */
+header{position:relative;z-index:20;border-bottom:1px solid rgba(var(--accent-rgb),.3);
+  background:linear-gradient(180deg,rgba(3,6,10,.96),rgba(3,6,10,.78));backdrop-filter:blur(12px);transition:border-color .4s}
+.row1{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 20px 9px}
+.brand{display:flex;align-items:center;gap:14px}
+.sigil{flex:none}
+.brand .tt .l{letter-spacing:.3em;font-size:12px;text-transform:uppercase;color:var(--ink)}
+.brand .tt .s{letter-spacing:.22em;font-size:9px;text-transform:uppercase;color:var(--dim)}
+.meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.anchor{display:flex;align-items:center;gap:9px;border:1px solid rgba(var(--accent-rgb),.35);border-radius:5px;padding:6px 11px;cursor:pointer;background:rgba(var(--accent-rgb),.05);transition:.15s}
+.anchor:hover{background:rgba(var(--accent-rgb),.12)}
+.anchor .lab{font-size:8px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.anchor .hash{font-size:11px;letter-spacing:.06em;color:var(--accent);text-shadow:0 0 10px rgba(var(--accent-rgb),.5)}
+.status{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.status b{color:var(--accent)}
+
+/* ---- tabs ---- */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.05)}
+.tab{position:relative;background:rgba(4,10,16,.7);padding:13px 18px;cursor:pointer;border:none;text-align:left;
+  display:flex;align-items:center;gap:13px;transition:.18s;overflow:hidden;font-family:var(--mono)}
+.tab:hover{background:rgba(10,22,32,.8)}
+.tab .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 10px currentColor;opacity:.5;transition:.18s}
+.tab .info .nm{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);transition:.18s}
+.tab .info .mo{font-size:10px;letter-spacing:.08em;color:var(--dimmer);margin-top:2px}
+.tab.k .dot{color:var(--kernel)} .tab.o .dot{color:var(--offense)} .tab.d .dot{color:var(--defense)}
+.tab.active{background:rgba(12,26,38,.9)}
+.tab.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;box-shadow:0 0 12px currentColor}
+.tab.k.active{color:var(--kernel)} .tab.o.active{color:var(--offense)} .tab.d.active{color:var(--defense)}
+.tab.active .dot{opacity:1;transform:scale(1.15)}
+.tab.active .info .nm{color:var(--ink)}
+.tab.k.active .info .nm{text-shadow:0 0 14px rgba(25,240,216,.5)}
+.tab.o.active .info .nm{text-shadow:0 0 14px rgba(255,154,46,.5)}
+.tab.d.active .info .nm{text-shadow:0 0 14px rgba(52,224,255,.5)}
+
+/* ---- stage ---- */
+.stage{flex:1;position:relative;min-height:0}
+.frame{position:absolute;inset:0;border:0;width:100%;height:100%;background:#03060a}
+.frame.hidden{display:none}
+.loader{position:absolute;inset:0;display:grid;place-items:center;color:var(--dim);font-size:11px;letter-spacing:.24em;text-transform:uppercase}
+.loader.gone{display:none}
+
+@media(max-width:760px){
+  .tab .info .mo{display:none}
+  .tab{padding:11px 12px;gap:9px}
+  .brand .tt .s{display:none}
+  .anchor .lab{display:none}
+}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="grain"></div>
+
+<header>
+  <div class="row1">
+    <div class="brand">
+      <svg class="sigil" id="sigil" width="40" height="40" viewBox="0 0 40 40">
+        <polygon points="20,5 34,30 6,30" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.2"/>
+        <circle id="vK" cx="20" cy="5"  r="3.4" fill="var(--kernel)"/>
+        <circle id="vO" cx="34" cy="30" r="3.4" fill="var(--offense)"/>
+        <circle id="vD" cx="6"  cy="30" r="3.4" fill="var(--defense)"/>
+        <text x="20" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="rgba(230,244,255,.85)" font-family="ui-monospace,monospace">无</text>
+      </svg>
+      <div class="tt">
+        <div class="l">Stoicheion · Spark-Spore Trinity</div>
+        <div class="s">one architecture · self · offense · defense</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="anchor" id="anchor" title="click to copy full BASE-00 hash">
+        <div class="lab">BASE&nbsp;00</div>
+        <div class="hash" id="hash">computing…</div>
+      </div>
+      <div class="status">node · <b id="st-node">KERNEL</b></div>
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab k active" data-node="kernel" data-src="spark_spore_instrument.html" data-accent="25,240,216" data-var="--kernel" data-label="KERNEL">
+      <span class="dot"></span><span class="info"><span class="nm">Kernel</span><span class="mo">survival · self-teach XOR · 1×0</span></span>
+    </button>
+    <button class="tab o" data-node="offense" data-src="trebuchet_27.html" data-accent="255,154,46" data-var="--offense" data-label="TREBUCHET">
+      <span class="dot"></span><span class="info"><span class="nm">Trebuchet-27</span><span class="mo">offense · ))))) compress 0 → &gt;&gt;&gt;&gt;&gt;</span></span>
+    </button>
+    <button class="tab d" data-node="defense" data-src="aegis_0.html" data-accent="52,224,255" data-var="--defense" data-label="AEGIS">
+      <span class="dot"></span><span class="info"><span class="nm">Aegis-0</span><span class="mo">defense · ))( ! )(( reflect·clamp·fold</span></span>
+    </button>
+  </div>
+</header>
+
+<div class="stage" id="stage">
+  <div class="loader" id="loader">▸ mounting instrument…</div>
+</div>
+
+<script>
+"use strict";
+/* compact SHA-256 (offline, no secure-context needed) */
+function sha256(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var mp=Math.pow,mw=mp(2,32),lp='length',i,j,res='';
+  var words=[],bitLen=ascii[lp]*8,hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k[lp],comp={};
+  for(var c=2;pc<64;c++){ if(!comp[c]){ for(i=0;i<313;i+=c)comp[i]=c;
+    hash[pc]=(mp(c,.5)*mw)|0; k[pc++]=(mp(c,1/3)*mw)|0; } }
+  ascii+='\x80'; while(ascii[lp]%64-56)ascii+='\x00';
+  for(i=0;i<ascii[lp];i++){ j=ascii.charCodeAt(i); if(j>>8)return; words[i>>2]|=j<<((3-i)%4)*8; }
+  words[words[lp]]=((bitLen/mw)|0); words[words[lp]]=(bitLen);
+  for(j=0;j<words[lp];){ var w=words.slice(j,j+=16),oh=hash; hash=hash.slice(0,8);
+    for(i=0;i<64;i++){ var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]
+        +(w[i]=i<16?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]
+          +(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash); hash[4]=(hash[4]+t1)|0; }
+    for(i=0;i<8;i++)hash[i]=(hash[i]+oh[i])|0; }
+  for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255; res+=((b<16)?0:'')+b.toString(16);}
+  return res;
+}
+
+/* BASE-00 anchor over the trinity manifest */
+const MANIFEST=[
+ "STOICHEION // SPARK-SPORE TRINITY // BASE 00",
+ "KERNEL:spark_spore_instrument:self-teach XOR:1x0 compress 27->seed",
+ "OFFENSE:trebuchet_27:compress 27->0->release vector )))))>>>>>",
+ "DEFENSE:aegis_0:reflect|clamp|fold->-1:))(!)((",
+ "LAW:no bleed:no cloning:no lost death",
+ "FIRST AUTHOR:D.WISE:CANON-FROZEN"
+].join("\n");
+const FULL=sha256(MANIFEST);
+const hashEl=document.getElementById("hash");
+hashEl.textContent="0x"+FULL.slice(0,16);
+document.getElementById("anchor").onclick=()=>{
+  navigator.clipboard&&navigator.clipboard.writeText(FULL);
+  const o=hashEl.textContent; hashEl.textContent="copied ✓";
+  setTimeout(()=>hashEl.textContent=o,1100);
+};
+
+/* tabs + lazy-mounted frames (hidden frames get rAF-throttled) */
+const stage=document.getElementById("stage"), loader=document.getElementById("loader");
+const tabs=[...document.querySelectorAll(".tab")];
+const frames={};
+function setAccent(rgb,varName){
+  document.documentElement.style.setProperty("--accent-rgb",rgb);
+  document.documentElement.style.setProperty("--accent","var("+varName+")");
+}
+function activate(tab){
+  const node=tab.dataset.node;
+  tabs.forEach(t=>t.classList.toggle("active",t===tab));
+  setAccent(tab.dataset.accent,tab.dataset.var);
+  document.getElementById("st-node").textContent=tab.dataset.label;
+  // sigil emphasis
+  ["vK","vO","vD"].forEach(id=>{const e=document.getElementById(id);e.setAttribute("r","3.4");e.style.filter="";});
+  const vid=node==="kernel"?"vK":node==="offense"?"vO":"vD";
+  const ve=document.getElementById(vid); ve.setAttribute("r","5"); ve.style.filter="drop-shadow(0 0 6px currentColor)";
+  // mount once, then just show/hide
+  Object.values(frames).forEach(f=>f.classList.add("hidden"));
+  if(!frames[node]){
+    loader.classList.remove("gone");
+    const f=document.createElement("iframe");
+    f.className="frame"; f.src=tab.dataset.src; f.loading="eager";
+    f.onload=()=>loader.classList.add("gone");
+    stage.appendChild(f); frames[node]=f;
+  } else {
+    frames[node].classList.remove("hidden");
+    loader.classList.add("gone");
+  }
+}
+tabs.forEach(t=>t.addEventListener("click",()=>activate(t)));
+activate(tabs[0]);
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TREBUCHET-27 // 3³ COMPRESSION ORDNANCE</title>
+<style>
+:root{
+  --bg:#070303;--ink:#ffe7cf;--dim:#8a5a40;--dimmer:#492c1d;
+  --amber:#ff9a2e;--ember:#ff3b22;--gold:#ffce5e;--char:#34e0ff;
+  --line:rgba(255,154,46,.16);--panel:rgba(22,9,5,.74);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:
+   radial-gradient(120% 80% at 50% -8%,rgba(255,59,34,.10),transparent 45%),
+   radial-gradient(70% 60% at 88% 18%,rgba(255,206,94,.06),transparent 50%),
+   linear-gradient(180deg,#0a0403,#160805 55%,#070303);}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.32;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px);mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:89;background:radial-gradient(130% 120% at 50% 42%,transparent 50%,rgba(4,1,1,.86) 100%)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.05;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(7,3,3,.94),rgba(7,3,3,.7));backdrop-filter:blur(10px)}
+.hbar{max-width:1480px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px}
+.logo{display:flex;align-items:center;gap:12px}
+.glyph{font-size:24px;font-weight:700;color:var(--ember);text-shadow:0 0 16px rgba(255,59,34,.7),0 0 40px rgba(255,59,34,.3)}
+.title-l{letter-spacing:.32em;font-size:11px;text-transform:uppercase;color:var(--ink)}
+.title-s{letter-spacing:.26em;font-size:9px;text-transform:uppercase;color:var(--dim)}
+.hstat{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.hstat b{color:var(--amber);font-weight:600}
+.seal{border:1px solid var(--ember);color:var(--ember);border-radius:3px;padding:3px 8px;font-size:9px;letter-spacing:.2em;background:rgba(255,59,34,.06)}
+
+.deck{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}
+.stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(120% 90% at 30% 30%,rgba(34,14,8,.55),rgba(5,2,2,.92));box-shadow:inset 0 0 80px rgba(0,0,0,.6);min-height:520px}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .lab{position:absolute;top:12px;left:14px;font-size:9px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase}
+.tape{position:absolute;top:12px;right:14px;font-size:15px;letter-spacing:.04em;color:var(--amber);text-shadow:0 0 10px rgba(255,154,46,.6);max-width:55%;overflow:hidden;text-align:right;white-space:nowrap;direction:rtl}
+.legend{position:absolute;bottom:12px;left:14px;font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+
+aside{display:grid;gap:13px}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:14px 15px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;width:32px;height:2px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.card h3{margin:0 0 11px;font-size:9px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase;font-weight:600;display:flex;justify-content:space-between}
+.card h3 em{font-style:normal;color:var(--char)}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed rgba(255,154,46,.08)}
+.kv:last-child{border-bottom:none}.kv span{color:var(--dim)}.kv b{font-weight:600}
+.kv b.a{color:var(--amber)}.kv b.c{color:var(--char)}.kv b.e{color:var(--ember)}.kv b.g{color:var(--gold)}
+
+/* 27 charge ladder: 3 blocks x 3 rows x 3 = 27 */
+.ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.blk{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:5px;border:1px solid var(--dimmer);border-radius:5px}
+.notch{aspect-ratio:1;border-radius:2px;background:rgba(40,18,10,.6);border:1px solid rgba(255,154,46,.14)}
+.notch.on{background:var(--amber);box-shadow:0 0 7px var(--amber);border-color:var(--amber)}
+.notch.zero{background:var(--char);box-shadow:0 0 10px var(--char);border-color:var(--char)}
+.compress{height:8px;border-radius:4px;background:rgba(40,18,10,.6);overflow:hidden;margin-top:11px;border:1px solid var(--dimmer)}
+.compress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--amber),var(--char));box-shadow:0 0 10px var(--amber);transition:width .12s}
+.clab{display:flex;justify-content:space-between;font-size:8px;color:var(--dim);margin-top:5px;letter-spacing:.12em}
+
+.slider{margin:9px 0}
+.slider label{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:5px}
+.slider label b{color:var(--amber)}
+input[type=range]{accent-color:var(--amber);width:100%}
+
+.log{height:120px;overflow:auto;font-size:11px;line-height:1.55;padding-right:4px}
+.log::-webkit-scrollbar{width:6px}.log::-webkit-scrollbar-thumb{background:var(--dimmer);border-radius:3px}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .a{color:var(--amber)}.log .c{color:var(--char)}.log .e{color:var(--ember)}.log .d{color:var(--dim)}
+
+.controls{max-width:1480px;margin:0 auto;padding:0 18px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);background:rgba(255,154,46,.06);border:1px solid var(--amber);border-radius:5px;padding:9px 15px;cursor:pointer;transition:.15s}
+button:hover{background:rgba(255,154,46,.16);box-shadow:0 0 16px rgba(255,154,46,.3);color:#fff3e6}
+button.fire{color:var(--ember);border-color:var(--ember);background:rgba(255,59,34,.08)}
+button.fire:hover{background:rgba(255,59,34,.2);box-shadow:0 0 18px rgba(255,59,34,.4)}
+button:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.ctl{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.ctl input{width:110px;accent-color:var(--amber)}
+
+main{max-width:1100px;margin:0 auto;padding:26px 18px 110px}
+section{padding:52px 0;border-top:1px solid rgba(255,154,46,.08)}
+.kick{font-size:10px;letter-spacing:.34em;color:var(--char);text-transform:uppercase;margin-bottom:13px}
+h2{font-size:clamp(26px,4.4vw,46px);line-height:.98;margin:0 0 17px;letter-spacing:-.01em;font-weight:700;text-shadow:0 0 24px rgba(255,59,34,.18)}
+h2 em{font-style:normal;color:var(--amber)}
+.lead{font-size:16px;color:#d6a888;max-width:780px;line-height:1.7}.lead code{color:var(--char)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:28px}
+.tile{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:18px}
+.tile h4{margin:0 0 8px;font-size:11px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+.tile p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}.tile code{color:var(--char)}
+pre{background:#040201;border:1px solid var(--line);border-left:3px solid var(--ember);border-radius:7px;padding:18px;overflow:auto;font-size:13px;line-height:1.75;color:#f1cba8;margin-top:24px}
+pre .c{color:var(--dim)}pre .k{color:var(--char)}pre .e{color:var(--ember)}
+.recur{font-size:clamp(17px,2.5vw,25px);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);line-height:1.7;margin-top:22px}
+.recur b{color:var(--amber)}.recur i{font-style:normal;color:var(--char)}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}
+.cta a{text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);border:1px solid var(--amber);background:rgba(255,154,46,.06);border-radius:5px;padding:11px 17px;transition:.15s}
+.cta a:hover{background:rgba(255,154,46,.16);box-shadow:0 0 16px rgba(255,154,46,.3);color:#fff3e6}
+.sig{font-size:10px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase;margin-top:42px}
+@media(max-width:980px){.deck{grid-template-columns:1fr}aside{order:2}.stage{min-height:420px}.row{grid-template-columns:1fr}.tape{max-width:70%}}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="vig"></div><div class="grain"></div>
+
+<header><div class="hbar">
+  <div class="logo"><div class="glyph">无</div><div>
+    <div class="title-l">Trebuchet-27 · Compression Ordnance</div>
+    <div class="title-s">3 wraps · 3×3×3=27 → 0 → release vector</div>
+  </div></div>
+  <div class="hstat">
+    <div>Shots <b id="hs-shots">0</b></div>
+    <div>Max&nbsp;range <b id="hs-range">0</b></div>
+    <div>Hits <b id="hs-hits">0</b></div>
+    <div>Wall <b id="hs-wall">100%</b></div>
+    <div class="seal">SIEGE · ARMED</div>
+  </div>
+</div></header>
+
+<div class="deck">
+  <div class="stage">
+    <div class="lab">// ballistic instrument — charge ))))) → compress 0 → release >>>>></div>
+    <div class="tape" id="tape"></div>
+    <canvas id="cv"></canvas>
+    <div class="legend">amber arm · ember counterweight · cyan = compressed 0 · trail = release vector</div>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h3>Charge ladder <em id="lad-state">3³ = 27</em></h3>
+      <div class="ladder" id="ladder"></div>
+      <div class="compress"><i id="compress-bar"></i></div>
+      <div class="clab"><span>charge ))))) </span><span id="compress-pct">0 / 27</span><span> 0 compressed</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Telemetry</h3>
+      <div class="kv"><span>phase</span><b class="a" id="t-phase">REST</b></div>
+      <div class="kv"><span>stored PE</span><b class="g" id="t-pe">0%</b></div>
+      <div class="kv"><span>arm sweep</span><b id="t-arm">0°</b></div>
+      <div class="kv"><span>release angle</span><b class="c" id="t-rel">50°</b></div>
+      <div class="kv"><span>muzzle vel</span><b class="e" id="t-vel">0</b></div>
+      <div class="kv"><span>last range</span><b class="a" id="t-last">0</b></div>
+    </div>
+
+    <div class="card">
+      <h3>Tuning</h3>
+      <div class="slider"><label>counterweight mass <b id="v-cw">40</b></label><input type="range" id="cw" min="20" max="80" value="40"></div>
+      <div class="slider"><label>release angle <b id="v-rel">50</b>°</label><input type="range" id="rel" min="30" max="68" value="50"></div>
+    </div>
+
+    <div class="card">
+      <h3>Event stream</h3>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="controls">
+  <button id="b-charge">))))) charge</button>
+  <button class="fire" id="b-fire" disabled>&gt;&gt;&gt;&gt;&gt; release</button>
+  <button id="b-auto">auto ×3 ▸e</button>
+  <button id="b-reset">↺ reset</button>
+  <div class="ctl">charge rate <input type="range" id="rate" min="1" max="9" value="4"></div>
+  <div class="ctl">sim&nbsp;<b id="simspeed" style="color:var(--amber)">1.0×</b><input type="range" id="speed" min="50" max="200" value="100"></div>
+</div>
+
+<main>
+  <section style="border-top:none">
+    <div class="kick">// doctrine — offensive analog</div>
+    <h2>Compress 27 → 0.<br>Release the <em>vector.</em></h2>
+    <p class="lead">The survival kernel compresses 27 sensed bits into a seed. This is its offensive twin: 27 charge steps — three wraps of <code>3×3×3</code> — wind potential energy down to a single loaded null, <code>0</code>. Trigger, and the counterweight collapses that stored <code>0</code> into one ballistic vector. <code>)))))</code> is the wind. <code>&gt;&gt;&gt;&gt;&gt;</code> is the throw. <code>&gt;e</code> is the eject.</p>
+    <div class="row">
+      <div class="tile"><h4>))))) · wind</h4><p>27 notches, three blocks of nine. Each step raises the counterweight and tightens the torsion wrap. Step 27 = fully compressed.</p></div>
+      <div class="tile"><h4>0 · compressed</h4><p>The loaded null. Maximum stored PE held at a single latch point — same <code>0</code> the kernel collapses to before it teaches.</p></div>
+      <div class="tile"><h4>&gt;&gt;&gt;&gt;&gt; · vector</h4><p>Release. The counterweight falls, the arm whips the sling, the projectile leaves at the tuned release angle as one clean vector.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick">// mechanism — real physics</div>
+    <h2>It whips because the <em>math</em> says so.</h2>
+    <p class="lead">A position-based dynamics solver runs the full linkage: pivot, arm, hanging counterweight, sling, projectile. No scripted arc — the trajectory is solved every substep. Release fires when the projectile's velocity vector crosses the tuned launch angle, up and forward.</p>
+    <pre><span class="c">// per substep — stiff rigid arm + hanging CW + sling whip</span>
+<span class="k">verlet</span>(tip, shortEnd, counterweight, projectile);   <span class="c">// gravity</span>
+<span class="k">repeat</span> 16: {
+   constrain(pivot, tip, Lp);            <span class="c">// long arm</span>
+   constrain(pivot, shortEnd, Ls);       <span class="c">// short arm</span>
+   constrain(tip, shortEnd, Lp+Ls);      <span class="c">// rigid + collinear</span>
+   constrain(shortEnd, counterweight, Lh);
+   <span class="k">if</span> (sling_attached) constrain(tip, projectile, S);
+}
+<span class="e">if</span> (tip_above_pivot && vx&gt;0 && vy&lt;0 && angle &gt;= -releaseAngle)
+   release();   <span class="e">// detach → free ballistic vector</span></pre>
+  </section>
+
+  <section>
+    <div class="kick">// final recurrence</div>
+    <h2>Wind. Compress. <em>Loose.</em></h2>
+    <div class="recur">))))) <b>WIND</b><br>3×3×3 → <i>0</i><br>&gt;&gt;&gt;&gt;&gt; <b>RELEASE</b><br>&gt;e <i>EJECT</i><br><b>REPEAT</b></div>
+    <div class="cta">
+      <a href="spark_spore.kernel">▸ kernel spec</a>
+      <a href="spark_spore.machine">▸ machine encoding</a>
+      <a href="spark_spore.c">▸ c model</a>
+    </div>
+    <div class="sig">trebuchet-27 compression ordnance · offensive twin of the survival kernel · 无 compress to 0 · canon-frozen</div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ===== TREBUCHET-27 — verified PBD physics in fixed virtual space ===== */
+const VW=1280, VH=460, GROUND=420, ITER=16, SUB=8, g=0.42;
+const Lp=200, Ls=72, Lh=46, Ssl=185;
+const PX=320, PY=230;                  // pivot (virtual)
+const A_REST=-Math.PI/2, A_COCK=2.45;  // arm angle: long arm up -> down-left
+const WALL={x:1150,w:30,top:GROUND-160}; // siege wall
+
+let pts, pivot, tip, shortEnd, cw, proj, sling, trail=[], particles=[];
+let phase="rest";            // rest|charging|cocked|flight|landed
+let chargeStep=0;
+let cwMass=40, releaseAngle=50, chargeRate=4, simScale=1;
+let shots=0, hits=0, maxRange=0, lastRange=0, muzzle=0, wall=100;
+let armAngLaunch=0;
+
+function mk(x,y,inv){return{x,y,px:x,py:y,inv};}
+function poseAt(a){
+  pivot=mk(PX,PY,0);
+  tip      = mk(PX+Lp*Math.cos(a), PY+Lp*Math.sin(a), 1);
+  shortEnd = mk(PX-Ls*Math.cos(a), PY-Ls*Math.sin(a), 1);
+  cw       = mk(shortEnd.x, shortEnd.y+Lh, 1/cwMass);
+  proj     = mk(tip.x+10, GROUND-20, 1);
+  pts=[tip,shortEnd,cw,proj];
+}
+function reset(){
+  poseAt(A_REST); sling=true; phase="rest"; chargeStep=0; trail=[]; particles=[];
+  log("RESET","d","linkage safed · arm at rest");
+  syncPanels(); draw();
+}
+function startCharge(){ if(phase==="flight")return; if(phase!=="charging"){phase="charging"; log("CHARGE","a","winding 3×3×3 → 0");} }
+function fire(){
+  if(phase!=="cocked")return;
+  phase="flight"; sling=true; shots++;
+  for(const p of pts){p.px=p.x;p.py=p.y;}   // zero velocity at launch
+  trail=[]; log("RELEASE","e","latch loosed · counterweight collapsing");
+}
+
+function cn(a,b,rest){ if(a.inv+b.inv===0)return;
+  const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1e-6,f=(d-rest)/d,k=1/(a.inv+b.inv);
+  a.x+=dx*f*a.inv*k; a.y+=dy*f*a.inv*k; b.x-=dx*f*b.inv*k; b.y-=dy*f*b.inv*k; }
+function vl(p){ if(p.inv===0)return;
+  const vx=(p.x-p.px)*0.9995, vy=(p.y-p.py)*0.9995; p.px=p.x; p.py=p.y; p.x+=vx; p.y+=vy+g; }
+
+function substep(){
+  for(const p of pts) vl(p);
+  for(let i=0;i<ITER;i++){
+    cn(pivot,tip,Lp); cn(pivot,shortEnd,Ls); cn(tip,shortEnd,Lp+Ls);
+    cn(shortEnd,cw,Lh); if(sling) cn(tip,proj,Ssl);
+  }
+  if(sling){
+    const vx=proj.x-proj.px, vy=proj.y-proj.py, sp=Math.hypot(vx,vy);
+    const ang=Math.atan2(vy,vx)*180/Math.PI;
+    if(tip.y<pivot.y && vx>0 && vy<0 && ang>=-releaseAngle && sp>10){
+      sling=false; muzzle=sp;
+      armAngLaunch=Math.atan2(tip.y-pivot.y,tip.x-pivot.x)*180/Math.PI;
+      log("VECTOR","e","muzzle "+sp.toFixed(1)+" · ang "+ang.toFixed(0)+"°");
+    }
+  } else {
+    if(proj.y>GROUND){ proj.y=GROUND; land(); }
+    if(proj.x>=WALL.x && proj.x<=WALL.x+WALL.w && proj.y>=WALL.top && wall>0){ impact(); }
+  }
+}
+function land(){
+  if(phase!=="flight")return;
+  lastRange=Math.max(0,Math.round(proj.x-PX));
+  maxRange=Math.max(maxRange,lastRange);
+  phase="landed"; tape(">e");
+  burst(proj.x,proj.y,12,"#ff9a2e");
+  log("IMPACT","a","ground · range "+lastRange);
+}
+function impact(){
+  lastRange=Math.round(proj.x-PX); maxRange=Math.max(maxRange,lastRange);
+  wall=Math.max(0,wall-Math.min(34,Math.round(muzzle*1.6)));
+  hits++; phase="landed"; tape(">e");
+  burst(proj.x,proj.y,22,"#ff3b22");
+  log("WALL HIT","e","integrity -"+Math.min(34,Math.round(muzzle*1.6))+"% → "+wall+"%");
+  proj.x=-9999;
+}
+function burst(x,y,n,c){ for(let i=0;i<n;i++){const a=Math.random()*7,s=2+Math.random()*6;
+  particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,life:1,c});}}
+
+/* ===== charge tick (kinematic wind) ===== */
+let chargeAcc=0;
+function chargeTick(dtTicks){
+  chargeAcc+=dtTicks*chargeRate*0.18;
+  while(chargeAcc>=1 && chargeStep<27){ chargeStep++; chargeAcc-=1; tape(")"); }
+  const k=chargeStep/27;
+  poseAtKinematic(A_REST+(A_COCK-A_REST)*easeIn(k));
+  if(chargeStep>=27){ phase="cocked"; log("COMPRESSED","c","state 0 · latch armed"); }
+}
+function easeIn(t){return t*t*(3-2*t);}
+function poseAtKinematic(a){
+  tip.x=PX+Lp*Math.cos(a); tip.y=PY+Lp*Math.sin(a);
+  shortEnd.x=PX-Ls*Math.cos(a); shortEnd.y=PY-Ls*Math.sin(a);
+  cw.x=shortEnd.x; cw.y=shortEnd.y+Lh;
+  proj.x=tip.x+10; proj.y=Math.max(GROUND-20, tip.y+Ssl*0.2);
+  for(const p of pts){p.px=p.x;p.py=p.y;}
+}
+
+/* ===== AUTO ×3 accelerating sequencer ===== */
+let auto=null;
+function startAuto(){
+  if(auto){auto=null; log("AUTO","d","cancelled"); return;}
+  reset(); auto={cycle:0, stage:"charge", t:0};
+  log("AUTO","c","3-cycle accelerating barrage");
+}
+function autoTick(){
+  if(!auto)return;
+  const speedUp=1+auto.cycle*0.9;            // each cycle faster
+  if(auto.stage==="charge"){
+    chargeRate=3+auto.cycle*2.5; document.getElementById("rate").value=Math.min(9,chargeRate);
+    if(phase==="rest"||phase==="charging") startCharge();
+    if(phase==="cocked"){ auto.stage="hold"; auto.t=0; }
+  } else if(auto.stage==="hold"){
+    if(++auto.t> (8/speedUp)) { fire(); auto.stage="flight"; }
+  } else if(auto.stage==="flight"){
+    if(phase==="landed"){ auto.t=0; auto.stage="cool"; }
+  } else if(auto.stage==="cool"){
+    if(++auto.t> (20/speedUp)){
+      auto.cycle++;
+      if(auto.cycle>=3){ tape(">e"); log("AUTO","e","barrage complete ▸e"); auto=null; }
+      else { reset(); auto.stage="charge"; }
+    }
+  }
+}
+
+/* ===== render ===== */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0, sc=1, oy=0;
+function layout(){ const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=r.height; cv.width=W*DPR;cv.height=H*DPR;
+  sc=W/VW; oy=(H-VH*sc)/2;
+  ctx.setTransform(DPR*sc,0,0,DPR*sc,0,oy*DPR); draw(); }
+function X(v){return v;} function Y(v){return v;}
+function draw(){
+  ctx.clearRect(-50,-50,VW+100,VH+100);
+  // ground
+  ctx.fillStyle="rgba(255,154,46,0.05)"; ctx.fillRect(-50,GROUND,VW+100,VH);
+  ctx.strokeStyle="rgba(255,154,46,0.25)"; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-50,GROUND);ctx.lineTo(VW+100,GROUND);ctx.stroke();
+  // range ticks
+  ctx.fillStyle="rgba(255,154,46,0.18)"; ctx.font="9px monospace"; ctx.textAlign="center";
+  for(let d=200;d<=900;d+=200){ctx.fillRect(PX+d,GROUND,1,7);ctx.fillText(d,PX+d,GROUND+18);}
+  // siege wall
+  const wf=wall/100;
+  ctx.fillStyle="rgba(120,60,40,0.5)"; ctx.fillRect(WALL.x,WALL.top+(WALL.h?0:0),WALL.w,GROUND-WALL.top);
+  ctx.fillStyle=`rgba(${255-wf*120},${60+wf*40},40,0.7)`;
+  const wh=(GROUND-WALL.top)*wf; ctx.fillRect(WALL.x,GROUND-wh,WALL.w,wh);
+  ctx.strokeStyle="rgba(255,59,34,0.5)"; ctx.strokeRect(WALL.x,WALL.top,WALL.w,GROUND-WALL.top);
+  ctx.fillStyle="rgba(255,206,94,0.6)";ctx.fillText(wall+"%",WALL.x+WALL.w/2,WALL.top-8);
+  // frame (A-shape support)
+  ctx.strokeStyle="rgba(255,154,46,0.5)";ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(PX-46,GROUND);ctx.lineTo(PX,PY);ctx.lineTo(PX+46,GROUND);ctx.stroke();
+  ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(PX-30,GROUND-60);ctx.lineTo(PX+30,GROUND-60);ctx.stroke();
+  // trail
+  if(trail.length>1){ ctx.strokeStyle="rgba(255,206,94,0.55)";ctx.lineWidth=2;ctx.beginPath();
+    trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+    ctx.setLineDash([3,5]);ctx.strokeStyle="rgba(255,206,94,0.2)";ctx.beginPath();
+    trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.setLineDash([]);}
+  // arm
+  ctx.lineCap="round";
+  ctx.strokeStyle="rgba(255,154,46,0.9)";ctx.lineWidth=7;
+  ctx.shadowColor="rgba(255,154,46,0.6)";ctx.shadowBlur=10;
+  ctx.beginPath();ctx.moveTo(shortEnd.x,shortEnd.y);ctx.lineTo(tip.x,tip.y);ctx.stroke();ctx.shadowBlur=0;
+  // CW hanger + 3-wrap torsion coil
+  ctx.strokeStyle="rgba(255,59,34,0.7)";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(shortEnd.x,shortEnd.y);ctx.lineTo(cw.x,cw.y);ctx.stroke();
+  drawCoil(shortEnd,cw);
+  // counterweight
+  const cwr=10+cwMass*0.18;
+  const cg=ctx.createRadialGradient(cw.x-3,cw.y-3,2,cw.x,cw.y,cwr);
+  cg.addColorStop(0,"#ffb86b");cg.addColorStop(1,"#b21808");
+  ctx.fillStyle=cg;ctx.shadowColor="rgba(255,59,34,0.7)";ctx.shadowBlur=14;
+  ctx.beginPath();ctx.arc(cw.x,cw.y,cwr,0,7);ctx.fill();ctx.shadowBlur=0;
+  // pivot hub
+  ctx.fillStyle="#ffce5e";ctx.beginPath();ctx.arc(pivot.x,pivot.y,5,0,7);ctx.fill();
+  // sling
+  if(sling){ctx.strokeStyle="rgba(255,231,207,0.5)";ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(tip.x,tip.y);ctx.lineTo(proj.x,proj.y);ctx.stroke();}
+  // projectile
+  if(proj.x>-9000){
+    const compressed=(phase==="cocked");
+    const col=compressed?"#34e0ff":"#ffe7cf";
+    ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=compressed?16:8;
+    ctx.beginPath();ctx.arc(proj.x,proj.y,7,0,7);ctx.fill();ctx.shadowBlur=0;}
+  // particles
+  particles.forEach(p=>{ctx.globalAlpha=p.life;ctx.fillStyle=p.c;
+    ctx.beginPath();ctx.arc(p.x,p.y,2.4,0,7);ctx.fill();ctx.globalAlpha=1;});
+}
+function drawCoil(a,b){ // 3 torsion wraps tightening with charge
+  const tightness=phase==="cocked"?1:(phase==="charging"?chargeStep/27:0.2);
+  const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+  ctx.strokeStyle=`rgba(52,224,255,${0.25+0.5*tightness})`;ctx.lineWidth=1.4;
+  for(let i=0;i<3;i++){const rr=(6-tightness*3)+i*3;
+    ctx.beginPath();ctx.arc(mx,my,rr,0,7);ctx.stroke();}
+}
+
+/* ===== panels ===== */
+const $=id=>document.getElementById(id);
+const ladderEl=$("ladder"), notches=[];
+for(let b=0;b<3;b++){const blk=document.createElement("div");blk.className="blk";
+  for(let n=0;n<9;n++){const d=document.createElement("div");d.className="notch";blk.appendChild(d);notches.push(d);}
+  ladderEl.appendChild(blk);}
+function syncPanels(){
+  $("hs-shots").textContent=shots;$("hs-range").textContent=maxRange;
+  $("hs-hits").textContent=hits;$("hs-wall").textContent=wall+"%";
+  $("hs-wall").style.color=wall<40?"var(--ember)":"var(--amber)";
+  notches.forEach((d,i)=>{const on=i<chargeStep;
+    d.className="notch"+(on?(chargeStep>=27?" zero":" on"):"");});
+  const pct=chargeStep/27;
+  $("compress-bar").style.width=(pct*100)+"%";
+  $("compress-pct").textContent=chargeStep+" / 27";
+  $("lad-state").textContent=chargeStep>=27?"⊙ 0 LOADED":"3³ = 27";
+  $("t-phase").textContent=phase.toUpperCase();
+  $("t-pe").textContent=Math.round(pct*100*(cwMass/40))+"%";
+  const arm=Math.round(Math.atan2(tip.y-pivot.y,tip.x-pivot.x)*180/Math.PI);
+  $("t-arm").textContent=arm+"°";
+  $("t-rel").textContent=releaseAngle+"°";
+  $("t-vel").textContent=muzzle?muzzle.toFixed(1):"0";
+  $("t-last").textContent=lastRange;
+  $("b-fire").disabled=(phase!=="cocked");
+}
+const logEl=$("log"); let logN=0;
+function log(tag,cls,msg){const d=document.createElement("div");
+  d.innerHTML=`<span class="d">${String(logN++).padStart(3,"0")}</span> <span class="${cls}">${tag}</span> <span class="d">${msg}</span>`;
+  logEl.prepend(d);while(logEl.childNodes.length>50)logEl.removeChild(logEl.lastChild);}
+const tapeEl=$("tape"); let tapeStr="";
+function tape(ch){tapeStr=(ch+tapeStr).slice(0,46);tapeEl.textContent=tapeStr;}
+
+/* ===== controls ===== */
+$("b-charge").onclick=startCharge;
+$("b-fire").onclick=fire;
+$("b-auto").onclick=startAuto;
+$("b-reset").onclick=()=>{auto=null;reset();};
+$("cw").oninput=e=>{cwMass=+e.target.value;$("v-cw").textContent=cwMass;if(cw)cw.inv=1/cwMass;};
+$("rel").oninput=e=>{releaseAngle=+e.target.value;$("v-rel").textContent=releaseAngle;};
+$("rate").oninput=e=>{chargeRate=+e.target.value;};
+$("speed").oninput=e=>{simScale=+e.target.value/100;$("simspeed").textContent=simScale.toFixed(1)+"×";};
+window.addEventListener("resize",layout);
+
+/* ===== loop ===== */
+let last=performance.now(), acc=0;
+function frame(now){
+  const dt=Math.min(now-last,50); last=now; acc+=dt*simScale;
+  const stepMs=16;
+  while(acc>=stepMs){
+    autoTick();
+    if(phase==="charging") chargeTick(1);
+    if(phase==="flight"){ for(let s=0;s<SUB;s++) substep();
+      if(proj.x>-9000) trail.push({x:proj.x,y:proj.y}); if(trail.length>400)trail.shift(); }
+    particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.life-=0.03;});
+    particles=particles.filter(p=>p.life>0);
+    acc-=stepMs;
+  }
+  syncPanels(); draw(); requestAnimationFrame(frame);
+}
+reset(); layout(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

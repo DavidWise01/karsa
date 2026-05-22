@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEGIS-0 // BOUNDARY-LAW DEFENSE</title>
+<style>
+:root{
+  --bg:#020509;--ink:#dff2ff;--dim:#4a7088;--dimmer:#1d3548;
+  --reflect:#34e0ff;--clamp:#4a8cff;--fold:#2effa6;--threat:#ff9a2e;--breach:#ff3b55;--gold:#ffd45e;
+  --line:rgba(52,224,255,.16);--panel:rgba(6,16,26,.74);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;color:var(--ink);font-family:var(--mono);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:
+   radial-gradient(120% 80% at 50% -8%,rgba(52,224,255,.08),transparent 45%),
+   radial-gradient(70% 60% at 85% 20%,rgba(46,255,166,.05),transparent 50%),
+   linear-gradient(180deg,#02060c,#04101c 55%,#020509);}
+.scan{position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.3;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px);mix-blend-mode:multiply}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:89;background:radial-gradient(130% 120% at 50% 42%,transparent 52%,rgba(1,3,6,.86) 100%)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.05;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(2,5,9,.94),rgba(2,5,9,.7));backdrop-filter:blur(10px)}
+.hbar{max-width:1480px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 18px}
+.logo{display:flex;align-items:center;gap:12px}
+.glyph{font-size:24px;font-weight:700;color:var(--fold);text-shadow:0 0 16px rgba(46,255,166,.6),0 0 40px rgba(46,255,166,.25)}
+.title-l{letter-spacing:.32em;font-size:11px;text-transform:uppercase}
+.title-s{letter-spacing:.24em;font-size:9px;text-transform:uppercase;color:var(--dim)}
+.hstat{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.hstat b{color:var(--reflect);font-weight:600}
+.seal{border:1px solid var(--fold);color:var(--fold);border-radius:3px;padding:3px 8px;font-size:9px;letter-spacing:.2em;background:rgba(46,255,166,.06)}
+
+.deck{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}
+.stage{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(80% 80% at 50% 50%,rgba(10,28,42,.5),rgba(2,5,9,.94));box-shadow:inset 0 0 90px rgba(0,0,0,.65);min-height:560px;cursor:crosshair}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .lab{position:absolute;top:12px;left:14px;font-size:9px;letter-spacing:.24em;color:var(--dim);text-transform:uppercase;pointer-events:none}
+.bracket{position:absolute;top:12px;right:14px;font-size:18px;letter-spacing:.1em;color:var(--fold);text-shadow:0 0 12px rgba(46,255,166,.6);pointer-events:none}
+.legend{position:absolute;bottom:12px;left:14px;display:flex;gap:13px;flex-wrap:wrap;font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;pointer-events:none;max-width:85%}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px;box-shadow:0 0 8px currentColor}
+.hint{position:absolute;bottom:12px;right:14px;font-size:9px;letter-spacing:.14em;color:var(--dimmer);text-transform:uppercase;pointer-events:none}
+
+aside{display:grid;gap:13px}
+.card{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:14px 15px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;width:32px;height:2px;background:var(--reflect);box-shadow:0 0 8px var(--reflect)}
+.card h3{margin:0 0 11px;font-size:9px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase;font-weight:600}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px dashed rgba(52,224,255,.08)}
+.kv:last-child{border-bottom:none}.kv span{color:var(--dim)}.kv b{font-weight:600}
+.kv b.r{color:var(--reflect)}.kv b.c{color:var(--clamp)}.kv b.f{color:var(--fold)}.kv b.x{color:var(--breach)}.kv b.t{color:var(--threat)}
+
+.layers{display:grid;gap:8px}
+.layer{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--dimmer);border-radius:6px;padding:9px 11px;cursor:pointer;transition:.15s;user-select:none}
+.layer:hover{border-color:var(--line)}
+.layer .nm{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.layer .ds{font-size:9px;color:var(--dim);letter-spacing:.06em}
+.layer .sw{width:34px;height:16px;border-radius:9px;background:var(--dimmer);position:relative;transition:.15s;flex:none}
+.layer .sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--dim);transition:.15s}
+.layer.on .sw::after{left:20px}
+.layer.lr.on{border-color:var(--reflect)}.layer.lr.on .sw{background:rgba(52,224,255,.3)}.layer.lr.on .sw::after{background:var(--reflect);box-shadow:0 0 8px var(--reflect)}.layer.lr.on .nm{color:var(--reflect)}
+.layer.lc.on{border-color:var(--clamp)}.layer.lc.on .sw{background:rgba(74,140,255,.3)}.layer.lc.on .sw::after{background:var(--clamp);box-shadow:0 0 8px var(--clamp)}.layer.lc.on .nm{color:var(--clamp)}
+.layer.lf.on{border-color:var(--fold)}.layer.lf.on .sw{background:rgba(46,255,166,.3)}.layer.lf.on .sw::after{background:var(--fold);box-shadow:0 0 8px var(--fold)}.layer.lf.on .nm{color:var(--fold)}
+
+.slider{margin:9px 0}
+.slider label{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:5px}
+.slider label b{color:var(--reflect)}
+input[type=range]{accent-color:var(--reflect);width:100%}
+
+.log{height:118px;overflow:auto;font-size:11px;line-height:1.55;padding-right:4px}
+.log::-webkit-scrollbar{width:6px}.log::-webkit-scrollbar-thumb{background:var(--dimmer);border-radius:3px}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .r{color:var(--reflect)}.log .c{color:var(--clamp)}.log .f{color:var(--fold)}.log .x{color:var(--breach)}.log .t{color:var(--threat)}.log .d{color:var(--dim)}
+
+.controls{max-width:1480px;margin:0 auto;padding:0 18px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--reflect);background:rgba(52,224,255,.06);border:1px solid var(--reflect);border-radius:5px;padding:9px 15px;cursor:pointer;transition:.15s}
+button:hover{background:rgba(52,224,255,.16);box-shadow:0 0 16px rgba(52,224,255,.3);color:#eafaff}
+button.go{color:var(--fold);border-color:var(--fold);background:rgba(46,255,166,.07)}
+button.go:hover{background:rgba(46,255,166,.18);box-shadow:0 0 16px rgba(46,255,166,.35)}
+button.warn{color:var(--threat);border-color:var(--threat);background:rgba(255,154,46,.06)}
+button.warn:hover{background:rgba(255,154,46,.16)}
+.ctl{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.ctl input{width:100px;accent-color:var(--reflect)}
+
+main{max-width:1100px;margin:0 auto;padding:26px 18px 110px}
+section{padding:52px 0;border-top:1px solid rgba(52,224,255,.08)}
+.kick{font-size:10px;letter-spacing:.34em;color:var(--threat);text-transform:uppercase;margin-bottom:13px}
+h2{font-size:clamp(26px,4.4vw,46px);line-height:.98;margin:0 0 17px;letter-spacing:-.01em;font-weight:700;text-shadow:0 0 24px rgba(52,224,255,.18)}
+h2 em{font-style:normal;color:var(--fold)}
+.lead{font-size:16px;color:#9fc4d8;max-width:780px;line-height:1.7}.lead code{color:var(--threat)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:28px}
+.tile{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:18px}
+.tile h4{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.tile.r h4{color:var(--reflect)}.tile.c h4{color:var(--clamp)}.tile.f h4{color:var(--fold)}
+.tile p{margin:0;color:var(--dim);font-size:13px;line-height:1.6}.tile code{color:var(--threat)}
+pre{background:#020608;border:1px solid var(--line);border-left:3px solid var(--fold);border-radius:7px;padding:18px;overflow:auto;font-size:13px;line-height:1.75;color:#bfe9f2;margin-top:24px}
+pre .c{color:var(--dim)}pre .k{color:var(--threat)}pre .f{color:var(--fold)}
+.recur{font-size:clamp(17px,2.5vw,25px);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);line-height:1.7;margin-top:22px}
+.recur b{color:var(--reflect)}.recur i{font-style:normal;color:var(--fold)}
+.cta{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px}
+.cta a{text-decoration:none;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--reflect);border:1px solid var(--reflect);background:rgba(52,224,255,.06);border-radius:5px;padding:11px 17px;transition:.15s}
+.cta a:hover{background:rgba(52,224,255,.16);box-shadow:0 0 16px rgba(52,224,255,.3);color:#eafaff}
+.sig{font-size:10px;letter-spacing:.18em;color:var(--dimmer);text-transform:uppercase;margin-top:42px}
+@media(max-width:980px){.deck{grid-template-columns:1fr}aside{order:2}.stage{min-height:440px}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="scan"></div><div class="vig"></div><div class="grain"></div>
+
+<header><div class="hbar">
+  <div class="logo"><div class="glyph">无</div><div>
+    <div class="title-l">Aegis-0 · Boundary-Law Defense</div>
+    <div class="title-s">))( ! )(( · reflect · clamp · fold → −1</div>
+  </div></div>
+  <div class="hstat">
+    <div>Folded <b id="hs-fold">0</b></div>
+    <div>Reflected <b id="hs-ref">0</b></div>
+    <div>Clamped <b id="hs-cl">0</b></div>
+    <div>Breaches <b id="hs-br">0</b></div>
+    <div class="seal" id="seal">CORE · SEALED</div>
+  </div>
+</div></header>
+
+<div class="deck">
+  <div class="stage" id="stage">
+    <div class="lab">// click to fold a vector · ))( ! )(( converges on the core null</div>
+    <div class="bracket" id="bracket"></div>
+    <canvas id="cv"></canvas>
+    <div class="legend">
+      <span><i style="color:var(--threat)"></i>threat vector</span>
+      <span><i style="color:var(--reflect)"></i>reflect ring</span>
+      <span><i style="color:var(--clamp)"></i>clamp ring</span>
+      <span><i style="color:var(--fold)"></i>fold / interceptor</span>
+      <span><i style="color:var(--breach)"></i>breach</span>
+    </div>
+    <div class="hint" id="hint">core −1 · integrity 100%</div>
+  </div>
+
+  <aside>
+    <div class="card">
+      <h3>Boundary law · layers</h3>
+      <div class="layers">
+        <div class="layer lr on" data-l="reflect"><div><div class="nm">REFLECT</div><div class="ds">glancing vectors bounce</div></div><div class="sw"></div></div>
+        <div class="layer lc on" data-l="clamp"><div><div class="nm">CLAMP</div><div class="ds">overflow capped · speed halved</div></div><div class="sw"></div></div>
+        <div class="layer lf on" data-l="fold"><div><div class="nm">FOLD → −1</div><div class="ds">interceptor collapses to 0</div></div><div class="sw"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Threat board</h3>
+      <div class="kv"><span>incoming</span><b class="t" id="t-in">0</b></div>
+      <div class="kv"><span>nearest range</span><b class="t" id="t-near">—</b></div>
+      <div class="kv"><span>interceptors live</span><b class="f" id="t-int">0</b></div>
+      <div class="kv"><span>core integrity</span><b class="r" id="t-core">100%</b></div>
+      <div class="kv"><span>wave</span><b id="t-wave">0</b></div>
+    </div>
+
+    <div class="card">
+      <h3>Tuning</h3>
+      <div class="slider"><label>threat velocity <b id="v-ts">1.6</b></label><input type="range" id="ts" min="8" max="34" value="16"></div>
+      <div class="slider"><label>spawn rate <b id="v-sr">med</b></label><input type="range" id="sr" min="20" max="160" value="80"></div>
+      <div class="slider"><label>interceptor speed <b id="v-is">5.0</b></label><input type="range" id="is" min="35" max="90" value="50"></div>
+    </div>
+
+    <div class="card">
+      <h3>Event stream</h3>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="controls">
+  <button class="warn" id="b-spawn">+ inject vector</button>
+  <button class="go" id="b-wave">▸ start waves</button>
+  <button id="b-pause">▮▮ pause</button>
+  <button id="b-reset">↺ reset</button>
+  <div class="ctl">sim&nbsp;<b id="ss" style="color:var(--reflect)">1.0×</b><input type="range" id="speed" min="40" max="180" value="100"></div>
+</div>
+
+<main>
+  <section style="border-top:none">
+    <div class="kick">// doctrine — the boundary law, operational</div>
+    <h2>The core does not <em>fight.</em><br>It folds.</h2>
+    <p class="lead">Straight from the kernel: <code>REFLECT noise · CLAMP overflow · FOLD danger to −1</code>. The defended core sits at <code>−1</code> — the protected library. Incoming vectors are not destroyed by force; they are converged on by two brackets <code>))( ! )((</code> and compressed back to <code>0</code>. Offense released a vector outward. Defense folds one inward.</p>
+    <div class="row">
+      <div class="tile r"><h4>)) reflect</h4><p>The outer ring. A glancing vector — high incidence angle — is mirrored about the radial normal and sent back out. Noise reflects.</p></div>
+      <div class="tile c"><h4>( clamp )</h4><p>The middle ring. A head-on vector that punches through reflect has its speed halved — overflow clamped — so it can be caught.</p></div>
+      <div class="tile f"><h4>(( fold → −1</h4><p>The inner law. An interceptor pulse launches from the core, leads the target, and collapses it to <code>0</code>. Danger folds to −1.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kick">// mechanism</div>
+    <h2>Three rings. One <em>null.</em></h2>
+    <p class="lead">No layer is mandatory — toggle them and watch the core's survival change. With only FOLD, the interceptors must catch everything. With REFLECT + CLAMP feeding FOLD, the law composes: most of the work is done before a pulse is ever fired.</p>
+    <pre><span class="c">// per threat crossing a ring, inward</span>
+<span class="k">if</span> (cross(REFLECT_R) && reflect_on && glancing(v, normal))
+     v = reflect(v, normal);          <span class="f">// noise reflects, vector exits</span>
+<span class="k">if</span> (cross(CLAMP_R)  && clamp_on)
+     v *= 0.5;                        <span class="f">// overflow clamped</span>
+<span class="k">if</span> (cross(FOLD_R)   && !neutralized)
+     breach(core);                    <span class="k">// failed to fold in time</span>
+
+<span class="c">// FOLD layer, autonomous</span>
+<span class="k">for</span> (threat in detect_ring)
+     launch_interceptor(lead(threat));  <span class="f">// collapse to 0</span></pre>
+  </section>
+
+  <section>
+    <div class="kick">// final recurrence</div>
+    <h2>Reflect. Clamp. <em>Fold.</em></h2>
+    <div class="recur">)) <b>REFLECT</b><br>( <i>CLAMP</i> )<br>(( <b>FOLD</b> → <i>−1</i><br>( ! ) <b>NULL HELD</b><br><b>REPEAT</b></div>
+    <div class="cta">
+      <a href="spark_spore.kernel">▸ kernel spec</a>
+      <a href="spark_spore.machine">▸ machine encoding</a>
+      <a href="spark_spore.c">▸ c model</a>
+    </div>
+    <div class="sig">aegis-0 boundary-law defense · reflect / clamp / fold → −1 · 无 null held · canon-frozen</div>
+  </section>
+</main>
+
+<script>
+"use strict";
+/* ===== AEGIS-0 — boundary-law point defense ===== */
+const VW=900, VH=560, CX=VW/2, CY=VH/2;
+const R_DETECT=300, R_REFLECT=210, R_CLAMP=140, R_FOLD=64, R_CORE=30;
+
+let layers={reflect:true,clamp:true,fold:true};
+let threats=[], intercs=[], fx=[];
+let core=100, folded=0, reflected=0, clamped=0, breaches=0, wave=0;
+let running=true, simScale=1, paused=false;
+let threatV=1.6, spawnMs=800, intercV=5.0;
+let spawnTimer=0, waveMode=false, waveTimer=0;
+
+function rand(a,b){return a+Math.random()*(b-a);}
+function spawnThreat(){
+  const ang=rand(0,Math.PI*2);
+  const x=CX+Math.cos(ang)*(R_DETECT+90), y=CY+Math.sin(ang)*(R_DETECT+90);
+  // aim toward core with a small offset so some are glancing
+  const off=rand(-90,90);
+  const tx=CX+Math.cos(ang+Math.PI/2)*off*0.0+rand(-40,40);
+  const ty=CY+rand(-40,40);
+  let dx=CX-x+rand(-70,70), dy=CY-y+rand(-70,70); const d=Math.hypot(dx,dy);
+  const sp=threatV*rand(0.85,1.2);
+  threats.push({x,y,vx:dx/d*sp,vy:dy/d*sp,baseSp:sp,
+    home:rand(0,1)<0.5?0.012:0.0,  // some home, some ballistic
+    pr:Math.hypot(x-CX,y-CY), did:{reflect:false,clamp:false}, dead:false, hp:1});
+}
+function launchInterceptor(t){
+  // lead prediction
+  let bx=t.x,by=t.y,relx=t.x-CX,rely=t.y-CY,dist=Math.hypot(relx,rely);
+  let tEst=dist/intercV;
+  bx=t.x+t.vx*tEst; by=t.y+t.vy*tEst;
+  let dx=bx-CX, dy=by-CY; const d=Math.hypot(dx,dy)||1;
+  intercs.push({x:CX,y:CY,vx:dx/d*intercV,vy:dy/d*intercV,life:120,target:t});
+}
+function fold(t,x,y){
+  t.dead=true; folded++;
+  burst(x,y,16,"--fold","#2effa6"); bracketFlash(x,y);
+  log("FOLD","f","vector → 0 · neutralized at −1");
+}
+function breach(t){
+  t.dead=true; breaches++; core=Math.max(0,core-9);
+  burst(t.x,t.y,20,"--breach","#ff3b55");
+  shake=10;
+  log("BREACH","x","core hit · integrity "+core+"%");
+}
+function reflectV(t,nx,ny){
+  const dot=t.vx*nx+t.vy*ny;
+  t.vx=t.vx-2*dot*nx; t.vy=t.vy-2*dot*ny; t.home=0;
+  reflected++; t.reflectedFlag=true;
+  burst(t.x,t.y,8,"--reflect","#34e0ff");
+  log("REFLECT","r","glancing vector mirrored");
+}
+
+let shake=0;
+function burst(x,y,n,v,c){for(let i=0;i<n;i++){const a=Math.random()*7,s=1.5+Math.random()*5;
+  fx.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,c});}}
+let brackets=[];
+function bracketFlash(x,y){brackets.push({x,y,t:1});}
+
+function step(){
+  // spawn
+  if(waveMode){ spawnTimer-=16*simScale;
+    if(spawnTimer<=0){spawnThreat(); spawnTimer=spawnMs*rand(0.6,1.2);}
+    waveTimer-=16*simScale;
+    if(waveTimer<=0){wave++;spawnMs=Math.max(220,spawnMs*0.9);waveTimer=9000;
+      log("WAVE","t","wave "+wave+" · density up");}
+  }
+  // threats
+  for(const t of threats){
+    if(t.dead)continue;
+    if(t.home>0){ // homing steer toward core
+      let dx=CX-t.x,dy=CY-t.y,d=Math.hypot(dx,dy)||1;
+      t.vx+=(dx/d - t.vx/Math.hypot(t.vx,t.vy))*t.home;
+      t.vy+=(dy/d - t.vy/Math.hypot(t.vx,t.vy))*t.home;
+    }
+    t.x+=t.vx*simScale; t.y+=t.vy*simScale;
+    const r=Math.hypot(t.x-CX,t.y-CY);
+    const nx=(t.x-CX)/r, ny=(t.y-CY)/r;          // outward radial normal
+    // crossing reflect ring inward
+    if(!t.did.reflect && t.pr>R_REFLECT && r<=R_REFLECT){
+      t.did.reflect=true;
+      if(layers.reflect && !t.reflectedFlag){
+        const sp=Math.hypot(t.vx,t.vy)||1;
+        const cosI=Math.abs((t.vx*nx+t.vy*ny)/sp);   // 1 = head-on, 0 = glancing
+        if(cosI<0.82) reflectV(t,nx,ny);
+      }
+    }
+    if(!t.did.clamp && t.pr>R_CLAMP && r<=R_CLAMP){
+      t.did.clamp=true;
+      if(layers.clamp && !t.reflectedFlag){ t.vx*=0.5; t.vy*=0.5; clamped++;
+        burst(t.x,t.y,6,"--clamp","#4a8cff"); }
+    }
+    if(r<=R_FOLD && !t.reflectedFlag){ breach(t); }
+    if(r>R_DETECT+200){ t.dead=true; }            // exited (reflected away)
+    t.pr=r;
+  }
+  // FOLD: auto-launch interceptors at threats inside detect ring
+  if(layers.fold){
+    for(const t of threats){
+      if(t.dead||t.reflectedFlag||t.targeted)continue;
+      const r=Math.hypot(t.x-CX,t.y-CY);
+      if(r<R_DETECT && intercs.length<7){ t.targeted=true; launchInterceptor(t); }
+    }
+  }
+  // interceptors
+  for(const ic of intercs){
+    ic.x+=ic.vx*simScale; ic.y+=ic.vy*simScale; ic.life-=simScale;
+    const t=ic.target;
+    if(t && !t.dead){
+      // light homing onto target
+      let dx=t.x-ic.x,dy=t.y-ic.y,d=Math.hypot(dx,dy)||1;
+      const sp=intercV; ic.vx=dx/d*sp; ic.vy=dy/d*sp;
+      if(d<14){ fold(t,t.x,t.y); ic.life=0; }
+    }
+    if(ic.life<=0 && ic.target && !ic.target.dead) ic.target.targeted=false;
+  }
+  threats=threats.filter(t=>!t.dead || false); threats=threats.filter(t=>!t.dead);
+  intercs=intercs.filter(ic=>ic.life>0);
+  fx.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;p.life-=0.035;});
+  fx=fx.filter(p=>p.life>0);
+  brackets.forEach(b=>b.t-=0.06); brackets=brackets.filter(b=>b.t>0);
+  if(shake>0)shake*=0.85;
+}
+
+/* ===== render ===== */
+const cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+let DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0, sc=1, ox=0, oy=0;
+function layout(){const r=cv.parentElement.getBoundingClientRect();W=r.width;H=r.height;
+  cv.width=W*DPR;cv.height=H*DPR; sc=Math.min(W/VW,H/VH); ox=(W-VW*sc)/2; oy=(H-VH*sc)/2;
+  ctx.setTransform(DPR*sc,0,0,DPR*sc,ox*DPR,oy*DPR); draw();}
+function ring(r,col,a,w){ctx.strokeStyle=col;ctx.globalAlpha=a;ctx.lineWidth=w;
+  ctx.beginPath();ctx.arc(CX,CY,r,0,7);ctx.stroke();ctx.globalAlpha=1;}
+function draw(){
+  const sx=shake>0.3?rand(-shake,shake):0, sy=shake>0.3?rand(-shake,shake):0;
+  ctx.save(); ctx.translate(sx,sy);
+  ctx.clearRect(-ox/sc-40,-oy/sc-40,VW+200,VH+200);
+  // rings
+  ring(R_DETECT,"rgba(74,140,255,0.10)",1,1);
+  ring(R_REFLECT,"rgba(52,224,255,0.5)",layers.reflect?0.55:0.12,1.4);
+  ring(R_CLAMP,"rgba(74,140,255,0.6)",layers.clamp?0.55:0.12,1.4);
+  ring(R_FOLD,"rgba(46,255,166,0.6)",layers.fold?0.6:0.15,1.4);
+  // sweep
+  const sweep=(performance.now()*0.0012)%(Math.PI*2);
+  ctx.strokeStyle="rgba(46,255,166,0.18)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+Math.cos(sweep)*R_DETECT,CY+Math.sin(sweep)*R_DETECT);ctx.stroke();
+  // core (!)
+  const pulse=0.5+0.5*Math.sin(performance.now()*0.004);
+  const cg=ctx.createRadialGradient(CX,CY,2,CX,CY,R_CORE);
+  const breached=core<35;
+  cg.addColorStop(0,breached?"#ff8aa0":"#9bffd8");
+  cg.addColorStop(1,breached?"rgba(255,59,85,0.1)":"rgba(46,255,166,0.08)");
+  ctx.fillStyle=cg;ctx.shadowColor=breached?"#ff3b55":"#2effa6";ctx.shadowBlur=18+pulse*10;
+  ctx.beginPath();ctx.arc(CX,CY,R_CORE*(0.8+pulse*0.12),0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle=breached?"#ff3b55":"#04110a";ctx.font="700 22px monospace";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("−1",CX,CY+1);
+  // fx
+  fx.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.c;
+    ctx.beginPath();ctx.arc(p.x,p.y,2.3,0,7);ctx.fill();});ctx.globalAlpha=1;
+  // brackets ))( ! )((
+  brackets.forEach(b=>{ctx.globalAlpha=b.t;ctx.strokeStyle="#2effa6";ctx.lineWidth=2;
+    const sp=18*(1-b.t)+6;
+    for(const s of [-1,1]){ctx.beginPath();
+      ctx.arc(b.x+ s*sp,b.y,12,s>0?-1:Math.PI-1, s>0?1:Math.PI+1);ctx.stroke();}
+    ctx.globalAlpha=1;});
+  // threats
+  for(const t of threats){
+    const col=t.reflectedFlag?"#34e0ff":"#ff9a2e";
+    // tail
+    const sp=Math.hypot(t.vx,t.vy)||1;
+    ctx.strokeStyle=col;ctx.globalAlpha=0.4;ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(t.x,t.y);ctx.lineTo(t.x-t.vx/sp*14,t.y-t.vy/sp*14);ctx.stroke();ctx.globalAlpha=1;
+    ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=8;
+    ctx.beginPath();ctx.arc(t.x,t.y,5,0,7);ctx.fill();ctx.shadowBlur=0;
+  }
+  // interceptors
+  for(const ic of intercs){
+    ctx.strokeStyle="#2effa6";ctx.globalAlpha=0.5;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(ic.x,ic.y);ctx.lineTo(CX,CY);ctx.stroke();ctx.globalAlpha=1;
+    ctx.fillStyle="#2effa6";ctx.shadowColor="#2effa6";ctx.shadowBlur=10;
+    ctx.beginPath();ctx.arc(ic.x,ic.y,3.2,0,7);ctx.fill();ctx.shadowBlur=0;
+  }
+  ctx.restore();
+}
+
+/* ===== panels ===== */
+const $=id=>document.getElementById(id);
+function sync(){
+  $("hs-fold").textContent=folded;$("hs-ref").textContent=reflected;
+  $("hs-cl").textContent=clamped;$("hs-br").textContent=breaches;
+  const live=threats.filter(t=>!t.dead&&!t.reflectedFlag).length;
+  $("t-in").textContent=live;
+  let near=Infinity;for(const t of threats){if(t.dead)continue;near=Math.min(near,Math.hypot(t.x-CX,t.y-CY));}
+  $("t-near").textContent=isFinite(near)?Math.round(near):"—";
+  $("t-int").textContent=intercs.length;
+  $("t-core").textContent=core+"%";$("t-core").style.color=core<35?"var(--breach)":"var(--reflect)";
+  $("t-wave").textContent=wave;
+  $("hint").textContent="core −1 · integrity "+core+"%";
+  const seal=$("seal");
+  if(core<=0){seal.textContent="CORE · COLLAPSED";seal.style.color="var(--breach)";seal.style.borderColor="var(--breach)";}
+  else if(core<35){seal.textContent="CORE · STRESSED";seal.style.color="var(--threat)";seal.style.borderColor="var(--threat)";}
+  else{seal.textContent="CORE · SEALED";seal.style.color="var(--fold)";seal.style.borderColor="var(--fold)";}
+  $("bracket").textContent=live>0?"))( ! )((":"( ! )";
+}
+const logEl=$("log");let logN=0;
+function log(tag,cls,msg){const d=document.createElement("div");
+  d.innerHTML=`<span class="d">${String(logN++).padStart(3,"0")}</span> <span class="${cls}">${tag}</span> <span class="d">${msg}</span>`;
+  logEl.prepend(d);while(logEl.childNodes.length>50)logEl.removeChild(logEl.lastChild);}
+
+/* ===== controls ===== */
+document.querySelectorAll(".layer").forEach(el=>{
+  el.onclick=()=>{const l=el.dataset.l;layers[l]=!layers[l];el.classList.toggle("on",layers[l]);
+    log("LAYER","d",l.toUpperCase()+" "+(layers[l]?"armed":"disarmed"));};
+});
+$("b-spawn").onclick=()=>{spawnThreat();log("INJECT","t","vector inbound");};
+$("b-wave").onclick=e=>{waveMode=!waveMode;e.target.textContent=waveMode?"▮ stop waves":"▸ start waves";
+  if(waveMode){wave=1;waveTimer=9000;spawnMs=800;log("WAVE","t","barrage engaged");}};
+$("b-pause").onclick=e=>{paused=!paused;e.target.textContent=paused?"▶ resume":"▮▮ pause";};
+$("b-reset").onclick=()=>{threats=[];intercs=[];fx=[];brackets=[];core=100;folded=reflected=clamped=breaches=0;wave=0;waveMode=false;$("b-wave").textContent="▸ start waves";log("RESET","d","core re-sealed at −1");};
+$("ts").oninput=e=>{threatV=+e.target.value/10;$("v-ts").textContent=threatV.toFixed(1);};
+$("sr").oninput=e=>{spawnMs=1800-(+e.target.value*10);$("v-sr").textContent=(+e.target.value<60?"low":+e.target.value>120?"high":"med");};
+$("is").oninput=e=>{intercV=+e.target.value/10;$("v-is").textContent=intercV.toFixed(1);};
+$("speed").oninput=e=>{simScale=+e.target.value/100;$("ss").textContent=simScale.toFixed(1)+"×";};
+$("stage").addEventListener("click",e=>{
+  const r=cv.getBoundingClientRect();
+  const mx=(e.clientX-r.left-ox)/sc, my=(e.clientY-r.top-oy)/sc;
+  // manual fold pulse toward nearest threat to click, else toward click point
+  let best=null,bd=1e9;for(const t of threats){if(t.dead||t.reflectedFlag)continue;
+    const d=(t.x-mx)**2+(t.y-my)**2;if(d<bd){bd=d;best=t;}}
+  if(best&&bd<90*90){best.targeted=true;launchInterceptor(best);log("MANUAL","f","fold pulse → vector");}
+  else{const dx=mx-CX,dy=my-CY,d=Math.hypot(dx,dy)||1;
+    intercs.push({x:CX,y:CY,vx:dx/d*intercV,vy:dy/d*intercV,life:90,target:null});}
+});
+window.addEventListener("resize",layout);
+
+/* ===== loop ===== */
+let last=performance.now(),acc=0;
+function frame(now){const dt=Math.min(now-last,50);last=now;
+  if(!paused){acc+=dt;while(acc>=16){step();acc-=16;}}
+  sync();draw();requestAnimationFrame(frame);}
+log("BOOT","f","core anchored at −1 · three rings armed");
+layout();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
