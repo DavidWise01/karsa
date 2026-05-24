@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Workbench — A Built Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Spline+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06080f;--ink:#eaf0f8;--body:#a6b3c8;--dim:#64728c;--dimmer:#27344a;
+  --phys:#46e6ff;--def:#7cffb0;--mem:#ffd166;--sig:#9b7bff;--gold:#ffd166;
+  --line:rgba(120,140,170,.14);--panel:rgba(12,18,30,.78);
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --sans:"Spline Sans",ui-sans-serif,system-ui,sans-serif;
+  --serif:"Fraunces",Georgia,serif;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:var(--sans);line-height:1.6;
+  background:
+   radial-gradient(120% 55% at 50% -10%,rgba(70,230,255,.06),transparent 50%),
+   radial-gradient(50% 45% at 85% 8%,rgba(255,209,102,.05),transparent 55%),
+   radial-gradient(55% 45% at 12% 95%,rgba(124,255,176,.05),transparent 55%),
+   linear-gradient(180deg,#070a14,#06080f 60%,#04060c);
+  background-attachment:fixed;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:88;opacity:.045;mix-blend-mode:screen;background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/></filter><rect width="100%25" height="100%25" filter="url(%23n)"/></svg>')}
+
+.wrap{max-width:1140px;margin:0 auto;padding:0 22px}
+header.hero{padding:84px 0 50px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--sig);margin-bottom:18px}
+h1{font-family:var(--serif);font-size:clamp(40px,7vw,82px);line-height:.97;margin:0 0 20px;letter-spacing:-.02em;font-weight:600}
+h1 em{font-style:italic;color:var(--phys)}
+.sub{font-size:18px;color:var(--body);max-width:760px}
+.disc{margin-top:24px;font-family:var(--mono);font-size:12px;color:var(--dim);border-left:2px solid var(--dimmer);padding-left:14px;max-width:760px;line-height:1.7}
+
+section{padding:64px 0;border-top:1px solid rgba(120,140,170,.1)}
+.kick{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;margin-bottom:14px}
+.kick.p{color:var(--phys)}.kick.d{color:var(--def)}.kick.m{color:var(--mem)}
+h2{font-family:var(--serif);font-size:clamp(27px,4vw,42px);line-height:1.04;margin:0 0 12px;letter-spacing:-.01em;font-weight:600}
+.lead{font-size:16px;color:var(--body);max-width:780px;margin-bottom:10px}
+.lead code{font-family:var(--mono);font-size:.88em;color:var(--gold)}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+@media(max-width:820px){.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.cards{grid-template-columns:1fr}}
+.tile{display:block;text-decoration:none;border:1px solid var(--line);border-radius:13px;background:var(--panel);
+  padding:18px;transition:.15s;position:relative;overflow:hidden}
+.tile:hover{transform:translateY(-3px);border-color:var(--accent,var(--phys));box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.tile::before{content:"";position:absolute;top:0;left:0;width:34px;height:2px;background:var(--accent,var(--phys));box-shadow:0 0 8px var(--accent,var(--phys))}
+.tile .n{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.tile h3{font-family:var(--serif);font-size:19px;margin:8px 0 6px;color:var(--ink);font-weight:600}
+.tile p{margin:0;font-size:13px;color:var(--body);line-height:1.55}
+.tile .tag{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,var(--phys));border:1px solid var(--line);border-radius:20px;padding:3px 9px}
+.p{--accent:var(--phys)}.d{--accent:var(--def)}.m{--accent:var(--mem)}.s{--accent:var(--sig)}
+
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--body)}
+.flow .step{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:rgba(12,18,30,.6)}
+.flow .step b{color:var(--phys)}
+.flow .ar{color:var(--dimmer)}
+
+.run{font-family:var(--mono);background:rgba(6,9,18,.7);border:1px solid var(--line);border-left:3px solid var(--mem);border-radius:8px;padding:18px;margin-top:18px;font-size:13px;line-height:1.9;color:var(--body);overflow-x:auto}
+.run b{color:var(--gold)}.run .c{color:var(--dim)}
+
+.honest{border:1px solid var(--line);border-radius:13px;background:var(--panel);padding:22px 24px;margin-top:8px}
+.honest h4{margin:0 0 12px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sig)}
+ul.clean{list-style:none;padding:0;margin:0}
+ul.clean li{padding:8px 0 8px 22px;position:relative;color:var(--body);font-size:14px;border-bottom:1px solid rgba(120,140,170,.06)}
+ul.clean li:last-child{border-bottom:none}
+ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--sig)}
+ul.clean li b{color:var(--ink)}
+
+footer{padding:48px 0 90px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dimmer);letter-spacing:.06em;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">无 · a built index · physics + defense + memory</div>
+  <h1>The <em>Workbench.</em></h1>
+  <p class="sub">One place that ties together everything built in this thread: a suite of interactive physics instruments with verified math, a family of defensive-architecture visualizers, and a working recursive-memory system — local git nodes syncing to a central database, with a live operator dashboard.</p>
+  <p class="disc">Two kinds of artifact live here, kept honestly separate. The <b>instruments</b> visualize established, citable science — every formula computed live and checked against its closed form. The <b>memory system</b> is real, runnable infrastructure with passing end-to-end tests. Nothing here claims to be more than it is.</p>
+</div></header>
+
+<section><div class="wrap">
+  <div class="kick p">// instruments — real physics, verified</div>
+  <h2>The quantum-dot arc</h2>
+  <p class="lead">Five instruments that build on each other: size sets color, flux bends phase, light meets matter, two photons are born entangled, and a Bell test proves it. Each computes the real equation live.</p>
+  <div class="flow">
+    <span class="step"><b>dot</b> size→color</span><span class="ar">→</span>
+    <span class="step"><b>ring</b> flux→phase</span><span class="ar">→</span>
+    <span class="step"><b>exciton</b> one photon</span><span class="ar">→</span>
+    <span class="step"><b>biexciton</b> two entangled</span><span class="ar">→</span>
+    <span class="step"><b>Bell test</b> proof</span>
+  </div>
+  <div class="cards">
+    <a class="tile p" href="instruments/quantum_dot_bench.html"><div class="n">01 · Brus equation</div><h3>Quantum Dot Bench</h3><p>Tune a nanocrystal's size, watch its emission color shift. Confinement → bandgap → wavelength, live.</p><span class="tag">interactive</span></a>
+    <a class="tile p" href="instruments/quantum_ring.html"><div class="n">02 · Aharonov–Bohm</div><h3>Quantum Ring</h3><p>Thread flux through a toroid; energy oscillates with period Φ₀=h/e though the electron never touches the field.</p><span class="tag">interactive</span></a>
+    <a class="tile p" href="instruments/light_meets_matter.html"><div class="n">03 · light–matter</div><h3>Light Meets Matter</h3><p>A photon strikes the dot, an electron leaps the gap, an exciton forms and re-emits. Absorb, relax, glow.</p><span class="tag">interactive</span></a>
+    <a class="tile p" href="instruments/biexciton_cascade.html"><div class="n">04 · XX→X→0</div><h3>Biexciton Cascade</h3><p>Two electron–hole pairs decay in a two-photon cascade — entangled when the dot is symmetric.</p><span class="tag">interactive</span></a>
+    <a class="tile p" href="instruments/bell_test.html"><div class="n">05 · CHSH</div><h3>The Bell Test</h3><p>Live coincidence counting. Watch S climb past the classical wall of 2 toward the quantum 2√2.</p><span class="tag">interactive</span></a>
+    <a class="tile s" href="instruments/detection_theory.html"><div class="n">06 · detection theory</div><h3>Metaphor → Mechanism</h3><p>ROC curves, the base-rate fallacy, Bloom filters — the real cybersecurity math, computed live.</p><span class="tag">explainer</span></a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kick d">// defensive architecture — visual studies</div>
+  <h2>The instrument series</h2>
+  <p class="lead">A family of visualizers exploring defensive postures — reflection, absorption, containment, pre-emption. Schematic studies (the energy is illustrative), built on one consistent geometry and palette.</p>
+  <div class="cards">
+    <a class="tile d" href="instruments/trinity.html"><div class="n">shell</div><h3>The Trinity</h3><p>Three instruments under one roof with a shared BASE-00 anchor (real SHA-256).</p><span class="tag">hub</span></a>
+    <a class="tile d" href="instruments/spark_spore_instrument.html"><div class="n">self</div><h3>Spark Spore Kernel</h3><p>Survival cell: self-teach by XOR, six-face bloom. Real ported bit-logic.</p><span class="tag">visual</span></a>
+    <a class="tile d" href="instruments/trebuchet_27.html"><div class="n">offense</div><h3>Trebuchet-27</h3><p>Compress 27→0→release. Verified PBD physics launch arc.</p><span class="tag">visual</span></a>
+    <a class="tile d" href="instruments/aegis_0.html"><div class="n">defense</div><h3>Aegis-0</h3><p>Reflect · clamp · fold inward to a defended core.</p><span class="tag">visual</span></a>
+    <a class="tile d" href="instruments/pulsar_shield.html"><div class="n">engine</div><h3>Pulsar Shield</h3><p>33Hz trinity sweep: life · death · spark. Verified mode fractions.</p><span class="tag">visual</span></a>
+    <a class="tile d" href="instruments/singularity_well.html"><div class="n">absolute</div><h3>Singularity Well</h3><p>Capture · spiral · swallow. Verified gravitational containment.</p><span class="tag">visual</span></a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kick m">// recursive memory — real, runnable infrastructure</div>
+  <h2>Local git ↔ central database</h2>
+  <p class="lead">An append-only memory store. Each local node keeps a hash-chained, git-committed log and syncs to a central database that re-verifies every chain. Entries are Ed25519-signed, so the server can prove not just that data is intact but <code>who</code> wrote it. A built-in operator dashboard makes it all inspectable.</p>
+  <div class="flow">
+    <span class="step"><b>append</b> + git commit</span><span class="ar">→</span>
+    <span class="step"><b>sign</b> Ed25519</span><span class="ar">→</span>
+    <span class="step"><b>push</b> to central</span><span class="ar">→</span>
+    <span class="step"><b>verify</b> chain + signatures</span><span class="ar">→</span>
+    <span class="step"><b>dashboard</b> inspect</span>
+  </div>
+  <div class="run">
+<span class="c"># in the recursive_memory/ package directory</span>
+pip install -r requirements.txt
+python <b>launch.py</b>            <span class="c"># starts central, seeds nodes, opens the dashboard</span>
+<span class="c"># then open</span>  http://localhost:8000/
+  </div>
+  <p class="lead" style="margin-top:14px">The dashboard (served at <code>/</code>) lists every node with a signed/unsigned lock, shows each chain entry with its id↔parent links, payload, recursive state digest and signature status, and verifies any chain server-side with one click. Tests prove append→git→push→multi-node→restore→tamper-rejection and signature-forgery rejection.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kick s">// the through-line</div>
+  <h2>What ties it together</h2>
+  <p class="lead">Across all three groups runs one idea: <b>a state that commits to its own history.</b> The Bell test commits a measurement to a provable correlation; the kernel folds each tunnel into its seed; the memory chain folds each entry's digest into the next. Different domains, same shape — <code>state(n) = f(input, state(n−1))</code> — and in every case the claim is only ever as strong as what can be checked.</p>
+  <div class="honest">
+    <h4>Honest scope — held throughout</h4>
+    <ul class="clean">
+      <li><b>Instruments</b> visualize established science (Brus, Aharonov–Bohm, Bell/CHSH, Bloom). Every number is checked against its closed form. They are teaching tools, not lab metrology.</li>
+      <li><b>Defensive visualizers</b> are schematic studies. The geometry and bit-logic are real where stated; the "energy" is illustrative, not a physical or strategic claim.</li>
+      <li><b>The memory system</b> is real infrastructure. "Memory" = stored state with verifiable lineage. The hash chain proves integrity and order; signatures prove authorship-by-key — not sentience, not real-world identity.</li>
+      <li>Nothing here asserts discovery of, or ownership over, any natural law or general concept.</li>
+    </ul>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  无 · The Workbench · interactive physics (verified) + defensive visual studies + recursive-memory system (tested) · built collaboratively, scoped honestly
+</div></footer>
+</body>
+</html>
