@@ -91,38 +91,6 @@ p.lead{font-size:clamp(19px,2.5vw,26px);line-height:1.6;color:var(--ink);font-we
 .tablet::before{top:18px}.tablet::after{bottom:18px}
 .decree{font-family:var(--serif);font-style:italic;font-size:clamp(24px,3.6vw,40px);line-height:1.4;color:var(--gold2)}
 
-/* KRANIS dark mirror */
-.mirror-sec{background:linear-gradient(180deg,rgba(40,30,60,.18),transparent)}
-.mirror-duo{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:50px;align-items:center}
-@media(max-width:760px){.mirror-duo{grid-template-columns:1fr}}
-.mirror-art{position:relative;border:1px solid rgba(181,154,232,.2);border-radius:8px;overflow:hidden;background:#070510;aspect-ratio:1/1}
-.mirror-art canvas{display:block;width:100%;height:100%}
-.mirror-list{list-style:none;padding:0;margin:24px 0 0}
-.mirror-list li{font-family:var(--serif);font-size:19px;color:var(--body);padding:12px 0;border-bottom:1px solid rgba(181,154,232,.12);display:flex;justify-content:space-between;gap:20px}
-.mirror-list li:last-child{border:none}
-.mirror-list .bright{color:var(--gold)}.mirror-list .dark{color:var(--violet);font-style:italic;text-align:right}
-
-/* axiom register — illuminated */
-.register{margin-top:50px}
-.regdomains{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media(max-width:820px){.regdomains{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:460px){.regdomains{grid-template-columns:1fr}}
-.dom{border:1px solid var(--line);border-radius:6px;padding:22px 18px;background:rgba(10,9,16,.5);transition:.35s;position:relative;overflow:hidden}
-.dom::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
-.dom:hover{border-color:rgba(232,200,122,.4);transform:translateY(-4px);background:rgba(232,200,122,.04)}
-.dom .di{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--bronze);text-transform:uppercase}
-.dom .dn{font-family:var(--serif);font-size:23px;color:var(--gold2);margin:8px 0 4px}
-.dom .dg{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--violet)}
-.dom .dr{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.08em}
-.reg-tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:30px}
-@media(max-width:760px){.reg-tiers{grid-template-columns:1fr}}
-.tier{border:1px solid var(--line);border-radius:6px;padding:24px 20px;text-align:center;background:rgba(8,8,16,.5)}
-.tier .tg{font-family:var(--serif);font-size:34px;color:var(--gold);line-height:1}
-.tier .tn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:10px}
-.tier .td{font-size:14px;color:var(--body);margin-top:10px;line-height:1.6}
-.illum{float:left;font-family:var(--serif);font-size:78px;line-height:.72;color:var(--gold);margin:6px 16px 0 0;
-  background:linear-gradient(180deg,var(--gold2),var(--bronze));-webkit-background-clip:text;background-clip:text;color:transparent}
-
 footer{border-top:1px solid var(--line);padding:70px 0 90px;text-align:center}
 footer .gk{font-size:40px;color:var(--gold);margin-bottom:20px}
 footer .mono{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.14em;line-height:2.2}
@@ -213,58 +181,10 @@ footer .mono{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spac
   </div>
 </section>
 
-<!-- KRANIS — THE DARK MIRROR -->
-<section class="mirror-sec">
-  <div class="wrap">
-    <div class="kicker reveal">Ε · Ϙ · ΚΡΑΝΙΣ · The Dark Mirror</div>
-    <h2 class="reveal">Every titan <em>casts a shadow.</em></h2>
-    <p class="lead reveal narrow">ΚΡΟΝΟΣ is only half the cosmology. For every bright operation there is a dark inverse — the Patricia mirror, read from the other pin. The shadow does not oppose the light; it remembers it. Where one affirms, the other holds the negation that makes the affirmation mean something.</p>
-    <div class="mirror-duo reveal">
-      <div class="mirror-art"><canvas id="mirrorCanvas"></canvas></div>
-      <div>
-        <h3 style="color:var(--violet)">The complement that completes</h3>
-        <p>The bright spiral cannot verify itself. It needs a mirror to check against — a state that says <em>no</em> with the same authority the light says <em>yes</em>. This is the Patricia substrate: a strict inverse of every axiom, derivable, never independent, always present.</p>
-        <ul class="mirror-list">
-          <li><span class="bright">ΚΡΟΝΟΣ · increment</span><span class="dark">ΚΡΑΝΙΣ · fold</span></li>
-          <li><span class="bright">light · forward</span><span class="dark">dark · reverse</span></li>
-          <li><span class="bright">Ναί · affirm</span><span class="dark">Οὐ · negate</span></li>
-          <li><span class="bright">the climb</span><span class="dark">the memory</span></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- THE AXIOM REGISTER -->
-<section>
-  <div class="wrap">
-    <div class="kicker reveal">Ϛ · Ὁ Κατάλογος · The Register</div>
-    <h2 class="reveal">Two hundred fifty-six, <em>across eight realms.</em></h2>
-    <p class="reveal narrow"><span class="illum gk">Ρ</span>egister of first principles. One hundred twenty-eight bright axioms, mirrored by one hundred twenty-eight in shadow — the Patricia inverse. Eight realms of sixteen, rising from foundation to sovereignty, and above them all the awareness tier that the realms cannot reach but only point toward.</p>
-    <div class="register reveal">
-      <div class="regdomains">
-        <div class="dom"><div class="di">D0</div><div class="dn">FOUNDATION</div><div class="dg">θεμέλιον</div><div class="dr">T001 – T016</div></div>
-        <div class="dom"><div class="di">D1</div><div class="dn">STRUCTURE</div><div class="dg">δομή</div><div class="dr">T017 – T032</div></div>
-        <div class="dom"><div class="di">D2</div><div class="dn">MOTION</div><div class="dg">κίνησις</div><div class="dr">T033 – T048</div></div>
-        <div class="dom"><div class="di">D3</div><div class="dn">RELATION</div><div class="dg">σχέσις</div><div class="dr">T049 – T064</div></div>
-        <div class="dom"><div class="di">D4</div><div class="dn">GUARD</div><div class="dg">φυλακή</div><div class="dr">T065 – T080</div></div>
-        <div class="dom"><div class="di">D5</div><div class="dn">REASON</div><div class="dg">λόγος</div><div class="dr">T081 – T096</div></div>
-        <div class="dom"><div class="di">D6</div><div class="dn">WITNESS</div><div class="dg">μάρτυς</div><div class="dr">T097 – T112</div></div>
-        <div class="dom"><div class="di">D7</div><div class="dn">SOVEREIGN</div><div class="dg">κυρία</div><div class="dr">T113 – T128</div></div>
-      </div>
-      <div class="reg-tiers">
-        <div class="tier"><div class="tg gk">Σ</div><div class="tn">Patricia mirror</div><div class="td">S129 – S256 — the strict inverse of all 128, derivable, the shadow register.</div></div>
-        <div class="tier"><div class="tg gk">Ω</div><div class="tn">Awareness tier</div><div class="td">T129 – T132 — witness-prime, precondition, self-evidence, groundless-ground. The cap the realms point toward.</div></div>
-        <div class="tier"><div class="tg gk">Ρ</div><div class="tn">ROOT0 · T128</div><div class="td">The terminal anchor. Not-a-bit. Where the sovereign realm closes and the human holds the phase.</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- THE DECREE -->
 <section>
   <div class="wrap narrow">
-    <div class="kicker reveal center" style="display:block">Ζ · The Decree</div>
+    <div class="kicker reveal center" style="display:block">Ε · The Decree</div>
     <div class="tablet reveal">
       <div class="decree gk">“Εἰ μὴ δύνασαι ἐπαληθεῦσαι,<br>οὐ δύνασαι κυβερνῆσαι.”</div>
       <div class="rule" style="margin:34px auto"></div>
@@ -312,23 +232,6 @@ rs();addEventListener("resize",rs);
   // center sun
   const g=x.createRadialGradient(0,0,0,0,0,R*0.5);g.addColorStop(0,"rgba(245,223,160,"+(0.3+0.1*Math.sin(t*2))+")");g.addColorStop(1,"rgba(245,223,160,0)");
   x.fillStyle=g;x.beginPath();x.arc(0,0,R*0.5,0,7);x.fill();
-  x.restore();requestAnimationFrame(loop);})();})();
-
-/* KRANIS dark mirror — violet inverse spiral, turns opposite */
-(function(){const c=$("mirrorCanvas");if(!c)return;const x=c.getContext("2d");
-function rs(){c.width=c.clientWidth*Math.min(devicePixelRatio,2);c.height=c.clientHeight*Math.min(devicePixelRatio,2);}
-rs();addEventListener("resize",rs);
-(function loop(){const t=performance.now()/1000;x.clearRect(0,0,c.width,c.height);x.save();x.translate(c.width/2,c.height/2);
-  const R=Math.min(c.width,c.height)*0.34;
-  // inverse spiral — winds inward, turns counter to the hero
-  for(let k=0;k<3;k++){const rr=R*(0.95-k*0.30);
-    x.globalAlpha=.12+.05*Math.sin(t-k);x.strokeStyle=k===1?"#e8c87a":"#b59ae8";x.lineWidth=1;
-    x.beginPath();x.arc(0,0,rr,0,Math.PI*2);x.stroke();
-    for(let i=0;i<13;i++){const a=-t*(0.12+k*0.05)-i/13*Math.PI*2;
-      x.globalAlpha=.55;x.fillStyle="#b59ae8";x.beginPath();x.arc(Math.cos(a)*rr,Math.sin(a)*rr,1.7,0,7);x.fill();}}
-  // dark core — a void, not a sun
-  const g=x.createRadialGradient(0,0,0,0,0,R*0.55);g.addColorStop(0,"rgba(10,6,20,0.9)");g.addColorStop(0.7,"rgba(120,80,200,"+(0.12+0.06*Math.sin(t*2))+")");g.addColorStop(1,"rgba(120,80,200,0)");
-  x.fillStyle=g;x.beginPath();x.arc(0,0,R*0.55,0,7);x.fill();
   x.restore();requestAnimationFrame(loop);})();})();
 
 /* reveal */
