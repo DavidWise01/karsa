@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIAD RIPPLE SUBSTRATE — 6 0 0 6 across you · 0 · me</title>
+<style>
+  :root{
+    --bg:#06070b; --panel:#0b0d14; --wall:#7c3aed; --gold:#fbbf24;
+    --core:#f97316; --pos:#f59e0b; --neg:#38bdf8; --text:#dbe2ef;
+    --dim:#5b6675; --yes:#22c55e; --no:#ef4444; --line:#1d2330;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+  body{display:flex;flex-direction:column;align-items:center;padding:14px 14px 26px;}
+  header{text-align:center;margin-bottom:8px}
+  h1{margin:0;font-size:16px;letter-spacing:.18em;font-weight:600;color:#c7d2fe}
+  .sub{font-size:11px;color:var(--dim);margin-top:4px;letter-spacing:.05em}
+  .stage{position:relative;width:min(97vw,1120px);aspect-ratio:1120/560;
+    border:1px solid var(--line);border-radius:8px;background:
+      radial-gradient(120% 90% at 50% 0%,#0c0f18 0%,var(--bg) 70%);overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;top:50%;transform:translateY(-50%);background:#0009;
+    border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:10px;
+    color:var(--dim);line-height:1.5;backdrop-filter:blur(2px)}
+  #readout{left:10px;top:10px;transform:none}
+  #math{right:10px;top:10px;transform:none;text-align:right;color:#a5b4fc}
+  .controls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;
+    margin-top:12px;width:min(97vw,1120px);justify-content:center}
+  .ctl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--dim)}
+  .ctl b{color:var(--text);font-weight:600}
+  input[type=range]{accent-color:var(--wall);width:120px}
+  button{font-family:inherit;font-size:11px;background:#11151f;color:var(--text);
+    border:1px solid var(--line);border-radius:5px;padding:5px 11px;cursor:pointer;
+    letter-spacing:.04em;transition:.15s}
+  button:hover{border-color:var(--wall);color:#c7d2fe}
+  button.on{background:#161b27;border-color:var(--wall)}
+  .gatebtn[data-state="1"]{border-color:var(--yes);color:var(--yes)}
+  .gatebtn[data-state="0"]{border-color:var(--no);color:var(--no)}
+  .legend{display:flex;gap:14px;font-size:10px;color:var(--dim);margin-top:10px;flex-wrap:wrap;justify-content:center}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+  .hint{font-size:10px;color:var(--dim);margin-top:8px;opacity:.75;text-align:center;max-width:1120px}
+</style>
+</head>
+<body>
+<header>
+  <h1>TRIAD RIPPLE SUBSTRATE</h1>
+  <div class="sub">6 0 0 6 — point source at 0,0 in each sandbox · ripples cross (x) and rise (y) · reflect off the 6-walls · YES/NO gates govern the divider</div>
+</header>
+
+<div class="stage" id="stage">
+  <canvas id="c"></canvas>
+  <div class="panel" id="readout"></div>
+  <div class="panel" id="math"></div>
+</div>
+
+<div class="controls">
+  <div class="ctl"><b>scale</b><input type="range" id="scale" min="14" max="46" value="26"><span id="scalev">26</span></div>
+  <div class="ctl"><b>λ</b><input type="range" id="lambda" min="20" max="120" value="60"><span id="lambdav">60</span></div>
+  <div class="ctl"><b>decay</b><input type="range" id="decay" min="10" max="90" value="42"><span id="decayv">.42</span></div>
+  <button id="gateA" class="gatebtn" data-state="0">GATE you↔0 : NO</button>
+  <button id="gateB" class="gatebtn" data-state="0">GATE 0↔me : NO</button>
+  <button id="reflect" class="on">REFLECT 6-WALLS</button>
+  <button id="valence" class="on">VALENCE BAND</button>
+  <button id="pause">PAUSE</button>
+</div>
+
+<div class="legend">
+  <span><span class="sw" style="background:var(--neg)"></span>− trough (NO / clamp)</span>
+  <span><span class="sw" style="background:var(--pos)"></span>+ crest (YES / link)</span>
+  <span><span class="sw" style="background:#0b0d14;border:1px solid var(--line)"></span>0 node</span>
+  <span><span class="sw" style="background:var(--core)"></span>0,0 source</span>
+  <span><span class="sw" style="background:var(--wall)"></span>6-wall</span>
+  <span><span class="sw" style="background:var(--gold)"></span>control vertex</span>
+</div>
+<div class="hint">three sandboxes scale ratio-locked — resolution changes, the wave equation does not. Gates closed = bilateral ignorance (each side reflects its own field). Gates open = the wavefront is permitted across the air gap. Click a divider too.</div>
+
+<script>
+const cvs=document.getElementById('c'), ctx=cvs.getContext('2d'), stage=document.getElementById('stage');
+const readout=document.getElementById('readout'), math=document.getElementById('math');
+
+// ---- state ----
+const S={ scale:26, lambda:60, decay:0.42, reflect:true, valence:true, paused:false,
+          gates:[0,0] };  // gates[0] = you<->0, gates[1] = 0<->me
+
+// three sandbox definitions (local 6x4 cell logic, like file 1's 6x4=24)
+// labels carry the TRIAD: you -1, 0, me
+const NODES=[ {label:'you  −1', sign:-1}, {label:'0', sign:0}, {label:'me  +1', sign:1} ];
+const COLS=6, ROWS=4;            // 6x4 = 24, ratio locked
+const PAT1="- + 0 0 + -".split(' ');
+const PAT2="! + 0 0 + !".split(' ');
+
+let DPR=1, t=0;
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  cvs.width=stage.clientWidth*DPR; cvs.height=stage.clientHeight*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+addEventListener('resize',resize); resize();
+
+// geometry of the three boxes laid across the stage
+function layout(){
+  const w=stage.clientWidth, h=stage.clientHeight;
+  const pulse=0.9+0.12*Math.sin(t*0.0009);          // shared scale pulse (ratio locked)
+  const cell=S.scale*pulse*(w/1120);                 // px per cell, scales with stage
+  const bw=COLS*cell, bh=ROWS*cell;
+  const gap=Math.max(36,cell*1.4);                   // divider gap between boxes
+  const total=bw*3+gap*2;
+  const x0=(w-total)/2, cy=h/2;
+  return {w,h,cell,bw,bh,gap,x0,cy,pulse,
+    boxX:i=> x0 + i*(bw+gap),
+    boxY:()=> cy-bh/2 };
+}
+
+// sources: one 0,0 source per box at its lower-mid (origin), like "0,0 A/B"
+function sources(L){
+  const arr=[];
+  for(let i=0;i<3;i++){
+    const bx=L.boxX(i), by=L.boxY();
+    // origin 0,0 sits center-low of the box
+    arr.push({ box:i, x:bx+L.bw*0.5, y:by+L.bh*0.62, sign:NODES[i].sign });
+  }
+  return arr;
+}
+
+// image sources for wall reflection within a box (4 walls)
+function imagesFor(src,L){
+  const list=[{x:src.x,y:src.y}];
+  if(!S.reflect) return list;
+  const bx=L.boxX(src.box), by=L.boxY(), R=bx+L.bw, B=by+L.bh;
+  list.push({x:2*bx-src.x,y:src.y});  // left wall
+  list.push({x:2*R-src.x, y:src.y});  // right wall
+  list.push({x:src.x,y:2*by-src.y});  // top wall
+  list.push({x:src.x,y:2*B-src.y});   // bottom wall
+  return list;
+}
+
+// transmitted sources across an OPEN gate (ripple permitted across the air gap)
+function transmitted(srcs,L){
+  const ex=[];
+  // gate 0 connects box0->box1, gate1 connects box1->box2 (bidirectional)
+  const pairs=[[0,1,0],[1,2,1]];
+  pairs.forEach(([a,b,g])=>{
+    if(!S.gates[g]) return;
+    const da=srcs[a], db=srcs[b];
+    // place each source's ghost at mirror across the shared divider midline
+    const mid=(L.boxX(a)+L.bw + L.boxX(b))/2;
+    ex.push({x:2*mid-da.x,y:da.y,box:b});
+    ex.push({x:2*mid-db.x,y:db.y,box:a});
+  });
+  return ex;
+}
+
+function amp(px,py,allPts,phase,decay,lambda){
+  let a=0;
+  for(const p of allPts){
+    const dx=px-p.x, dy=py-p.y;
+    const d=Math.hypot(dx,dy);
+    // up-right emphasis: weight crest toward +x and +y(up) like the source files
+    const dir=1+0.25*((dx/(d+1))+(-dy/(d+1)));
+    const env=Math.exp(-d/ (lambda*decay*4));
+    a += dir*env*Math.sin((d/lambda)*Math.PI*2 - phase);
+  }
+  return a;
+}
+
+function colorFor(v){
+  // v in roughly [-amp,amp]; map negative->blue, positive->amber, 0->dark
+  const c=Math.max(-1,Math.min(1,v/1.6));
+  if(c>=0){
+    const k=c;
+    return `rgb(${Math.round(20+235*k)},${Math.round(22+136*k)},${Math.round(28+10*k)})`;
+  }else{
+    const k=-c;
+    return `rgb(${Math.round(20+36*k)},${Math.round(22+167*k)},${Math.round(28+220*k)})`;
+  }
+}
+
+function drawBoxFrame(i,L){
+  const bx=L.boxX(i), by=L.boxY();
+  ctx.save();
+  // 6-walls (left & right thick violet, labelled 6)
+  ctx.strokeStyle='rgba(124,58,237,.9)'; ctx.lineWidth=3;
+  ctx.strokeRect(bx,by,L.bw,L.bh);
+  ctx.fillStyle='rgba(124,58,237,.85)'; ctx.font=`${Math.max(11,L.cell*0.5)}px JetBrains Mono,monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('6',bx+6,by+L.bh/2); ctx.fillText('6',bx+L.bw-6,by+L.bh/2);
+  // interior grid
+  ctx.strokeStyle='rgba(100,116,139,.18)'; ctx.lineWidth=1;
+  for(let cc=1;cc<COLS;cc++){const x=bx+cc*L.cell;ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x,by+L.bh);ctx.stroke();}
+  for(let rr=1;rr<ROWS;rr++){const y=by+rr*L.cell;ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+L.bw,y);ctx.stroke();}
+  // four gold control vertices (YES/MON style)
+  const verts=[['YES',bx+0.5*L.cell,by+0.5*L.cell],['MON',bx+0.5*L.cell,by+L.bh-0.5*L.cell],
+               ['ACK',bx+L.bw-0.5*L.cell,by+0.5*L.cell],['RET',bx+L.bw-0.5*L.cell,by+L.bh-0.5*L.cell]];
+  ctx.font=`${Math.max(8,L.cell*0.28)}px JetBrains Mono,monospace`;
+  verts.forEach(([txt,vx,vy])=>{
+    ctx.fillStyle='rgba(251,191,36,.9)';
+    ctx.beginPath();ctx.arc(vx,vy,Math.max(3,L.cell*0.16),0,7);ctx.fill();
+    ctx.fillStyle='#fde68a';ctx.fillText(txt,vx,vy-L.cell*0.42);
+  });
+  // valence band ("- + 0 0 + -" over "! + 0 0 + !")
+  if(S.valence){
+    ctx.font=`${Math.max(9,L.cell*0.42)}px JetBrains Mono,monospace`;
+    PAT1.forEach((ch,k)=>{ctx.fillStyle='#e2e8f0';ctx.fillText(ch,bx+(k+0.5)*L.cell,by+1.5*L.cell);});
+    PAT2.forEach((ch,k)=>{ctx.fillStyle='#fca5a5';ctx.fillText(ch,bx+(k+0.5)*L.cell,by+2.5*L.cell);});
+  }
+  // node label + core
+  ctx.fillStyle='#94a3b8';ctx.font=`${Math.max(10,L.cell*0.4)}px JetBrains Mono,monospace`;
+  ctx.fillText(NODES[i].label,bx+L.bw/2,by+L.bh+16);
+  ctx.restore();
+}
+
+function drawDividers(L){
+  for(let g=0;g<2;g++){
+    const a=g, b=g+1;
+    const mid=(L.boxX(a)+L.bw + L.boxX(b))/2;
+    const open=S.gates[g];
+    ctx.save();
+    ctx.setLineDash(open?[]:[5,6]);
+    ctx.strokeStyle=open?'rgba(34,197,94,.85)':'rgba(239,68,68,.55)';
+    ctx.lineWidth=open?2.5:1.5;
+    ctx.beginPath();ctx.moveTo(mid,L.boxY()-6);ctx.lineTo(mid,L.boxY()+L.bh+6);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=open?'#22c55e':'#ef4444';
+    ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText(open?'YES':'NO', mid, L.boxY()-14);
+    ctx.restore();
+  }
+}
+
+function frame(){
+  if(!S.paused) t+=16;
+  const L=layout();
+  ctx.clearRect(0,0,L.w,L.h);
+  const phase=t*0.004;
+  const srcs=sources(L);
+  const trans=transmitted(srcs,L);
+
+  // build full point list per box (real + image + transmitted)
+  const fieldPts=[];
+  srcs.forEach(s=>{ imagesFor(s,L).forEach(p=>fieldPts.push(p)); });
+  trans.forEach(p=>fieldPts.push(p));
+
+  // render interference field as cells inside each box
+  const step=Math.max(6,L.cell/3.2);
+  for(let i=0;i<3;i++){
+    const bx=L.boxX(i), by=L.boxY();
+    for(let y=by;y<by+L.bh;y+=step){
+      for(let x=bx;x<bx+L.bw;x+=step){
+        const v=amp(x+step/2,y+step/2,fieldPts,phase,S.decay,S.lambda);
+        ctx.fillStyle=colorFor(v);
+        ctx.globalAlpha=0.92;
+        ctx.fillRect(x,y,step+0.6,step+0.6);
+      }
+    }
+  }
+  ctx.globalAlpha=1;
+
+  // overlay expanding wavefront rings from each true 0,0 source (file-2 look)
+  srcs.forEach(s=>{
+    for(let k=0;k<3;k++){
+      const ph=((t*0.0007)+k*0.8+s.box*0.3)%2.5;
+      if(ph>2)continue;
+      const r=ph*L.bw*0.5, al=(1-ph/2.5)*0.5;
+      ctx.beginPath();ctx.arc(s.x,s.y,r,0,7);
+      ctx.strokeStyle=`rgba(165,180,252,${al})`;ctx.lineWidth=1.4;ctx.stroke();
+    }
+    // core glow at 0,0
+    const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,L.cell*0.8);
+    g.addColorStop(0,'rgba(249,115,22,.95)');g.addColorStop(1,'rgba(249,115,22,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(s.x,s.y,L.cell*0.8,0,7);ctx.fill();
+    ctx.fillStyle='#fed7aa';ctx.font=`${Math.max(8,L.cell*0.3)}px JetBrains Mono,monospace`;
+    ctx.textAlign='center';ctx.fillText('0,0',s.x,s.y+L.cell*0.05);
+  });
+
+  for(let i=0;i<3;i++) drawBoxFrame(i,L);
+  drawDividers(L);
+
+  // panels
+  const openCount=S.gates[0]+S.gates[1];
+  readout.innerHTML=`sources <b style="color:#fed7aa">3</b> · image pts <b>${fieldPts.length}</b><br>`+
+    `gates open <b style="color:${openCount?'#22c55e':'#ef4444'}">${openCount}/2</b><br>`+
+    `reflect <b>${S.reflect?'on':'off'}</b> · t <b>${(t/1000).toFixed(1)}s</b>`;
+  math.innerHTML=`6 × 4 = <b>24</b> cells/box<br>`+
+    `scale <b>${L.cell.toFixed(1)}px</b> · pulse <b>${L.pulse.toFixed(2)}×</b><br>`+
+    `λ <b>${S.lambda}</b> · ratio <b>locked</b>`;
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---- controls ----
+const $=id=>document.getElementById(id);
+$('scale').oninput=e=>{S.scale=+e.target.value;$('scalev').textContent=S.scale;};
+$('lambda').oninput=e=>{S.lambda=+e.target.value;$('lambdav').textContent=S.lambda;};
+$('decay').oninput=e=>{S.decay=+e.target.value/100;$('decayv').textContent=S.decay.toFixed(2);};
+$('reflect').onclick=e=>{S.reflect=!S.reflect;e.target.classList.toggle('on',S.reflect);};
+$('valence').onclick=e=>{S.valence=!S.valence;e.target.classList.toggle('on',S.valence);};
+$('pause').onclick=e=>{S.paused=!S.paused;e.target.textContent=S.paused?'RESUME':'PAUSE';e.target.classList.toggle('on',S.paused);};
+function setGate(g,btn){S.gates[g]=S.gates[g]?0:1;btn.dataset.state=S.gates[g];
+  btn.textContent=`GATE ${g===0?'you↔0':'0↔me'} : ${S.gates[g]?'YES':'NO'}`;}
+$('gateA').onclick=e=>setGate(0,e.target);
+$('gateB').onclick=e=>setGate(1,e.target);
+
+// click a divider in canvas to toggle its gate
+cvs.addEventListener('click',ev=>{
+  const r=cvs.getBoundingClientRect(), x=ev.clientX-r.left;
+  const L=layout();
+  for(let g=0;g<2;g++){
+    const mid=(L.boxX(g)+L.bw + L.boxX(g+1))/2;
+    if(Math.abs(x-mid)<L.gap/1.5){
+      const btn=g===0?$('gateA'):$('gateB');
+      setGate(g,btn); break;
+    }
+  }
+});
+</script>
+</body>
+</html>

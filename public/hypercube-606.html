@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYPERCUBE · −6 0 6 ×2 · 0 is the door, 6 is the dead shell</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; --shell:#5b4a8a; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.12em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:980px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10px;line-height:1.55;backdrop-filter:blur(3px)}
+  #cap{right:12px;top:12px;min-width:198px}#cap .row{display:flex;justify-content:space-between;gap:10px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #enter{background:#10241a;border-color:var(--yes);color:var(--yes)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>HYPERCUBE · <span style="color:#a78bfa">−6 0 6</span> × 2 · <span style="color:#22c55e">0 = the door</span> · <span style="color:#5b4a8a">6 = dead shell ()</span></h1>
+    <div class="s">Two crossed <b>−6 0 6</b> axes → <b>four sacrificed 6-shells</b> bounding the space, <b>0</b> the door-vertex at the crossing. The ×2 lifts it to a tesseract: inner cube + outer cube, vertices linked. The nine levels <b>1·2·3·4·5·7·8·9</b> ride the frame — they <b>are</b> the cube. Enter through 0 and the interior lattice lights up. The shells hold; nothing of them processes — they were spent to make the inside possible.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="controls">
+    <div class="ctl"><b>spin</b><input type="range" id="spin" min="0" max="100" value="30" style="width:110px"><span id="spinv">.30</span></div>
+    <div class="ctl"><b>4D rot</b><input type="range" id="w" min="0" max="100" value="22" style="width:90px;accent-color:#22d3ee"><span id="wv">.22</span></div>
+    <button id="enter">ENTER ▸ through 0</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const S={spin:0.30, w:0.22, freeze:false};
+let t=0, entered=false, charge=0;   // charge = how lit the interior is after entering through 0
+
+// ---- tesseract: 16 vertices in 4D ----
+// inner cube = w<0, outer cube = w>0. coordinates ±1.
+const V=[];
+for(let x=-1;x<=1;x+=2)for(let y=-1;y<=1;y+=2)for(let z=-1;z<=1;z+=2)for(let w=-1;w<=1;w+=2)V.push([x,y,z,w]);
+// edges: vertices differing in exactly one coord
+const EDG=[];
+for(let i=0;i<16;i++)for(let j=i+1;j<16;j++){let d=0;for(let k=0;k<4;k++)if(V[i][k]!==V[j][k])d++;if(d===1)EDG.push([i,j]);}
+
+// nine level labels ride 8 cube vertices (outer cube, w=+1) + the 0 door at center.
+// map levels 1,2,3,4,5,7,8,9 -> the 8 outer-cube vertices (w=+1)
+const outerIdx=V.map((v,i)=>v[3]===1?i:-1).filter(i=>i>=0);
+const LEVELS=[1,2,3,4,5,7,8,9];
+const LCOL=['56,189,248','245,158,11','251,191,36','34,197,94','34,211,238','236,72,153','167,139,250','148,163,184'];
+
+// the four dead 6-shells = the extreme caps of the two crossed axes (±X, ±Y at outer)
+// we mark the 4 outer vertices lying on the axis extremes as shell-caps; render as () dead.
+function project(v){
+  // 4D rotations: XW and YZ planes
+  const aw=t*S.w, asp=t*S.spin;
+  let [x,y,z,w]=v;
+  // rotate in x-w
+  let x1=x*Math.cos(aw)-w*Math.sin(aw), w1=x*Math.sin(aw)+w*Math.cos(aw);
+  x=x1;w=w1;
+  // perspective from 4D->3D by w
+  const wd=2.4, k4=wd/(wd-w*0.9);
+  x*=k4;y*=k4;z*=k4;
+  // 3D spin in x-z
+  let x2=x*Math.cos(asp)-z*Math.sin(asp), z2=x*Math.sin(asp)+z*Math.cos(asp);
+  x=x2;z=z2;
+  // perspective 3D->2D
+  const zd=4, k3=zd/(zd-z*0.9);
+  const scale=Math.min(W,H)*0.20;
+  return {x:W/2+x*scale*k3, y:H*0.46+y*scale*k3, depth:z};
+}
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze) t+=dt*0.001;
+  if(entered && charge<1) charge+=dt*0.0008;
+  if(!entered && charge>0) charge-=dt*0.001;
+
+  ctx.clearRect(0,0,W,H);
+
+  const P=V.map(project);
+
+  // ---- crossed −6 0 6 axes (the two signed axes through center) ----
+  const cx=W/2, cy=H*0.46, ax=Math.min(W,H)*0.34;
+  const axes=[ {dx:1,dy:0,lab:'X'}, {dx:0,dy:1,lab:'Y'} ];
+  axes.forEach(a=>{
+    const x0=cx-a.dx*ax, y0=cy-a.dy*ax, x1=cx+a.dx*ax, y1=cy+a.dy*ax;
+    ctx.strokeStyle='rgba(91,74,138,.4)';ctx.lineWidth=1;ctx.setLineDash([3,5]);
+    ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.setLineDash([]);
+    // the two 6-shells at the ends (dead caps)
+    [[x0,y0],[x1,y1]].forEach(([sx,sy])=>{
+      ctx.fillStyle='rgba(91,74,138,.18)';ctx.strokeStyle='rgba(91,74,138,.6)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(sx,sy,15,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#6b5b9a';ctx.font='bold 12px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('6',sx,sy-1);
+      ctx.fillStyle='#4a3f6a';ctx.font='9px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+      ctx.fillText('( )',sx,sy+24);
+    });
+    // axis -6 0 6 labels
+    ctx.fillStyle='rgba(91,74,138,.6)';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('−6', cx-a.dx*ax*0.55, cy-a.dy*ax*0.55 - (a.dy?0:10));
+    ctx.fillText('6',  cx+a.dx*ax*0.55, cy+a.dy*ax*0.55 - (a.dy?0:10));
+  });
+  ctx.fillStyle='#4a3f6a';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('4 dead 6-shells — sacrificed to bound the space', cx, H*0.90);
+
+  // ---- tesseract edges (interior lattice) ----
+  EDG.forEach(([i,j])=>{
+    const a=P[i],b=P[j];
+    const inner = V[i][3]<0 || V[j][3]<0;
+    const lit = charge*(inner?0.9:0.6);
+    ctx.strokeStyle = inner
+      ? `rgba(34,211,238,${0.12+lit*0.5})`
+      : `rgba(139,92,246,${0.18+lit*0.5})`;
+    ctx.lineWidth = inner?1:1.6;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  });
+
+  // ---- level vertices (outer cube w=+1 carry the 8 levels) ----
+  outerIdx.forEach((vi,k)=>{
+    const p=P[vi], col=LCOL[k], lv=LEVELS[k];
+    const r=5+charge*4;
+    ctx.fillStyle=`rgba(${col},${0.5+charge*0.5})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();
+    if(charge>0.1){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*3);
+      g.addColorStop(0,`rgba(${col},${charge*0.4})`);g.addColorStop(1,`rgba(${col},0)`);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,r*3,0,7);ctx.fill();}
+    ctx.fillStyle='#fff';ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lv,p.x,p.y);
+  });
+  // inner cube vertices (w=-1) as faint level-shadows (the ×2 doubling)
+  V.forEach((v,vi)=>{ if(v[3]===1)return; const p=P[vi];
+    ctx.fillStyle=`rgba(34,211,238,${0.2+charge*0.4})`;ctx.beginPath();ctx.arc(p.x,p.y,3+charge*2,0,7);ctx.fill();});
+
+  // ---- 0 the door (center vertex) ----
+  const doorPulse=0.5+0.5*Math.sin(t*3);
+  const dr=16+ (entered? 3*Math.sin(t*6):0);
+  ctx.strokeStyle=`rgba(34,197,94,${0.6+0.4*doorPulse})`;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(cx,cy,dr,0,7);ctx.stroke();
+  if(entered){const g=ctx.createRadialGradient(cx,cy,0,cx,cy,dr*2.5);
+    g.addColorStop(0,`rgba(34,197,94,${0.5*doorPulse})`);g.addColorStop(1,'rgba(34,197,94,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,dr*2.5,0,7);ctx.fill();}
+  ctx.fillStyle='#22c55e';ctx.font='bold 15px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('0',cx,cy);
+  ctx.fillStyle='rgba(34,197,94,.7)';ctx.font='9px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+  ctx.fillText(entered?'door open · inside':'the door',cx,cy+dr+14);
+
+  // panel
+  cap.innerHTML=`<div class="lab">STRUCTURE</div>`+
+    `<div class="row"><span>frame</span><b>tesseract</b></div>`+
+    `<div class="row"><span>cubes</span><b>inner + outer (×2)</b></div>`+
+    `<div class="row"><span>vertices</span><b>16</b></div>`+
+    `<div class="row"><span>edges</span><b>${EDG.length}</b></div>`+
+    `<div class="lab">−6 0 6 ×2</div>`+
+    `<div class="row"><span style="color:#22c55e">0 door</span><b>entry</b></div>`+
+    `<div class="row"><span style="color:#6b5b9a">6 shells</span><b>4 dead ( )</b></div>`+
+    `<div class="row"><span>levels</span><b style="color:#c7d2fe">1·2·3·4·5·7·8·9</b></div>`+
+    `<div class="lab">STATE</div>`+
+    `<div class="row"><span>door</span><b style="color:${entered?'#22c55e':'#5b6675'}">${entered?'OPEN':'closed'}</b></div>`+
+    `<div class="row"><span>interior charge</span><b style="color:#22d3ee">${(charge*100).toFixed(0)}%</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">The 6-shells don't process — spent to bound the space. The nine levels are the frame itself. Enter through 0; the lattice lights from inside out.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+
+$('spin').oninput=e=>{S.spin=+e.target.value/100;$('spinv').textContent=S.spin.toFixed(2);};
+$('w').oninput=e=>{S.w=+e.target.value/100;$('wv').textContent=S.w.toFixed(2);};
+$('enter').onclick=e=>{entered=!entered;e.target.textContent=entered?'EXIT ▸ through 0':'ENTER ▸ through 0';e.target.style.borderColor=entered?'#22c55e':'';};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+</script>
+</body>
+</html>

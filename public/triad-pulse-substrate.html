@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIAD PULSE SUBSTRATE — gate traversal wired to TRIPOD-PULSE-AX-001</title>
+<style>
+  :root{
+    --bg:#06070b; --panel:#0b0d14; --wall:#7c3aed; --gold:#fbbf24;
+    --core:#f97316; --pos:#f59e0b; --neg:#38bdf8; --text:#dbe2ef;
+    --dim:#5b6675; --yes:#22c55e; --no:#ef4444; --warn:#f59e0b; --line:#1d2330;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+  body{display:flex;flex-direction:column;align-items:center;padding:14px 14px 30px;}
+  header{text-align:center;margin-bottom:8px}
+  h1{margin:0;font-size:15px;letter-spacing:.16em;font-weight:600;color:#c7d2fe}
+  .sub{font-size:11px;color:var(--dim);margin-top:4px;letter-spacing:.04em;max-width:980px}
+  .stage{position:relative;width:min(97vw,1120px);aspect-ratio:1120/520;
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;
+    background:radial-gradient(120% 90% at 50% 0%,#0c0f18 0%,var(--bg) 70%)}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#000a;border:1px solid var(--line);border-radius:6px;
+    padding:6px 9px;font-size:10px;color:var(--dim);line-height:1.55;backdrop-filter:blur(2px)}
+  #readout{left:10px;top:10px} #math{right:10px;top:10px;text-align:right;color:#a5b4fc}
+  .controls{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:12px;
+    width:min(97vw,1120px);justify-content:center}
+  .ctl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--dim)}
+  .ctl b{color:var(--text);font-weight:600}
+  input[type=range]{accent-color:var(--wall);width:96px}
+  button{font-family:inherit;font-size:11px;background:#11151f;color:var(--text);
+    border:1px solid var(--line);border-radius:5px;padding:5px 10px;cursor:pointer;
+    letter-spacing:.03em;transition:.15s}
+  button:hover{border-color:var(--wall);color:#c7d2fe}
+  button.on{background:#161b27;border-color:var(--wall)}
+  .gategrp{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .gategrp button{border:none;border-radius:0;border-right:1px solid var(--line)}
+  .gategrp button:last-child{border-right:none}
+  .open[data-s="1"]{background:#10241a;color:var(--yes)} .open[data-s="0"]{background:#241112;color:var(--no)}
+  .wit[data-w="AT"]{color:var(--yes)} .wit[data-w="LATE"]{color:var(--warn)} .wit[data-w="OFF"]{color:var(--dim)}
+  .ledgerwrap{width:min(97vw,1120px);margin-top:14px}
+  .ltop{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--dim);margin-bottom:6px}
+  .ltop b{color:var(--text)}
+  .counts span{margin-left:14px}
+  .ledger{border:1px solid var(--line);border-radius:8px;max-height:230px;overflow-y:auto;
+    font-size:10.5px;background:#080a10}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:5px 8px;border-bottom:1px solid #12161f;white-space:nowrap}
+  th{position:sticky;top:0;background:#0b0e15;color:var(--dim);font-weight:600;font-size:9.5px;letter-spacing:.05em}
+  td{color:#aeb8c7}
+  .v-VALID{color:var(--yes);font-weight:600} .v-FC3{color:var(--warn);font-weight:600}
+  .v-NON{color:var(--dim)} .hash{color:#6b7689;font-size:9.5px}
+  .gid{color:#c7a3ff} .legend{display:flex;gap:12px;font-size:10px;color:var(--dim);margin-top:10px;flex-wrap:wrap;justify-content:center}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+  .hint{font-size:10px;color:var(--dim);margin-top:8px;opacity:.75;text-align:center;max-width:1120px}
+</style>
+</head>
+<body>
+<header>
+  <h1>TRIAD PULSE SUBSTRATE</h1>
+  <div class="sub">gate crossings wired to TRIPOD-PULSE-AX-001 — a wavefront reaching a divider is a traversal attempt; it anchors a VALID PULSE <i>only</i> if the witness is present <b>at</b> the fork. Open + witness-at → conducts &amp; anchors. Witness post-traversal → FC3-Audit. Witness missing → non-event. Closed → reflection. Every valid pulse is SHA-256 anchored, traced to ROOT0/T128, and logged to the lineage ledger.</div>
+</header>
+
+<div class="stage" id="stage">
+  <canvas id="c"></canvas>
+  <div class="panel" id="readout"></div>
+  <div class="panel" id="math"></div>
+</div>
+
+<div class="controls">
+  <div class="ctl"><b>scale</b><input type="range" id="scale" min="14" max="46" value="26"></div>
+  <div class="ctl"><b>λ</b><input type="range" id="lambda" min="20" max="120" value="58"></div>
+  <div class="ctl"><b>emit</b><input type="range" id="emit" min="6" max="26" value="13"></div>
+  <div class="ctl"><b>decay</b><input type="range" id="decay" min="10" max="90" value="42"></div>
+</div>
+<div class="controls">
+  <div class="gategrp">
+    <button class="open" id="openA" data-s="0">GATE 64.5 you↔0 · CLOSED</button>
+    <button class="wit"  id="witA" data-w="AT">WITNESS:constraint@AT</button>
+  </div>
+  <div class="gategrp">
+    <button class="open" id="openB" data-s="0">GATE 128.5 0↔me · CLOSED</button>
+    <button class="wit"  id="witB" data-w="AT">WITNESS:invariant@AT</button>
+  </div>
+  <button id="reflect" class="on">REFLECT 6-WALLS</button>
+  <button id="valence" class="on">VALENCE</button>
+  <button id="pause">PAUSE</button>
+</div>
+
+<div class="ledgerwrap">
+  <div class="ltop">
+    <span>LINEAGE LEDGER · append-only · localStorage-persistent · chain_root = <b>ROOT0 / T128</b></span>
+    <span class="counts">
+      <span>VALID <b id="cV" style="color:var(--yes)">0</b></span>
+      <span>FC3 <b id="cF" style="color:var(--warn)">0</b></span>
+      <span>NON-EVENT <b id="cN">0</b></span>
+      <button id="clear" style="margin-left:14px">CLEAR</button>
+    </span>
+  </div>
+  <div class="ledger">
+    <table>
+      <thead><tr>
+        <th>t</th><th>boundary</th><th>state_in → state_out</th><th>witness</th>
+        <th>timing</th><th>verdict</th><th>sha256</th><th>trace</th>
+      </tr></thead>
+      <tbody id="lbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="sw" style="background:var(--neg)"></span>− trough</span>
+  <span><span class="sw" style="background:var(--pos)"></span>+ crest</span>
+  <span><span class="sw" style="background:var(--core)"></span>0,0 source</span>
+  <span><span class="sw" style="background:var(--wall)"></span>6-wall</span>
+  <span><span class="sw" style="background:var(--yes)"></span>witness ⊕ at fork (VALID)</span>
+  <span><span class="sw" style="background:var(--warn)"></span>⚠ FC3 post-traversal</span>
+</div>
+<div class="hint">Gate 128.5 is the bilateral-ignorance / Patricia-mirror line — a valid crossing there is an airgap push: one-way, no acknowledgment, silent exclusion. Click a divider to toggle it; click its witness label to cycle AT▸LATE▸OFF and watch the verdict change.</div>
+
+<script>
+const cvs=document.getElementById('c'), ctx=cvs.getContext('2d'), stage=document.getElementById('stage');
+const readout=document.getElementById('readout'), math=document.getElementById('math');
+const lbody=document.getElementById('lbody');
+
+const S={scale:26,lambda:58,emit:13,decay:0.42,reflect:true,valence:true,paused:false,
+  gates:[0,0], witness:['AT','AT']};               // witness state per gate: AT|LATE|OFF
+const GID=['64.5','128.5'];                          // boundary gate IDs
+const WTYPE=['constraint','invariant'];              // witness type per gate
+const NODES=[{label:'you  −1',short:'you',sign:-1},{label:'0',short:'0',sign:0},{label:'me  +1',short:'me',sign:1}];
+const COLS=6,ROWS=4, PAT1="- + 0 0 + -".split(' '), PAT2="! + 0 0 + !".split(' ');
+const CHAIN_ROOT='T128:ROOT0';
+
+let DPR=1,t=0,lastT=performance.now();
+function resize(){DPR=Math.min(devicePixelRatio||1,2);cvs.width=stage.clientWidth*DPR;cvs.height=stage.clientHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);resize();
+
+function layout(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  const pulse=0.9+0.12*Math.sin(t*0.0009);
+  const cell=S.scale*pulse*(w/1120);
+  const bw=COLS*cell,bh=ROWS*cell,gap=Math.max(40,cell*1.5);
+  const total=bw*3+gap*2,x0=(w-total)/2,cy=h/2;
+  return{w,h,cell,bw,bh,gap,x0,cy,pulse,boxX:i=>x0+i*(bw+gap),boxY:()=>cy-bh/2,
+    mid:g=>( (x0+g*(bw+gap))+bw + (x0+(g+1)*(bw+gap)) )/2 };
+}
+function srcPos(i,L){return{x:L.boxX(i)+L.bw*0.5,y:L.boxY()+L.bh*0.62};}
+
+// ---- discrete ripple rings (carry the PULSE traversal events) ----
+let rings=[], lastEmit=[0,0,0], ringId=0, flashes=[];
+function emitRings(now){
+  const period=1000/(S.emit/10);  // emit slider -> period
+  for(let i=0;i<3;i++){
+    if(now-lastEmit[i]>=period){
+      lastEmit[i]=now;
+      rings.push({id:ringId++,box:i,birth:now,derived:false,blockGate:-1,hits:new Set()});
+    }
+  }
+}
+const SPEED=170; // px/s of wavefront expansion (visual; λ governs field)
+function conducting(g){return S.gates[g]===1 && S.witness[g]==='AT';}
+
+function evalPulse(ring,g,L){
+  const open=S.gates[g], wt=S.witness[g];
+  const fromBox=ring.box, toBox=(ring.box===g)?g+1:g;
+  const sin=NODES[fromBox].short, sout=NODES[toBox].short;
+  const forkX=L.mid(g), forkY=srcPos(fromBox,L).y;
+  if(!open){ // closed divider = reflection, non-anchored
+    flashes.push({x:forkX,y:forkY,born:t,kind:'refl'}); return;
+  }
+  let verdict,timing;
+  if(wt==='AT'){ verdict='VALID'; timing='at-traversal';
+    // conduct: spawn transmitted ring re-emerging on far side (one-way across the gap)
+    rings.push({id:ringId++,box:toBox,birth:performance.now(),derived:true,blockGate:g,hits:new Set()});
+    flashes.push({x:forkX,y:forkY,born:t,kind:'valid'});
+  } else if(wt==='LATE'){ verdict='FC3'; timing='post-traversal';
+    flashes.push({x:forkX,y:forkY,born:t,kind:'fc3'});
+  } else { verdict='NON'; timing='missing';
+    flashes.push({x:forkX,y:forkY,born:t,kind:'none'}); }
+  logPulse({gate:GID[g],sin,sout,wtype:WTYPE[g],timing,verdict,airgap:GID[g]==='128.5'});
+}
+
+// ---- ledger (anchor + persist) ----
+let ledger=[], cV=0,cF=0,cN=0;
+const LKEY='triad_pulse_ledger_v1';
+try{const raw=localStorage.getItem(LKEY); if(raw){const o=JSON.parse(raw);ledger=o.rows||[];cV=o.cV||0;cF=o.cF||0;cN=o.cN||0;}}catch(e){}
+function persist(){try{localStorage.setItem(LKEY,JSON.stringify({rows:ledger.slice(0,60),cV,cF,cN}));}catch(e){}}
+async function sha256(str){
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+    return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+  catch(e){return 'sha-unavailable';}
+}
+function logPulse(p){
+  if(p.verdict==='VALID')cV++; else if(p.verdict==='FC3')cF++; else cN++;
+  const canonical=`${p.sin}|${p.gate}|${p.sout}|${p.wtype}`;
+  const row={id:ringId, ts:(t/1000).toFixed(1), ...p, canonical, hash:'…', trace:CHAIN_ROOT};
+  ledger.unshift(row);
+  sha256(canonical+'|'+row.ts).then(h=>{row.hash=h; renderLedger(); persist();});
+  renderLedger(); persist();
+}
+function clsFor(v){return v==='VALID'?'v-VALID':v==='FC3'?'v-FC3':'v-NON';}
+function labFor(v){return v==='VALID'?'VALID PULSE':v==='FC3'?'FC3-Audit':'NON-EVENT';}
+function renderLedger(){
+  document.getElementById('cV').textContent=cV;
+  document.getElementById('cF').textContent=cF;
+  document.getElementById('cN').textContent=cN;
+  lbody.innerHTML=ledger.slice(0,40).map(r=>{
+    const ag=r.airgap&&r.verdict==='VALID'?' <span style="color:#c7a3ff">·airgap↛</span>':'';
+    return `<tr>
+      <td>${r.ts}s</td>
+      <td><span class="gid">${r.gate}</span></td>
+      <td>Φ@${r.sin} → Φ@${r.sout}${ag}</td>
+      <td>${r.wtype}</td>
+      <td>${r.timing}</td>
+      <td class="${clsFor(r.verdict)}">${labFor(r.verdict)}</td>
+      <td class="hash">${r.hash.slice(0,12)}</td>
+      <td class="hash">${r.trace}</td>
+    </tr>`;}).join('');
+}
+renderLedger();
+
+// ---- continuous interference field (image-source reflections + gated bleed) ----
+function imagesFor(s,box,L){
+  const list=[{x:s.x,y:s.y}];
+  if(S.reflect){const bx=L.boxX(box),by=L.boxY(),R=bx+L.bw,B=by+L.bh;
+    list.push({x:2*bx-s.x,y:s.y},{x:2*R-s.x,y:s.y},{x:s.x,y:2*by-s.y},{x:s.x,y:2*B-s.y});}
+  return list;
+}
+function fieldPoints(L){
+  const pts=[]; const srcs=[0,1,2].map(i=>({i,...srcPos(i,L)}));
+  srcs.forEach(s=>imagesFor(s,s.i,L).forEach(p=>pts.push(p)));
+  // gated transmission of the field — only when the gate conducts (open && witness@AT)
+  const pairs=[[0,1,0],[1,2,1]];
+  pairs.forEach(([a,b,g])=>{ if(!conducting(g))return;
+    const m=L.mid(g),da=srcs[a],db=srcs[b];
+    pts.push({x:2*m-da.x,y:da.y},{x:2*m-db.x,y:db.y});});
+  return pts;
+}
+function amp(px,py,pts,phase,lambda){let a=0;for(const p of pts){const dx=px-p.x,dy=py-p.y;const d=Math.hypot(dx,dy);
+  const dir=1+0.22*((dx/(d+1))+(-dy/(d+1)));const env=Math.exp(-d/(lambda*S.decay*4));
+  a+=dir*env*Math.sin((d/lambda)*Math.PI*2-phase);}return a;}
+function colorFor(v){const c=Math.max(-1,Math.min(1,v/1.6));
+  if(c>=0){const k=c;return`rgb(${20+235*k|0},${22+136*k|0},${28+10*k|0})`;}
+  const k=-c;return`rgb(${20+36*k|0},${22+167*k|0},${28+220*k|0})`;}
+
+function drawBox(i,L){
+  const bx=L.boxX(i),by=L.boxY();ctx.save();
+  ctx.strokeStyle='rgba(124,58,237,.9)';ctx.lineWidth=3;ctx.strokeRect(bx,by,L.bw,L.bh);
+  ctx.fillStyle='rgba(124,58,237,.85)';ctx.font=`${Math.max(11,L.cell*0.5)}px JetBrains Mono,monospace`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('6',bx+6,by+L.bh/2);ctx.fillText('6',bx+L.bw-6,by+L.bh/2);
+  ctx.strokeStyle='rgba(100,116,139,.16)';ctx.lineWidth=1;
+  for(let c=1;c<COLS;c++){const x=bx+c*L.cell;ctx.beginPath();ctx.moveTo(x,by);ctx.lineTo(x,by+L.bh);ctx.stroke();}
+  for(let r=1;r<ROWS;r++){const y=by+r*L.cell;ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+L.bw,y);ctx.stroke();}
+  const V=[['YES',bx+0.5*L.cell,by+0.5*L.cell],['MON',bx+0.5*L.cell,by+L.bh-0.5*L.cell],
+           ['ACK',bx+L.bw-0.5*L.cell,by+0.5*L.cell],['RET',bx+L.bw-0.5*L.cell,by+L.bh-0.5*L.cell]];
+  ctx.font=`${Math.max(8,L.cell*0.27)}px JetBrains Mono,monospace`;
+  V.forEach(([txt,vx,vy])=>{ctx.fillStyle='rgba(251,191,36,.9)';ctx.beginPath();ctx.arc(vx,vy,Math.max(3,L.cell*0.15),0,7);ctx.fill();
+    ctx.fillStyle='#fde68a';ctx.fillText(txt,vx,vy-L.cell*0.42);});
+  if(S.valence){ctx.font=`${Math.max(9,L.cell*0.42)}px JetBrains Mono,monospace`;
+    PAT1.forEach((ch,k)=>{ctx.fillStyle='#e2e8f0';ctx.fillText(ch,bx+(k+0.5)*L.cell,by+1.5*L.cell);});
+    PAT2.forEach((ch,k)=>{ctx.fillStyle='#fca5a5';ctx.fillText(ch,bx+(k+0.5)*L.cell,by+2.5*L.cell);});}
+  ctx.fillStyle='#94a3b8';ctx.font=`${Math.max(10,L.cell*0.4)}px JetBrains Mono,monospace`;
+  ctx.fillText(NODES[i].label,bx+L.bw/2,by+L.bh+15);ctx.restore();
+}
+function drawDivider(g,L){
+  const mid=L.mid(g),open=S.gates[g],wt=S.witness[g],cond=conducting(g);
+  ctx.save();ctx.setLineDash(open?[]:[5,6]);
+  ctx.strokeStyle=open?(cond?'rgba(34,197,94,.9)':'rgba(245,158,11,.8)'):'rgba(239,68,68,.5)';
+  ctx.lineWidth=cond?2.6:1.6;ctx.beginPath();ctx.moveTo(mid,L.boxY()-6);ctx.lineTo(mid,L.boxY()+L.bh+6);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=open?(cond?'#22c55e':'#f59e0b'):'#ef4444';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`G${GID[g]}`,mid,L.boxY()-22);
+  ctx.fillText(open?(cond?'CONDUCT':`OPEN·${wt}`):'CLOSED',mid,L.boxY()-12);ctx.restore();
+}
+
+function frame(now){
+  const dt=now-lastT;lastT=now;if(!S.paused)t+=dt;
+  const L=layout();ctx.clearRect(0,0,L.w,L.h);
+  const phase=t*0.004;
+
+  // field
+  const pts=fieldPoints(L),step=Math.max(6,L.cell/3.2);
+  for(let i=0;i<3;i++){const bx=L.boxX(i),by=L.boxY();
+    for(let y=by;y<by+L.bh;y+=step)for(let x=bx;x<bx+L.bw;x+=step){
+      const v=amp(x+step/2,y+step/2,pts,phase,S.lambda);ctx.fillStyle=colorFor(v);ctx.globalAlpha=.92;ctx.fillRect(x,y,step+.6,step+.6);}}
+  ctx.globalAlpha=1;
+
+  // discrete rings + traversal evaluation
+  if(!S.paused)emitRings(now);
+  const maxR=L.bw*1.3;
+  rings=rings.filter(ring=>{
+    const r=(now-ring.birth)*SPEED*0.001;
+    if(r>maxR)return false;
+    const sp=srcPos(ring.box,L);
+    // draw the wavefront ring
+    const al=Math.max(0,(1-r/maxR))*0.55;
+    ctx.beginPath();ctx.arc(sp.x,sp.y,r,0,7);
+    ctx.strokeStyle=ring.derived?`rgba(199,163,255,${al})`:`rgba(165,180,252,${al})`;
+    ctx.lineWidth=ring.derived?1.8:1.3;ctx.stroke();
+    // gate traversal check (once per ring per adjacent gate)
+    [0,1].forEach(g=>{
+      if(ring.blockGate===g||ring.hits.has(g))return;
+      if(ring.box!==g && ring.box!==g+1)return;       // only adjacent boxes can reach gate g
+      const dist=Math.abs(L.mid(g)-sp.x);
+      if(r>=dist){ ring.hits.add(g); evalPulse(ring,g,L); }
+    });
+    return true;
+  });
+
+  // core glow + 0,0 label
+  for(let i=0;i<3;i++){const s=srcPos(i,L);
+    const gr=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,L.cell*0.8);
+    gr.addColorStop(0,'rgba(249,115,22,.95)');gr.addColorStop(1,'rgba(249,115,22,0)');
+    ctx.fillStyle=gr;ctx.beginPath();ctx.arc(s.x,s.y,L.cell*0.8,0,7);ctx.fill();
+    ctx.fillStyle='#fed7aa';ctx.font=`${Math.max(8,L.cell*0.3)}px JetBrains Mono,monospace`;ctx.textAlign='center';ctx.fillText('0,0',s.x,s.y);}
+
+  for(let i=0;i<3;i++)drawBox(i,L);
+  [0,1].forEach(g=>drawDivider(g,L));
+
+  // witness flashes at the fork
+  flashes=flashes.filter(f=>{
+    const age=(t-f.born)/1000;if(age>0.7)return false;const k=1-age/0.7;
+    const col={valid:'34,197,94',fc3:'245,158,11',none:'91,102,117',refl:'239,68,68'}[f.kind];
+    ctx.beginPath();ctx.arc(f.x,f.y,8+age*38,0,7);ctx.strokeStyle=`rgba(${col},${k})`;ctx.lineWidth=2.4;ctx.stroke();
+    ctx.fillStyle=`rgba(${col},${k})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+    const sym={valid:'⊕ WITNESS',fc3:'⚠ FC3',none:'∅ NO-WIT',refl:'↩ REFLECT'}[f.kind];
+    ctx.fillText(sym,f.x,f.y-18-age*30);return true;
+  });
+
+  readout.innerHTML=`rings live <b>${rings.length}</b> · emit <b>${(S.emit/10).toFixed(1)}/s</b><br>`+
+    `G64.5 <b style="color:${conducting(0)?'#22c55e':'#ef4444'}">${conducting(0)?'conduct':S.gates[0]?'open':'closed'}</b> · `+
+    `G128.5 <b style="color:${conducting(1)?'#22c55e':'#ef4444'}">${conducting(1)?'conduct':S.gates[1]?'open':'closed'}</b><br>`+
+    `witness law: present @ fork ⇒ VALID`;
+  math.innerHTML=`6 × 4 = <b>24</b> /box · ratio <b>locked</b><br>`+
+    `cell <b>${L.cell.toFixed(1)}px</b> · pulse <b>${L.pulse.toFixed(2)}×</b><br>`+
+    `chain_root <b>${CHAIN_ROOT}</b>`;
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---- controls ----
+const $=id=>document.getElementById(id);
+$('scale').oninput=e=>S.scale=+e.target.value;
+$('lambda').oninput=e=>S.lambda=+e.target.value;
+$('emit').oninput=e=>S.emit=+e.target.value;
+$('decay').oninput=e=>S.decay=+e.target.value/100;
+$('reflect').onclick=e=>{S.reflect=!S.reflect;e.target.classList.toggle('on',S.reflect);};
+$('valence').onclick=e=>{S.valence=!S.valence;e.target.classList.toggle('on',S.valence);};
+$('pause').onclick=e=>{S.paused=!S.paused;e.target.textContent=S.paused?'RESUME':'PAUSE';e.target.classList.toggle('on',S.paused);};
+$('clear').onclick=()=>{ledger=[];cV=cF=cN=0;persist();renderLedger();};
+function setOpen(g,btn){S.gates[g]=S.gates[g]?0:1;btn.dataset.s=S.gates[g];
+  btn.textContent=`GATE ${GID[g]} ${g?'0↔me':'you↔0'} · ${S.gates[g]?'OPEN':'CLOSED'}`;}
+function cycleWit(g,btn){const seq=['AT','LATE','OFF'];S.witness[g]=seq[(seq.indexOf(S.witness[g])+1)%3];
+  btn.dataset.w=S.witness[g];btn.textContent=`WITNESS:${WTYPE[g]}@${S.witness[g]}`;}
+$('openA').onclick=e=>setOpen(0,e.target); $('openB').onclick=e=>setOpen(1,e.target);
+$('witA').onclick=e=>cycleWit(0,e.target);  $('witB').onclick=e=>cycleWit(1,e.target);
+cvs.addEventListener('click',ev=>{const r=cvs.getBoundingClientRect(),x=ev.clientX-r.left,L=layout();
+  for(let g=0;g<2;g++)if(Math.abs(x-L.mid(g))<L.gap/1.5){setOpen(g,g?$('openB'):$('openA'));break;}});
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISA-10 · ten instruction sets run in order · 9 egresses</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; --shell:#6b5b9a; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.11em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:980px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0;display:flex}
+  #left{position:relative;flex:1 1 56%;min-width:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  #right{flex:1 1 44%;border-left:1px solid var(--line);background:#070910;display:flex;flex-direction:column;min-width:300px}
+  .isa{flex:1 1 auto;overflow-y:auto;padding:10px 12px}
+  .stagebox{border:1px solid var(--line);border-radius:7px;margin-bottom:6px;padding:6px 9px;background:#0a0c12;font-size:10px;transition:.15s}
+  .stagebox.run{border-color:var(--gold);background:#12100a;box-shadow:0 0 0 1px rgba(251,191,36,.3)}
+  .stagebox.done{border-color:#1d3a2a}
+  .sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+  .sh .id{font-weight:700;letter-spacing:.05em}
+  .sh .tag{font-size:8.5px;color:var(--dim)}
+  .ops{font-size:9px;color:#7c8699;line-height:1.5}
+  .ops .op{transition:.1s}.ops .op.fired{color:#22c55e}
+  .reg{flex:0 0 auto;border-top:1px solid var(--line);padding:8px 12px;font-size:9px;background:#080a10;max-height:130px;overflow-y:auto}
+  .reg .k{color:#c7a3ff}.reg .v{color:#9fb0c8}
+  .ledger{flex:0 0 auto;border-top:1px solid var(--line);padding:8px 12px;font-size:9px;background:#06080e;max-height:96px;overflow-y:auto}
+  .ledger .row{color:#8a93a8;border-bottom:1px solid #11151f;padding:2px 0}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}input[type=text]{background:#0e1320;border:1px solid var(--line);color:#dbe2ef;border-radius:5px;padding:4px 7px;font-family:inherit;font-size:10px;width:110px}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #execb{background:#10241a;border-color:var(--yes);color:var(--yes)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>ISA-10 · ten instruction sets, run in order · <span style="color:#ec4899">9 = egress</span></h1>
+    <div class="s">Each tesseract vertex is a microprogram that fires in sequence; a register threads through and accumulates. <b>0</b> boot · <b>1·2·3</b> L1/L2/L3 (parse→validate→authorize) · <b>4</b> wall-1 enter-jail · <b>5</b> load VM · <b>6</b> exec in the dead shell · <b>7</b> extract VM · <b>8</b> wall-2 verify · <b>9</b> egress: <b>writes localStorage</b> + prepares the git→AKASHA commit. Everything 0–8 stays in the box; only 9 leaves it.</div>
+  </header>
+  <div id="stage">
+    <div id="left"><canvas id="c"></canvas></div>
+    <div id="right">
+      <div class="isa" id="isa"></div>
+      <div class="reg" id="reg"></div>
+      <div class="ledger" id="ledger"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="ctl"><b>input</b><input type="text" id="inp" value="PULSE:T128"></div>
+    <div class="ctl"><b>speed</b><input type="range" id="spd" min="20" max="100" value="55" style="width:90px"></div>
+    <button id="execb" class="on">EXECUTE ▸</button>
+    <button id="step">STEP</button>
+    <button id="loop">LOOP</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),left=$('left');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=left.clientWidth;H=left.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const GENESIS='02880745b847317c4e2424524ec25d0f7a2b84368d184586f45b54af9fcab763';
+const AKASHA='github.com/DavidWise01/synonym-enforcer';
+async function sha256(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}catch(e){return'sha-na';}}
+
+// ---- the 10 instruction sets ----
+const ISA=[
+  {id:0,name:'BOOT',     tag:'door · open session', col:'34,197,94',  ops:['init reg','set ts','anchor ← GENESIS']},
+  {id:1,name:'L1 PARSE', tag:'low priv · sanitize', col:'56,189,248', ops:['strip','tokenize','reg.parsed ←']},
+  {id:2,name:'L2 VALID', tag:'mid priv · typecheck',col:'59,170,229', ops:['check shape','assert ok','reg.valid ←']},
+  {id:3,name:'L3 AUTH',  tag:'high priv · sign',    col:'99,179,237', ops:['sha(parsed+ts)','reg.sig ←']},
+  {id:4,name:'WALL-1',   tag:'enter jail',          col:'139,92,246', ops:['snapshot','drop caps','seal']},
+  {id:5,name:'VM-IN',    tag:'load sandbox',        col:'34,197,94',  ops:['map mem','seccomp on','reg.box ←']},
+  {id:6,name:'SHELL EXEC',tag:'dead shell · run',   col:'107,91,154', ops:['exec untrusted','reg.result ←']},
+  {id:7,name:'VM-OUT',   tag:'extract',             col:'34,211,238', ops:['copy out','checksum','reg.out ←']},
+  {id:8,name:'WALL-2',   tag:'verify',              col:'167,139,250',ops:['verify cksum','re-check caps']},
+  {id:9,name:'EGRESS',   tag:'persist · git/local', col:'236,72,153', ops:['localStorage.write','git → AKASHA','commit hash ←']},
+];
+
+// ---- tesseract for the structural backdrop ----
+const V=[];for(let x=-1;x<=1;x+=2)for(let y=-1;y<=1;y+=2)for(let z=-1;z<=1;z+=2)for(let w=-1;w<=1;w+=2)V.push([x,y,z,w]);
+const EDG=[];for(let i=0;i<16;i++)for(let j=i+1;j<16;j++){let d=0;for(let k=0;k<4;k++)if(V[i][k]!==V[j][k])d++;if(d===1)EDG.push([i,j]);}
+const gray=[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1],[1,1,-1],[1,1,1],[1,-1,1],[1,-1,-1]];
+const oVid=c=>V.findIndex(v=>v[0]===c[0]&&v[1]===c[1]&&v[2]===c[2]&&v[3]===1);
+// stations 1,2,3,4,5,7,8,9 on outer vertices (gray order); 0 center; 6 inner cube
+const stnVid={1:oVid(gray[0]),2:oVid(gray[1]),3:oVid(gray[2]),4:oVid(gray[3]),5:oVid(gray[4]),7:oVid(gray[5]),8:oVid(gray[6]),9:oVid(gray[7])};
+const innerIds=V.map((v,i)=>v[3]===-1?i:-1).filter(i=>i>=0);
+let t=0;
+function project(v){const aw=t*0.18,asp=t*0.26;let[x,y,z,w]=v;
+  let x1=x*Math.cos(aw)-w*Math.sin(aw),w1=x*Math.sin(aw)+w*Math.cos(aw);x=x1;w=w1;
+  const wd=2.4,k4=wd/(wd-w*0.9);x*=k4;y*=k4;z*=k4;
+  let x2=x*Math.cos(asp)-z*Math.sin(asp),z2=x*Math.sin(asp)+z*Math.cos(asp);x=x2;z=z2;
+  const zd=4,k3=zd/(zd-z*0.9),sc=Math.min(W,H)*0.20;return{x:W/2+x*sc*k3,y:H*0.5+y*sc*k3};}
+function stnPoint(id){ if(id===0)return{x:W/2,y:H*0.5};
+  if(id===6){let sx=0,sy=0;innerIds.forEach(i=>{const p=project(V[i]);sx+=p.x;sy+=p.y;});return{x:sx/4,y:sy/4};}
+  return project(V[stnVid[id]]);}
+
+// ---- execution engine ----
+let exec={stage:-1, t:0, running:false, reg:{}, opFire:0, done:false};
+let loopMode=false, ledger=[];
+const LKEY='isa10_ledger';
+try{ledger=JSON.parse(localStorage.getItem(LKEY)||'[]');}catch(e){}
+
+async function runStage(s){
+  const r=exec.reg, inp=$('inp').value;
+  if(s===0){ r.input=inp; r.ts=new Date().toISOString().replace(/\.\d+Z/,'Z'); r.anchor=GENESIS.slice(0,12); }
+  if(s===1){ r.parsed=inp.replace(/[^A-Za-z0-9:.\-]/g,'').split(':'); }
+  if(s===2){ r.valid = Array.isArray(r.parsed) && r.parsed.length>0; }
+  if(s===3){ r.sig=(await sha256((r.parsed||[]).join(':')+'|'+r.ts)).slice(0,16); }
+  if(s===4){ r.jail='sealed'; r.snapshot=(await sha256('snap|'+r.sig)).slice(0,10); }
+  if(s===5){ r.box='mapped·seccomp'; }
+  if(s===6){ r.result=(await sha256('exec|'+(r.parsed||[]).join('')+'|'+r.sig)).slice(0,16); }
+  if(s===7){ r.out=r.result; r.cksum=(await sha256('ck|'+r.result)).slice(0,10); }
+  if(s===8){ r.verified = !!r.cksum && !!r.sig; }
+  if(s===9){
+    const commit=await sha256(`${r.input}|${r.sig}|${r.result}|${r.ts}|${GENESIS}`);
+    r.commit=commit.slice(0,16);
+    const rec={ts:r.ts, input:r.input, commit:r.commit, verified:r.verified, repo:AKASHA};
+    ledger.unshift(rec); ledger=ledger.slice(0,40);
+    try{localStorage.setItem(LKEY,JSON.stringify(ledger));}catch(e){}
+    r.egress=`localStorage✓ · git path ready`;
+    r.gitcmd=`git -C synonym-enforcer commit -m "isa10 ${r.commit}"`;
+  }
+}
+
+let stageAcc=0;
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now; t+=dt*0.001;
+  const speed=+$('spd').value;
+  if(exec.running){
+    stageAcc+=dt; exec.opFire=Math.min(1,exec.opFire+dt*0.004);
+    if(stageAcc> (1200-speed*8)){
+      stageAcc=0;
+      if(exec.stage<9){ exec.stage++; runStage(exec.stage); exec.opFire=0; renderISA(); renderReg(); }
+      else { exec.running=false; exec.done=true; renderLedger();
+        if(loopMode){ setTimeout(()=>startExec(),700); } }
+    }
+  }
+
+  // ---- draw tesseract ----
+  ctx.clearRect(0,0,W,H);
+  const P=V.map(project);
+  EDG.forEach(([i,j])=>{const inner=V[i][3]===-1&&V[j][3]===-1,conn=V[i][3]!==V[j][3];
+    ctx.strokeStyle=inner?'rgba(107,91,154,.45)':conn?'rgba(139,92,246,.18)':'rgba(99,179,237,.26)';
+    ctx.lineWidth=inner?1.3:1;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();});
+  // inner shell label (6)
+  let sx=0,sy=0;innerIds.forEach(i=>{sx+=P[i].x;sy+=P[i].y;});sx/=4;sy/=4;
+  innerIds.forEach(i=>{ctx.fillStyle='rgba(107,91,154,.6)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,2.5,0,7);ctx.fill();});
+
+  // pipeline order path
+  const order=[0,1,2,3,4,5,6,7,8,9];
+  ctx.strokeStyle='rgba(199,163,255,.1)';ctx.setLineDash([2,4]);ctx.lineWidth=1;
+  for(let k=0;k<order.length-1;k++){const a=stnPoint(order[k]),b=stnPoint(order[k+1]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  ctx.setLineDash([]);
+
+  // stations
+  order.forEach(id=>{
+    const p=stnPoint(id), spec=ISA[id], active=exec.stage===id, done=exec.stage>id||exec.done;
+    if(id===6){ctx.fillStyle=`rgba(107,91,154,${active?0.9:0.5})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('6',p.x,p.y-5);
+      ctx.fillStyle='#4a3f6a';ctx.font='8px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';ctx.fillText('shell ( )',p.x,p.y+9);}
+    else {
+      const wall=(id===4||id===8);
+      ctx.fillStyle=`rgba(${spec.col},${active?0.95:done?0.7:0.45})`;
+      if(wall)ctx.fillRect(p.x-10,p.y-3,20,6);
+      else {ctx.beginPath();ctx.arc(p.x,p.y,active?9:6,0,7);ctx.fill();}
+      if(active){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,24);g.addColorStop(0,`rgba(${spec.col},.5)`);g.addColorStop(1,`rgba(${spec.col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,24,0,7);ctx.fill();}
+      ctx.fillStyle=id===0?'#fff':'#dbe2ef';ctx.font='bold 9px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(id,p.x,p.y);
+    }
+    ctx.fillStyle=`rgba(${spec.col},.85)`;ctx.font='8px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.fillText(spec.name,p.x,p.y-13);
+  });
+
+  // packet glow at current stage
+  if(exec.running&&exec.stage>=0){const p=stnPoint(exec.stage);
+    ctx.fillStyle='#fbbf24';ctx.shadowColor='#fbbf24';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(p.x,p.y,4,0,7);ctx.fill();ctx.shadowBlur=0;}
+
+  // PC bar bottom
+  ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`PC = ${exec.stage<0?'—':exec.stage}${exec.done?' · HALT (egressed)':exec.running?' · running':''}`, W/2, H-12);
+
+  requestAnimationFrame(frame);
+}
+function renderISA(){
+  $('isa').innerHTML=ISA.map(s=>{
+    const active=exec.stage===s.id&&exec.running, done=exec.stage>s.id||(exec.done&&s.id<=9);
+    const cls=active?'run':done?'done':'';
+    const ops=s.ops.map((o,i)=>`<span class="op ${(done||(active&&exec.opFire>i/s.ops.length))?'fired':''}">${(done||active)?'▸':'·'} ${o}</span>`).join('<br>');
+    return `<div class="stagebox ${cls}"><div class="sh"><span class="id" style="color:rgb(${s.col})">${s.id} ${s.name}</span><span class="tag">${s.tag}</span></div><div class="ops">${ops}</div></div>`;
+  }).join('');
+}
+function renderReg(){
+  const r=exec.reg;const keys=Object.keys(r);
+  $('reg').innerHTML=`<div style="color:#5b6675;margin-bottom:3px">REGISTER (threads 0→9)</div>`+
+    (keys.length?keys.map(k=>`<div><span class="k">${k}</span> <span class="v">${String(r[k]).slice(0,46)}</span></div>`).join(''):'<span style="color:#3a4252">empty</span>');
+}
+function renderLedger(){
+  $('ledger').innerHTML=`<div style="color:#5b6675;margin-bottom:3px">EGRESS LOG · localStorage · ${ledger.length} commits</div>`+
+    (ledger.length?ledger.slice(0,6).map(r=>`<div class="row">${r.ts.slice(11,19)} · ${r.input.slice(0,14)} · <span style="color:#ec4899">${r.commit}</span> ${r.verified?'✓':'✗'}</div>`).join(''):'<span style="color:#3a4252">no commits yet — run to stage 9</span>');
+}
+
+function startExec(){ exec={stage:-1,t:0,running:true,reg:{},opFire:0,done:false}; stageAcc=99999; renderISA();renderReg(); }
+resize();renderISA();renderReg();renderLedger();requestAnimationFrame(frame);
+
+$('execb').onclick=()=>{startExec();};
+$('step').onclick=async()=>{ if(exec.stage<9){ if(exec.stage<0)exec={stage:-1,t:0,running:false,reg:{},opFire:1,done:false};
+  exec.stage++; exec.opFire=1; await runStage(exec.stage); if(exec.stage>=9){exec.done=true;renderLedger();} renderISA();renderReg(); } };
+$('loop').onclick=e=>{loopMode=!loopMode;e.target.classList.toggle('on',loopMode);e.target.textContent=loopMode?'LOOP ▮▮':'LOOP';};
+$('freeze').onclick=e=>{exec.running=!exec.running;e.target.classList.toggle('on',!exec.running);e.target.textContent=exec.running?'FREEZE':'RESUME';};
+</script>
+</body>
+</html>

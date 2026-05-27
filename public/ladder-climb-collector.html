@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LADDER CLIMB — carrier up |2⟩→|5⟩, shed energy: lost or collected (Patricia)</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:9px 16px 5px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.13em;color:#c7d2fe;font-weight:600}
+  .s{font-size:10px;color:var(--dim);margin:2px auto 0;max-width:950px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:10px;line-height:1.55;backdrop-filter:blur(3px)}
+  #cap{right:14px;top:14px;min-width:222px}#cap .row{display:flex;justify-content:space-between;gap:12px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #mode[data-m="collect"]{background:#10241a;border-color:var(--yes);color:var(--yes)}
+  #mode[data-m="open"]{background:#241112;border-color:var(--no);color:var(--no)}
+  .legend{display:flex;gap:13px;font-size:9.5px;color:var(--dim);justify-content:center;padding:4px;flex-wrap:wrap}
+  .sw{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>LADDER CLIMB · carrier shed per gap crossing — <span style="color:#ef4444">lost</span> or <span style="color:#22c55e">collected (Patricia)</span></h1>
+    <div class="s">Each gap crossing drives population up one rung (<b>|1⟩→|2⟩→|3⟩→|4⟩→|5⟩</b>) and sheds a quantum. The rung reached counts traversals — the carrier is the climb, not a fixed level. Above |5⟩ is the <b>continuum (256→257 escape)</b>. The fork: shed energy is <b>lost</b> (open, Σp&lt;1) or <b>collected</b> by the Patricia mode (closed at the larger boundary, qutrit + collector = 1). Patricia: <b>the leak is the product</b>.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--cyan)"></span>|0⟩ ground (−1 shadow)</span>
+    <span><span class="sw" style="background:var(--warn)"></span>|1⟩ working (0 witness)</span>
+    <span><span class="sw" style="background:var(--gold)"></span>|2..5⟩ carrier climb (+1)</span>
+    <span><span class="sw" style="background:var(--pink)"></span>shed quantum</span>
+    <span><span class="sw" style="background:var(--violet)"></span>continuum / 257</span>
+  </div>
+  <div class="controls">
+    <div class="ctl"><b>drive</b><input type="range" id="drive" min="5" max="60" value="26" style="width:120px"><span id="drivev">0.26</span></div>
+    <button id="mode" data-m="collect">SHED → COLLECT (Patricia)</button>
+    <button id="step">SINGLE CROSSING ▸</button>
+    <button id="reset">RESET to |0⟩</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const NLEV=6;                 // |0>..|5>
+const S={drive:0.26, collect:true, freeze:false};
+// population per level; starts all in ground
+let pop=new Array(NLEV).fill(0); pop[0]=1;
+let collector=0;              // Patricia reservoir (collected shed energy)
+let lost=0;                   // energy escaped to continuum (open mode)
+let crossings=0;
+let quanta=[];                // flying shed quanta {x,y,vx,vy,collected}
+let ionized=0;                // population that reached continuum
+let stepReq=false;
+
+// anharmonic level energies: spacing shrinks going up (well softens)
+function levelFrac(i){ // 0..1 height fraction, anharmonic
+  let e=0; for(let k=0;k<i;k++){ e += 1 - 0.12*k; }   // each gap smaller than the last
+  let tot=0; for(let k=0;k<NLEV-1;k++){ tot += 1-0.12*k; }
+  return e/tot;
+}
+
+let lastT=performance.now(), acc=0;
+function climbOnce(){
+  // find highest occupied level, move a chunk up one rung, shed a quantum
+  let hi=0; for(let i=0;i<NLEV;i++) if(pop[i]>0.01) hi=i;
+  const moveFrac=0.5;
+  if(hi<NLEV-1){
+    const amt=pop[hi]*moveFrac;
+    pop[hi]-=amt; pop[hi+1]+=amt;
+    crossings++;
+    // shed quantum: gap energy decreases as you climb (anharmonic), proportional to amt
+    const gapE=(1-0.12*hi);
+    spawnQuantum(hi+1, amt*gapE*0.3);
+  } else {
+    // at |5>: next crossing ionizes -> continuum (256->257 escape)
+    const amt=pop[hi]*moveFrac;
+    pop[hi]-=amt; ionized+=amt;
+    crossings++;
+    spawnQuantum(NLEV, amt*0.4, true);  // escape quantum
+  }
+}
+function spawnQuantum(fromLevel, energy, escape=false){
+  const lx=W*0.30, lw=W*0.16;
+  const y = escape? H*0.13 : levelY(fromLevel);
+  quanta.push({x:lx+lw*0.5, y, e:energy, age:0, escape,
+    collected: S.collect && !escape});
+}
+function levelY(i){ const top=H*0.18, bot=H*0.74; return bot-(bot-top)*levelFrac(i); }
+
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze){
+    acc+=dt;
+    const period=1000*(0.05/S.drive)*6;  // higher drive -> faster crossings
+    while(acc>period){ acc-=period; climbOnce(); }
+  }
+  if(stepReq){ climbOnce(); stepReq=false; }
+
+  // advance quanta
+  quanta.forEach(q=>{ q.age+=dt*0.001;
+    if(q.collected){ // drift toward collector (right)
+      const tx=W*0.78, ty=H*0.5; q.x+=(tx-q.x)*0.06; q.y+=(ty-q.y)*0.06;
+      if(Math.hypot(tx-q.x,ty-q.y)<14 && !q.done){ collector+=q.e; q.done=true; }
+    } else if(q.escape){ q.y-=dt*0.05; if(!q.done && q.y<H*0.1){ lost+=q.e; q.done=true; } }
+    else { q.x+=dt*0.08; if(!q.done && q.x>W){ lost+=q.e; q.done=true; } } // open: fly off right = lost
+  });
+  quanta=quanta.filter(q=>q.age<3 && !(q.done&&q.age>0.4));
+
+  ctx.clearRect(0,0,W,H);
+
+  // ===== continuum band (escape / 257) =====
+  const contY=H*0.14;
+  const cg=ctx.createLinearGradient(0,0,0,contY);
+  cg.addColorStop(0,'rgba(139,92,246,.20)');cg.addColorStop(1,'rgba(139,92,246,0)');
+  ctx.fillStyle=cg;ctx.fillRect(0,0,W,contY);
+  ctx.strokeStyle='rgba(139,92,246,.5)';ctx.setLineDash([4,5]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,contY);ctx.lineTo(W,contY);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(199,163,255,.8)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+  ctx.fillText('CONTINUUM · escape from the well · 256 → 257',12,contY-8);
+
+  // ===== ladder (left-center) =====
+  const lx=W*0.30, lw=W*0.16;
+  for(let i=0;i<NLEV;i++){
+    const y=levelY(i);
+    const col = i===0?'34,211,238': i===1?'245,158,11':'251,191,36';
+    ctx.strokeStyle=`rgba(${col},.5)`;ctx.lineWidth=1.5;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(lx,y);ctx.lineTo(lx+lw,y);ctx.stroke();ctx.setLineDash([]);
+    // population fill + orb
+    const ph=pop[i]*(H*0.10);
+    if(pop[i]>0.005){
+      const grd=ctx.createLinearGradient(0,y,0,y-ph);grd.addColorStop(0,`rgba(${col},.65)`);grd.addColorStop(1,`rgba(${col},.04)`);
+      ctx.fillStyle=grd;ctx.fillRect(lx+lw*0.25,y-ph,lw*0.5,ph);
+      ctx.fillStyle=`rgba(${col},${0.3+0.7*pop[i]})`;ctx.beginPath();ctx.arc(lx+lw/2,y,4+12*pop[i],0,7);ctx.fill();
+    }
+    const role=i===0?'−1 shadow':i===1?'0 witness':'+1 carrier';
+    ctx.fillStyle=`rgb(${col})`;ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(`|${i}⟩  ${role}`, lx+lw+10, y+3);
+    ctx.fillStyle='#8a93a8';ctx.textAlign='right';ctx.fillText(pop[i].toFixed(2), lx-8, y+3);
+  }
+  ctx.fillStyle='#5b6675';ctx.textAlign='center';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText('anharmonic — gaps shrink upward', lx+lw/2, H*0.77);
+
+  // ===== shed quanta =====
+  quanta.forEach(q=>{const a=Math.max(0,1-q.age/2);
+    ctx.fillStyle=q.escape?`rgba(199,163,255,${a})`:q.collected?`rgba(34,197,94,${a})`:`rgba(236,72,153,${a})`;
+    ctx.beginPath();ctx.arc(q.x,q.y,3+q.e*8,0,7);ctx.fill();});
+
+  // ===== Patricia collector (right) =====
+  const px=W*0.72, pw=W*0.14, ptop=H*0.22, pbot=H*0.72, phgt=pbot-ptop;
+  ctx.strokeStyle=S.collect?'rgba(34,197,94,.7)':'rgba(70,82,105,.4)';ctx.lineWidth=1.5;
+  ctx.strokeRect(px,ptop,pw,phgt);
+  const fill=Math.min(1,collector)*phgt;
+  const fg=ctx.createLinearGradient(0,pbot,0,pbot-fill);
+  fg.addColorStop(0,'rgba(34,197,94,.6)');fg.addColorStop(1,'rgba(34,211,238,.3)');
+  ctx.fillStyle=fg;ctx.fillRect(px,pbot-fill,pw,fill);
+  ctx.fillStyle=S.collect?'#22c55e':'#5b6675';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('PATRICIA', px+pw/2, ptop-18);
+  ctx.fillText('collector', px+pw/2, ptop-6);
+  ctx.fillStyle='#8a93a8';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText(`Σ collected = ${collector.toFixed(3)}`, px+pw/2, pbot+16);
+  ctx.fillText('the leak = the product', px+pw/2, pbot+28);
+  if(!S.collect){ctx.fillStyle='rgba(239,68,68,.7)';ctx.fillText('(open: bypassed)', px+pw/2, pbot+40);}
+
+  // ===== conservation readout =====
+  const qsum=pop.reduce((a,b)=>a+b,0);
+  const totalClosed = qsum + collector;          // collected: should track 1
+  const totalOpen = qsum;                        // open: drains below 1 (energy lost)
+  const shown = S.collect? totalClosed : totalOpen;
+  const ok = Math.abs(shown-1)<0.02;
+  const bx=W*0.30, by=H*0.83, bw=W*0.42;
+  ctx.fillStyle='#10141f';ctx.fillRect(bx,by,bw,14);
+  // stacked: qutrit pop + collector (or + lost gap)
+  ctx.fillStyle='rgba(251,191,36,.8)';ctx.fillRect(bx,by,qsum*bw,14);
+  if(S.collect){ctx.fillStyle='rgba(34,197,94,.7)';ctx.fillRect(bx+qsum*bw,by,collector*bw,14);}
+  else {ctx.fillStyle='rgba(239,68,68,.25)';ctx.fillRect(bx+qsum*bw,by,(1-qsum)*bw,14);}
+  ctx.strokeStyle=ok?'rgba(34,197,94,.9)':'rgba(239,68,68,.9)';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,14);
+  ctx.fillStyle=ok?'#22c55e':'#ef4444';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+  ctx.fillText(S.collect
+    ? `qutrit ${qsum.toFixed(2)} + Patricia ${collector.toFixed(2)} = ${totalClosed.toFixed(2)} ${ok?'✓ conserved at larger boundary':''}`
+    : `qutrit ${qsum.toFixed(2)} · lost to continuum ${(1-qsum).toFixed(2)} ✗ open, not conserved`,
+    bx, by+28);
+
+  // panel
+  cap.innerHTML=`<div class="lab">CARRIER = THE CLIMB</div>`+
+    `<div class="row"><span>crossings</span><b>${crossings}</b></div>`+
+    `<div class="row"><span>top rung</span><b>|${(()=>{let h=0;for(let i=0;i<NLEV;i++)if(pop[i]>0.01)h=i;return h;})()}⟩</b></div>`+
+    `<div class="row"><span>ionized → 257</span><b style="color:#c7a3ff">${ionized.toFixed(3)}</b></div>`+
+    `<div class="lab">THE FORK</div>`+
+    `<div class="row"><span>mode</span><b style="color:${S.collect?'#22c55e':'#ef4444'}">${S.collect?'COLLECT':'OPEN'}</b></div>`+
+    `<div class="row"><span>shed → </span><b>${S.collect?'Patricia':'lost'}</b></div>`+
+    `<div class="row"><span>conservation</span><b style="color:${ok?'#22c55e':'#ef4444'}">${ok?'holds':'broken'}</b></div>`+
+    `<div class="lab">READING</div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:3px">Ladder-climb &amp; ionization are real transmon physics. That shed energy is genuinely lost in an isolated qubit. Collecting it requires a real coupled mode (the Patricia resonator) — physically coherent, and it's where conservation is restored. Whether the leak is harvestable product or waste is the architectural claim to defend.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+
+$('drive').oninput=e=>{S.drive=+e.target.value/100;$('drivev').textContent=S.drive.toFixed(2);};
+$('mode').onclick=e=>{S.collect=!S.collect;e.target.dataset.m=S.collect?'collect':'open';
+  e.target.textContent=S.collect?'SHED → COLLECT (Patricia)':'SHED → OPEN (lost)';};
+$('step').onclick=()=>stepReq=true;
+$('reset').onclick=()=>{pop=new Array(NLEV).fill(0);pop[0]=1;collector=0;lost=0;crossings=0;ionized=0;quanta=[];};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+</script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OUROBOROS · two tangent rings, witness external, kissing at 0</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:9px 16px 5px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.12em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:960px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:10px;line-height:1.6;backdrop-filter:blur(3px)}
+  #cap{right:14px;top:14px;min-width:230px}#cap .row{display:flex;justify-content:space-between;gap:12px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:10px 16px;align-items:center;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>OUROBOROS · register ring ∘ witness ring · tangent at <span style="color:#22c55e">0</span></h1>
+    <div class="s">The <b>+1 is not a digit</b> — it's an external witness on its <b>own ring</b>. Register ring cycles <b>0→…→255→0</b> (mod 256); the witness ring is one larger and closes at <b>257 ≡ 0</b> (mod 257). The two circles are <b>tangent</b> — they share exactly one point, the <b>null 0</b>, and are otherwise disjoint. The witness observes the whole register but never occupies a slot in it: it touches only where the snake's mouth meets its tail. One null, two faces — the register's origin and the witness's closure.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="controls">
+    <div class="ctl"><b>N (register base)</b><input type="range" id="n" min="4" max="256" value="256" style="width:200px"><span id="nv">256</span></div>
+    <div class="ctl"><b>flow</b><input type="range" id="sp" min="0" max="100" value="40" style="width:90px;accent-color:#8b5cf6"></div>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+function isPrime(n){if(n<2)return false;for(let i=2;i*i<=n;i++)if(n%i===0)return false;return true;}
+
+let N=256, t=0, frozen=false;
+let regPos=0, witPos=0;  // current marker positions (continuous)
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;const sp=+$('sp').value/100;
+  if(!frozen){ t+=dt*0.001;
+    regPos=(regPos+sp*dt*0.02)% N;
+    witPos=(witPos+sp*dt*0.02)% (N+1);
+  }
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H*0.5;
+  const R=Math.min(W,H)*0.30;          // register ring radius
+  const Rw=R*0.62;                      // witness ring radius (smaller, tangent inside at 0)
+  // shared null point: place at bottom of register ring
+  const nullA=Math.PI/2;               // angle of 0 on register ring (bottom)
+  const nx=cx+Math.cos(nullA)*R, ny=cy+Math.sin(nullA)*R;
+  // witness ring is internally tangent at the null: its center is on the line from reg-center to null, R-Rw away
+  const wcx=cx+Math.cos(nullA)*(R-Rw), wcy=cy+Math.sin(nullA)*(R-Rw);
+
+  // ---- register ring ----
+  ctx.strokeStyle='rgba(99,179,237,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
+  // tick positions (sample up to ~64 ticks)
+  const showTicks=Math.min(N,64), step=N/showTicks;
+  for(let k=0;k<showTicks;k++){ const idx=Math.round(k*step); const a=nullA - (idx/N)*Math.PI*2;
+    const x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R;
+    ctx.fillStyle=idx===0?'#22c55e':'rgba(99,179,237,.55)';
+    ctx.beginPath();ctx.arc(x,y,idx===0?0:1.6,0,7);ctx.fill(); }
+  // register label
+  ctx.fillStyle='#63b3ed';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`register ring · mod ${N}`, cx, cy-R-14);
+  ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText(`0 → … → ${N-1} → 0   (ouroboros: ${N-1}+1=0)`, cx, cy-R-2);
+
+  // ---- witness ring (tangent at null) ----
+  const wfield=isPrime(N+1);
+  ctx.strokeStyle=wfield?'rgba(199,163,255,.7)':'rgba(245,158,11,.6)';ctx.lineWidth=2;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.arc(wcx,wcy,Rw,0,7);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=wfield?'#c7a3ff':'#f59e0b';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`witness ring · mod ${N+1} ${wfield?'(field)':'(not field)'}`, wcx, wcy+4);
+  ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText(`${N+1} ≡ 0`, wcx, wcy+18);
+
+  // ---- the shared null (tangent point) ----
+  const pulse=0.5+0.5*Math.sin(t*3);
+  const g=ctx.createRadialGradient(nx,ny,0,nx,ny,22);
+  g.addColorStop(0,`rgba(34,197,94,${0.5+0.4*pulse})`);g.addColorStop(1,'rgba(34,197,94,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(nx,ny,22,0,7);ctx.fill();
+  ctx.fillStyle='#22c55e';ctx.beginPath();ctx.arc(nx,ny,5,0,7);ctx.fill();
+  ctx.fillStyle='#22c55e';ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('0', nx, ny+24);
+  ctx.fillStyle='rgba(34,197,94,.7)';ctx.font='8px JetBrains Mono,monospace';
+  ctx.fillText('shared null · tangent point', nx, ny+36);
+
+  // ---- markers cycling ----
+  // register marker
+  const ra=nullA-(regPos/N)*Math.PI*2, rx=cx+Math.cos(ra)*R, ry=cy+Math.sin(ra)*R;
+  ctx.fillStyle='#63b3ed';ctx.shadowColor='#63b3ed';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(rx,ry,5,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#9fb0c8';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(Math.round(regPos),rx+ (rx>cx?12:-12),ry);
+  // witness marker (on its own ring, angle measured from the same null)
+  const wa=nullA-(witPos/(N+1))*Math.PI*2, wx=wcx+Math.cos(nullA)*0, wy=0; // recompute below
+  const wmx=wcx+Math.cos(wa+ (nullA - nullA))*Rw; // keep simple: place witness marker on its ring
+  // parametrize witness ring starting at the tangent (which is at angle (nullA+PI) from wcx... actually tangent point is at nullA direction from reg center; from witness center it's at +nullA too since center shifted along nullA)
+  const wAng = nullA - (witPos/(N+1))*Math.PI*2;
+  const wpx=wcx+Math.cos(wAng)*Rw, wpy=wcy+Math.sin(wAng)*Rw;
+  ctx.fillStyle=wfield?'#c7a3ff':'#f59e0b';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(wpx,wpy,5,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#9fb0c8';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(Math.round(witPos),wpx+(wpx>wcx?12:-12),wpy);
+
+  // sightline: the witness observes the register (line from witness marker to register marker)
+  ctx.strokeStyle='rgba(199,163,255,.18)';ctx.setLineDash([2,5]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(wpx,wpy);ctx.lineTo(rx,ry);ctx.stroke();ctx.setLineDash([]);
+
+  // panel
+  const co=isPrime(N+1);
+  cap.innerHTML=`<div class="lab">TWO RINGS</div>`+
+    `<div class="row"><span>register</span><b style="color:#63b3ed">mod ${N}</b></div>`+
+    `<div class="row"><span>witness</span><b style="color:#c7a3ff">mod ${N+1}</b></div>`+
+    `<div class="row"><span>contact</span><b style="color:#22c55e">1 point (0)</b></div>`+
+    `<div class="lab">OUROBOROS</div>`+
+    `<div class="row"><span>register wrap</span><b>${N-1}+1 = 0</b></div>`+
+    `<div class="row"><span>witness closes</span><b>${N+1} ≡ 0</b></div>`+
+    `<div class="lab">WITNESS RING</div>`+
+    `<div class="row"><span>${N+1} prime?</span><b style="color:${co?'#22c55e':'#f59e0b'}">${co?'yes · field':'no'}</b></div>`+
+    `<div class="row"><span>external?</span><b style="color:#22c55e">yes · tangent</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">The witness never enters the register — disjoint circles, tangent at the null. It sees every position (sightline) but occupies none. 0 is the register's origin and the witness's closure at once.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+$('n').oninput=e=>{N=+e.target.value;$('nv').textContent=N;};
+$('sp').oninput=()=>{};
+$('freeze').onclick=e=>{frozen=!frozen;e.target.classList.toggle('on',frozen);e.target.textContent=frozen?'RESUME':'FREEZE';};
+</script>
+</body>
+</html>

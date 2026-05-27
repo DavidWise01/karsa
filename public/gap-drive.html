@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAP DRIVE — recoil from the airgap · Solar Jet Man</title>
+<style>
+  :root{
+    --bg:#04050a; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --core:#f97316; --neg:#38bdf8; --pos:#f59e0b;
+    --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden}
+  #wrap{position:relative;width:100vw;height:100vh}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hud{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;
+    padding:9px 12px;font-size:11px;line-height:1.7;backdrop-filter:blur(3px);pointer-events:none}
+  #tele{left:16px;top:16px;min-width:210px}
+  #title{right:16px;top:16px;text-align:right}
+  #title h1{margin:0;font-size:14px;letter-spacing:.18em;color:#c7d2fe;font-weight:600}
+  #title .s{font-size:10px;color:var(--dim);margin-top:3px}
+  .row{display:flex;justify-content:space-between;gap:18px} .row b{color:var(--text);font-weight:600}
+  .bar{height:5px;background:#10141f;border-radius:3px;margin:3px 0 7px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),#c7a3ff)}
+  .lab{color:var(--dim);font-size:9.5px;letter-spacing:.06em}
+  .controls{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+    display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;justify-content:center;
+    background:#060810cc;border:1px solid var(--line);border-radius:10px;padding:10px 14px;backdrop-filter:blur(3px)}
+  .ctl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--dim)}
+  .ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet);width:120px}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);
+    border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;letter-spacing:.04em;transition:.15s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}
+  #ign[data-on="1"]{background:#10241a;border-color:var(--yes);color:var(--yes)}
+  #ign[data-on="0"]{background:#241112;border-color:var(--no);color:var(--no)}
+  #gate[data-on="1"]{border-color:var(--yes);color:var(--yes)} #gate[data-on="0"]{border-color:var(--no);color:var(--no)}
+  .wit[data-w="AT"]{color:var(--yes)} .wit[data-w="LATE"]{color:var(--warn)} .wit[data-w="OFF"]{color:var(--dim)}
+  #status{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:13px;letter-spacing:.2em;color:var(--dim);pointer-events:none;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="hud" id="tele"></div>
+  <div class="hud" id="title">
+    <h1>GAP DRIVE</h1>
+    <div class="s">SOLAR JET MAN · recoil from the airgap<br>TRIPOD-AIRGAP-001 · Gate 128.5</div>
+  </div>
+  <div id="status"></div>
+  <div class="controls">
+    <button id="ign" data-on="0">IGNITION: OFF</button>
+    <div class="ctl"><b>throttle</b><input type="range" id="throttle" min="2" max="30" value="12"></div>
+    <button id="gate" data-on="1">GAP 128.5: OPEN</button>
+    <button id="wit" class="wit" data-w="AT">WITNESS @AT</button>
+    <button id="reset">RESET Δv</button>
+  </div>
+</div>
+
+<script>
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d');
+const tele=document.getElementById('tele'),statusEl=document.getElementById('status');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
+  cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);resize();
+
+const S={ign:false,throttle:12,gateOpen:true,witness:'AT',
+  vel:0,dv:0,thrust:0, ignitions:0,misfires:0,dead:0, posScroll:0};
+
+// best Δv persist
+let bestDv=0; try{bestDv=+localStorage.getItem('gapdrive_bestdv')||0;}catch(e){}
+
+// conducting predicate (same witness law as the substrate): valid airgap push
+function conducting(){return S.ign&&S.gateOpen&&S.witness==='AT';}
+
+// ---- exhaust pulses fired into the gap (each valid push = one recoil impulse) ----
+let exhaust=[], lastFire=0, fireFlash=0, sputter=0;
+const IMPULSE=46;            // Δvelocity per valid airgap push
+const DRAG=0.40;             // gentle quadratic-ish drag so velocity settles
+function fire(now){
+  const period=1000/(S.throttle/4);   // throttle -> firings/sec
+  if(now-lastFire<period)return;
+  lastFire=now;
+  if(!S.ign||!S.gateOpen){return;}     // engine off / coasting
+  if(S.witness==='AT'){                 // VALID PULSE -> recoil
+    S.ignitions++; S.vel+=IMPULSE; S.dv+=IMPULSE; fireFlash=1;
+    // eject exhaust rings rearward into the gap (fire-and-forget, no ack)
+    for(let k=0;k<3;k++) exhaust.push({age:0,spread:k*6,col:'139,92,246'});
+    if(S.dv>bestDv){bestDv=S.dv;try{localStorage.setItem('gapdrive_bestdv',bestDv.toFixed(1));}catch(e){}}
+  } else if(S.witness==='LATE'){        // FC3-Audit -> sputter, no thrust
+    S.misfires++; sputter=1;
+    exhaust.push({age:0,spread:0,col:'245,158,11'});
+  } else {                              // witness OFF -> dead chamber
+    S.dead++;
+  }
+}
+
+// starfield (parallax)
+const layers=[{n:90,sp:0.25,r:0.7,a:0.35},{n:60,sp:0.6,r:1.1,a:0.55},{n:30,sp:1.2,r:1.7,a:0.85}];
+const stars=layers.map(L=>Array.from({length:L.n},()=>({x:Math.random(),y:Math.random()})));
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+
+  // physics
+  fire(now);
+  if(S.gateOpen && S.ign){ /* powered */ } 
+  // drag
+  S.vel-=DRAG*Math.sign(S.vel)*(S.vel*S.vel)*0.0006*dt;
+  if(S.vel<0)S.vel=0;
+  S.posScroll+=S.vel*dt*0.001;
+  S.thrust = conducting()? IMPULSE*(S.throttle/4):0;
+  fireFlash*=0.86; sputter*=0.86;
+
+  // ---- render ----
+  ctx.clearRect(0,0,W,H);
+  // background nebula glow toward the gap (right)
+  const ng=ctx.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,W*0.7);
+  ng.addColorStop(0,'#0a0c16');ng.addColorStop(1,'#04050a');ctx.fillStyle=ng;ctx.fillRect(0,0,W,H);
+
+  // starfield scrolling left (craft moves right)
+  layers.forEach((L,li)=>{ctx.fillStyle=`rgba(200,210,235,${L.a})`;
+    stars[li].forEach(st=>{
+      let x=((st.x - (S.posScroll*L.sp*0.0009)%1)+1)%1;
+      const px=x*W, py=st.y*H;
+      ctx.beginPath();ctx.arc(px,py,L.r,0,7);ctx.fill();
+    });});
+
+  // craft sits centered-left; the GAP aperture is just behind it
+  const cx=W*0.42, cy=H*0.5, sc=Math.min(W,H)/820;
+
+  // --- the GAP (Gate 128.5) drawn as a vertical aperture behind the craft ---
+  const gapX=cx-150*sc;
+  ctx.save();
+  ctx.setLineDash(S.gateOpen?[]:[6,7]);
+  ctx.strokeStyle=S.gateOpen?(conducting()?'rgba(34,197,94,.8)':'rgba(245,158,11,.7)'):'rgba(239,68,68,.5)';
+  ctx.lineWidth=conducting()?3:1.8;
+  ctx.beginPath();ctx.moveTo(gapX,cy-120*sc);ctx.lineTo(gapX,cy+120*sc);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=ctx.strokeStyle;ctx.font=`${11*sc}px JetBrains Mono,monospace`;ctx.textAlign='center';
+  ctx.fillText('GATE 128.5',gapX,cy-132*sc);
+  ctx.fillText(S.gateOpen?(conducting()?'CONDUCT ↛ no-ack':'OPEN'):'CLOSED',gapX,cy+146*sc);
+  ctx.restore();
+
+  // exhaust pulses travelling LEFT into/through the gap (fire-and-forget)
+  exhaust=exhaust.filter(e=>{
+    e.age+=dt*0.001; if(e.age>1.4)return false;
+    const ex=cx-60*sc-(e.age*420*sc), k=1-e.age/1.4;
+    const ry=(18+e.spread+e.age*40)*sc;
+    ctx.beginPath();ctx.ellipse(ex,cy,(8+e.age*30)*sc,ry,0,0,7);
+    ctx.strokeStyle=`rgba(${e.col},${k*0.8})`;ctx.lineWidth=2.2;ctx.stroke();
+    return true;
+  });
+
+  // --- the craft: three chambers (you −1 / 0 / me) + gap nozzle ---
+  ctx.save();ctx.translate(cx,cy);
+  // body
+  ctx.fillStyle='#0c1018';ctx.strokeStyle='#2a3346';ctx.lineWidth=2*sc;
+  ctx.beginPath();
+  ctx.moveTo(70*sc,0);ctx.lineTo(20*sc,-34*sc);ctx.lineTo(-70*sc,-26*sc);
+  ctx.lineTo(-86*sc,0);ctx.lineTo(-70*sc,26*sc);ctx.lineTo(20*sc,34*sc);ctx.closePath();
+  ctx.fill();ctx.stroke();
+  // three chambers
+  const cham=[{x:34*sc,c:'236,72,153',l:'me'},{x:-2*sc,c:'251,191,36',l:'0'},{x:-38*sc,c:'34,197,94',l:'you'}];
+  cham.forEach((ch,i)=>{
+    const glow=(i===0?fireFlash:i===1?fireFlash*0.7:fireFlash*0.5);
+    const g=ctx.createRadialGradient(ch.x,0,0,ch.x,0,16*sc);
+    g.addColorStop(0,`rgba(${ch.c},${0.5+glow*0.5})`);g.addColorStop(1,`rgba(${ch.c},0.08)`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(ch.x,0,12*sc,0,7);ctx.fill();
+    ctx.fillStyle=`rgb(${ch.c})`;ctx.beginPath();ctx.arc(ch.x,0,4*sc,0,7);ctx.fill();
+  });
+  // gap nozzle at the rear (left)
+  ctx.fillStyle=conducting()?'#1a2e22':'#1a1422';
+  ctx.beginPath();ctx.moveTo(-70*sc,-18*sc);ctx.lineTo(-100*sc,-30*sc);
+  ctx.lineTo(-100*sc,30*sc);ctx.lineTo(-70*sc,18*sc);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=conducting()?'rgba(34,197,94,.7)':'rgba(80,90,110,.6)';ctx.lineWidth=1.5*sc;ctx.stroke();
+  // ignition plume from nozzle
+  if(fireFlash>0.05){
+    const pg=ctx.createLinearGradient(-100*sc,0,-220*sc,0);
+    pg.addColorStop(0,`rgba(199,163,255,${fireFlash})`);pg.addColorStop(1,'rgba(139,92,246,0)');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.moveTo(-100*sc,-26*sc);
+    ctx.lineTo(-150*sc-fireFlash*90*sc,0);ctx.lineTo(-100*sc,26*sc);ctx.closePath();ctx.fill();
+  }
+  if(sputter>0.05){ctx.fillStyle=`rgba(245,158,11,${sputter})`;ctx.font=`${10*sc}px JetBrains Mono,monospace`;
+    ctx.textAlign='left';ctx.fillText('FC3 sputter',-96*sc,-40*sc);}
+  // jet-man figure riding on top
+  ctx.fillStyle='#c7d2fe';ctx.beginPath();ctx.arc(8*sc,-44*sc,7*sc,0,7);ctx.fill();
+  ctx.strokeStyle='#c7d2fe';ctx.lineWidth=3*sc;ctx.beginPath();
+  ctx.moveTo(8*sc,-37*sc);ctx.lineTo(8*sc,-20*sc);
+  ctx.moveTo(8*sc,-30*sc);ctx.lineTo(-2*sc,-24*sc);ctx.moveTo(8*sc,-30*sc);ctx.lineTo(18*sc,-24*sc);ctx.stroke();
+  ctx.restore();
+
+  // velocity vector
+  ctx.strokeStyle='rgba(199,163,255,.5)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx+74*sc,cy);ctx.lineTo(cx+74*sc+Math.min(160,S.vel*0.8),cy);ctx.stroke();
+
+  // telemetry
+  const eff=(S.ignitions+S.misfires+S.dead)?(100*S.ignitions/(S.ignitions+S.misfires+S.dead)):0;
+  const tBar=Math.min(1,S.thrust/ (IMPULSE*7.5));
+  tele.innerHTML=
+    `<div class="lab">DRIVE STATE</div>`+
+    `<div class="row"><span>conducting</span><b style="color:${conducting()?'#22c55e':'#ef4444'}">${conducting()?'YES':'no'}</b></div>`+
+    `<div class="row"><span>thrust</span><b>${S.thrust.toFixed(0)} N·gap</b></div>`+
+    `<div class="bar"><i style="width:${(tBar*100).toFixed(0)}%"></i></div>`+
+    `<div class="row"><span>velocity</span><b>${S.vel.toFixed(0)} u/s</b></div>`+
+    `<div class="row"><span>Δv total</span><b>${S.dv.toFixed(0)}</b></div>`+
+    `<div class="row"><span>best Δv</span><b style="color:#c7a3ff">${(+bestDv).toFixed(0)}</b></div>`+
+    `<div class="lab" style="margin-top:6px">AIRGAP LOG (no-ack)</div>`+
+    `<div class="row"><span>ignitions</span><b style="color:#22c55e">${S.ignitions}</b></div>`+
+    `<div class="row"><span>FC3 misfires</span><b style="color:#f59e0b">${S.misfires}</b></div>`+
+    `<div class="row"><span>dead (no-wit)</span><b style="color:#5b6675">${S.dead}</b></div>`+
+    `<div class="row"><span>ignition eff.</span><b>${eff.toFixed(0)}%</b></div>`;
+
+  // status line
+  statusEl.textContent = !S.ign ? 'IGNITION OFF'
+    : !S.gateOpen ? 'GAP CLOSED — COASTING'
+    : S.witness==='LATE' ? 'WITNESS POST-TRAVERSAL — FC3 SPUTTER'
+    : S.witness==='OFF' ? 'NO WITNESS AT FORK — DEAD CHAMBER'
+    : '';
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// controls
+const $=id=>document.getElementById(id);
+$('ign').onclick=e=>{S.ign=!S.ign;e.target.dataset.on=S.ign?1:0;e.target.textContent=`IGNITION: ${S.ign?'ON':'OFF'}`;};
+$('throttle').oninput=e=>S.throttle=+e.target.value;
+$('gate').onclick=e=>{S.gateOpen=!S.gateOpen;e.target.dataset.on=S.gateOpen?1:0;e.target.textContent=`GAP 128.5: ${S.gateOpen?'OPEN':'CLOSED'}`;};
+$('wit').onclick=e=>{const seq=['AT','LATE','OFF'];S.witness=seq[(seq.indexOf(S.witness)+1)%3];
+  e.target.dataset.w=S.witness;e.target.textContent=`WITNESS @${S.witness}`;};
+$('reset').onclick=()=>{S.vel=0;S.dv=0;S.ignitions=0;S.misfires=0;S.dead=0;};
+</script>
+</body>
+</html>

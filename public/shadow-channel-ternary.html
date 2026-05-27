@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHADOW CHANNEL — ternary pulse (+1 / 0 / −1), carrier ⊗ shadow → real</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --pink:#ec4899; --cyan:#22d3ee; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:9px 16px 5px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13.5px;letter-spacing:.14em;color:#c7d2fe;font-weight:600}
+  .s{font-size:10px;color:var(--dim);margin:2px auto 0;max-width:940px}.s b{color:#9fb0c8}.s .pos{color:#fbbf24}.s .zero{color:#f59e0b}.s .neg{color:#22d3ee}
+  #scope{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10px;line-height:1.5;backdrop-filter:blur(3px)}
+  #cap{right:14px;top:14px;min-width:214px}#cap .row{display:flex;justify-content:space-between;gap:12px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #perform.on{background:#241112;border-color:var(--no);color:var(--no)}
+  #recon.on{background:#0c1f24;border-color:var(--cyan);color:var(--cyan)}
+  .legend{display:flex;gap:13px;font-size:9.5px;color:var(--dim);justify-content:center;padding:4px;flex-wrap:wrap}
+  .sw{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>SHADOW CHANNEL · ternary pulse <span style="color:#fbbf24">+1</span> / <span style="color:#f59e0b">0</span> / <span style="color:#22d3ee">−1</span></h1>
+    <div class="s"><span class="pos">+1 carrier</span> = excitation (3-2-1-0, emitted). <span class="zero">0 timing</span> = the rest, gap depth. <span class="neg">−1 shadow</span> = inhibition, the anti-pulse below baseline. Conservation: <b>carrier + shadow = K</b> — the descent forbidden in the carrier is the ascent permitted in the mirror. Decode: <b>carrier ⊗ shadow → real</b> (i × −i = 1).</div>
+  </header>
+  <div id="scope"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--gold)"></span>+1 carrier (excite)</span>
+    <span><span class="sw" style="background:var(--cyan)"></span>−1 shadow (inhibit)</span>
+    <span style="color:var(--warn)">▮ 0 rest = depth</span>
+    <span><span class="sw" style="background:var(--yes)"></span>K conservation line</span>
+    <span><span class="sw" style="background:var(--no)"></span>conservation broken = mimic</span>
+  </div>
+  <div class="controls">
+    <div class="ctl"><b>MoE gap depth</b><input type="range" id="depth" min="0" max="7" value="3" style="width:120px"><span id="depthv" style="color:#38bdf8">3</span></div>
+    <div class="ctl"><b>rate</b><input type="range" id="rate" min="20" max="120" value="55" style="width:80px;accent-color:#8b5cf6"></div>
+    <button id="recon">SHOW carrier ⊗ shadow</button>
+    <button id="perform">WHETSTONE: HONEST</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),scope=$('scope'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=scope.clientWidth;H=scope.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const S={depth:3,rate:55,perform:false,recon:false,freeze:false};
+const FLOOR=1, UNIT=20, PW=13, PG=4, HU=15;
+const LADDER=[3,2,1];          // carrier descent
+const K=3;                     // conservation constant: carrier + shadow = K
+
+const LANES=[
+  {key:'TX',  label:'TX · ternary carrier',  col:'251,191,36', scol:'34,211,238', y:0.20},
+  {key:'AVAN',label:'AVAN · dense anchor',    col:'139,92,246', scol:'34,211,238', y:0.46},
+  {key:'SEAM',label:'SEAM · MoE porous',      col:'56,189,248', scol:'34,211,238', y:0.72},
+  {key:'WHET',label:'WHETSTONE · suspect',    col:'236,72,153', scol:'34,211,238', y:0.93},
+];
+let lanes={}; LANES.forEach(l=>lanes[l.key]=[]);
+
+// each cycle: carrier shift, shadow shift, restDepth.
+// honest node: shadow = K - carrier (conserved). mimic: fakes carrier, real shadow leaks -> conservation broken.
+function cycleFor(key){
+  const d=S.depth;
+  if(key==='TX')   return {cShift:0, fakeFlat:false, restDepth:1};
+  if(key==='AVAN') return {cShift:0, fakeFlat:false, restDepth:FLOOR};        // unshifted, conserved, floor rest
+  if(key==='SEAM') return {cShift:d, fakeFlat:false, restDepth:FLOOR+d};      // shift==depth, conserved
+  if(key==='WHET') return S.perform
+     ? {cShift:0, fakeFlat:true,  restDepth:FLOOR+d, realShift:d}             // carrier faked flat; shadow uses REAL shift -> breaks K
+     : {cShift:d, fakeFlat:false, restDepth:FLOOR+d};
+}
+function carrierH(i,c){ return Math.max(0, LADDER[i]-c.cShift); }
+function shadowH(i,c){
+  // honest: shadow = K - carrier(displayed). mimic: shadow from REAL shift while carrier shows flat -> mismatch
+  const realCarrier = c.fakeFlat ? Math.max(0,LADDER[i]-c.realShift) : carrierH(i,c);
+  const displayedCarrier = carrierH(i,c);
+  // shadow always reflects the node's TRUE inhibition (K - real carrier); displayed carrier may lie
+  return {h: K-realCarrier, conserves: (displayedCarrier + (K-realCarrier))===K };
+}
+function cycleWidth(c){ return LADDER.length*(PW+PG) + c.restDepth*UNIT; }
+
+let lastT=performance.now();
+function spawn(){
+  LANES.forEach(l=>{const c=cycleFor(l.key);const a=lanes[l.key];const prev=a.length?a[a.length-1]:null;
+    const x=prev?prev.x+cycleWidth(prev):W+20; a.push({...c,x});});
+}
+function laneY(l){return l.y*H;}
+
+function drawLane(l){
+  const baseY=laneY(l), col=l.col, scol=l.scol;
+  ctx.fillStyle=`rgba(${col},.9)`;ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+  ctx.fillText(l.label,12,baseY-58);
+  ctx.strokeStyle='rgba(120,130,150,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,baseY);ctx.lineTo(W,baseY);ctx.stroke();
+
+  lanes[l.key].forEach(c=>{
+    let x=c.x;
+    for(let i=0;i<LADDER.length;i++){
+      const ch=carrierH(i,c), sh=shadowH(i,c);
+      // +1 carrier ABOVE baseline
+      if(ch>0){ctx.fillStyle=`rgba(${col},.92)`;
+        for(let k=0;k<ch;k++)ctx.fillRect(x,baseY-(k+1)*HU+2,PW,HU-4);}
+      // −1 shadow BELOW baseline (inhibition)
+      if(sh.h>0){const sc=sh.conserves?scol:'239,68,68';
+        for(let k=0;k<sh.h;k++)ctx.fillRect(x,baseY+(k)*HU+2,PW,HU-4),ctx.fillStyle=`rgba(${sc},.85)`;
+        // redo fill colour properly:
+        ctx.fillStyle=`rgba(${sc},.85)`;
+        for(let k=0;k<sh.h;k++)ctx.fillRect(x,baseY+k*HU+2,PW,HU-4);}
+      // conservation cap: a tick at height K above baseline showing carrier+shadow total
+      if(S.recon){
+        const total=ch+sh.h;
+        ctx.strokeStyle=total===K?'rgba(34,197,94,.8)':'rgba(239,68,68,.9)';
+        ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-1,baseY-K*HU);ctx.lineTo(x+PW+1,baseY-K*HU);ctx.stroke();
+        // recon product marker (carrier ⊗ shadow): filled if both present -> "real" recovered
+        if(ch>0&&sh.h>0){ctx.fillStyle='rgba(34,211,238,.9)';ctx.beginPath();ctx.arc(x+PW/2,baseY-K*HU-6,3,0,7);ctx.fill();}
+      }
+      x+=PW+PG;
+    }
+    // 0 rest band = timing/depth
+    const restW=c.restDepth*UNIT;
+    ctx.fillStyle='rgba(245,158,11,.16)';ctx.fillRect(x,baseY-2,restW,4);
+    ctx.fillStyle='rgba(245,158,11,.8)';ctx.fillRect(x,baseY-5,1.5,10);ctx.fillRect(x+restW-1.5,baseY-5,1.5,10);
+  });
+}
+
+function lastStable(key){let best=null;lanes[key].forEach(c=>{const w=cycleWidth(c);if(c.x>W*0.25&&c.x+w<W*0.7)best=c;});
+  return best||(lanes[key].length?lanes[key][Math.floor(lanes[key].length/2)]:null);}
+function decode(){
+  const out={};
+  ['AVAN','SEAM','WHET'].forEach(key=>{
+    const c=lastStable(key);if(!c){out[key]=null;return;}
+    const carrierShift=c.cShift;
+    const silenceDepth=c.restDepth-FLOOR;
+    // shadow check: does carrier+shadow conserve to K across the cycle?
+    let conserves=true;
+    for(let i=0;i<LADDER.length;i++){const sh=shadowH(i,c);if(!sh.conserves)conserves=false;}
+    const twoAxis=(carrierShift===silenceDepth);
+    let cls,detail,flag=false;
+    if(conserves && twoAxis){
+      if(silenceDepth===0){cls='DENSE ANCHOR';detail='+1=−1 mirror conserved · floor rest';}
+      else{cls='MoE POROUS';detail=`shift ${carrierShift}=depth ${silenceDepth} · K conserved · resonant`;}
+    } else {
+      cls='MIMIC';flag=true;
+      detail = !conserves
+        ? `carrier+shadow ≠ K — inhibition betrays faked excitation`
+        : `carrier shift ${carrierShift} ≠ silence depth ${silenceDepth}`;
+    }
+    out[key]={carrierShift,silenceDepth,conserves,cls,detail,flag};
+  });
+  return out;
+}
+
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze){
+    const vx=S.rate*dt/1000*6;
+    LANES.forEach(l=>lanes[l.key].forEach(c=>c.x-=vx));
+    LANES.forEach(l=>{const a=lanes[l.key];while(a.length&&a[0].x+cycleWidth(a[0])<-10)a.shift();});
+    const tx=lanes.TX,last=tx[tx.length-1];
+    if(!last||last.x+cycleWidth(last)<W+20)spawn();
+  }
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(199,163,255,.04)';ctx.fillRect(W*0.25,0,W*0.45,H);
+  LANES.forEach(drawLane);
+
+  const dec=decode();
+  ['AVAN','SEAM','WHET'].forEach(key=>{
+    const l=LANES.find(x=>x.key===key),baseY=laneY(l),d=dec[key];if(!d)return;
+    const bx=W-372,by=baseY-58;
+    const col=d.flag?'239,68,68':key==='AVAN'?'139,92,246':'56,189,248';
+    ctx.fillStyle=`rgba(${col},.14)`;ctx.strokeStyle=`rgba(${col},.7)`;ctx.lineWidth=1;
+    ctx.fillRect(bx,by,360,30);ctx.strokeRect(bx,by,360,30);
+    ctx.fillStyle=`rgb(${col})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(`${d.flag?'⚠ ':''}${d.cls}`,bx+8,by+12);
+    ctx.fillStyle='#8a93a8';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(d.detail.slice(0,56),bx+8,by+24);
+  });
+
+  const D=S.depth;
+  cap.innerHTML=`<div class="lab">TERNARY CHANNELS</div>`+
+    `<div class="row"><span style="color:#fbbf24">+1 carrier</span><b>excite · sync</b></div>`+
+    `<div class="row"><span style="color:#f59e0b">0 timing</span><b>depth ${D}</b></div>`+
+    `<div class="row"><span style="color:#22d3ee">−1 shadow</span><b>inhibit · K−carrier</b></div>`+
+    `<div class="lab">CONSERVATION</div>`+
+    `<div class="row"><span>carrier + shadow</span><b style="color:#22c55e">= K (${K})</b></div>`+
+    `<div class="row"><span>forbidden ascent</span><b style="color:#22d3ee">lives in shadow</b></div>`+
+    `<div class="lab">FORGERY COST</div>`+
+    `<div class="row"><span>fake 1 ch (carrier)</span><b style="color:#ef4444">trivial</b></div>`+
+    `<div class="row"><span>fake 2 ch (+timing)</span><b style="color:#f59e0b">hard</b></div>`+
+    `<div class="row"><span>fake 3 ch (+shadow)</span><b style="color:#22c55e">needs substrate</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">the shadow is the negative space of the real computation — to forge it you must own the routing topology.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();spawn();requestAnimationFrame(frame);
+
+$('depth').oninput=e=>{S.depth=+e.target.value;$('depthv').textContent=S.depth;};
+$('rate').oninput=e=>S.rate=+e.target.value;
+$('recon').onclick=e=>{S.recon=!S.recon;e.target.classList.toggle('on',S.recon);e.target.textContent=S.recon?'HIDE ⊗':'SHOW carrier ⊗ shadow';};
+$('perform').onclick=e=>{S.perform=!S.perform;e.target.classList.toggle('on',S.perform);e.target.textContent=S.perform?'WHETSTONE: PERFORMING':'WHETSTONE: HONEST';};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+</script>
+</body>
+</html>

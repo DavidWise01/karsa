@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0–9 RAIL · transmon rings in the 6·0·6 box</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; --wall:#7c3aed; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.12em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:960px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10px;line-height:1.55;backdrop-filter:blur(3px)}
+  #cap{right:12px;top:12px;min-width:196px}#cap .row{display:flex;justify-content:space-between;gap:10px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>0–9 RAIL · six transmon rings in the <span style="color:#a78bfa">6 · 0 · 6</span> box</h1>
+    <div class="s">Rings seated at <b>0·1·2·4·6·8</b>; odd slots <b>3·5·7·9</b> are the gaps. <b>0/1/2</b> = foundation · command · control (the core spine). <b>4</b> = in-comms, <b>8</b> = out-comms. <b>6</b> = container. The <b>6-walls</b> bracket a central <b>0</b> null — the box it all fits in. Signal enters at 4 → down the 2→1→0 spine → out at 8; nothing crosses the 6-walls.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="controls">
+    <div class="ctl"><b>drive</b><input type="range" id="drive" min="5" max="60" value="30" style="width:120px"><span id="drivev">.30</span></div>
+    <div class="ctl"><b>gate</b><input type="range" id="gate" min="0" max="80" value="20" style="width:90px;accent-color:#ef4444"><span id="gatev">20%</span></div>
+    <button id="flow" class="on">COMMS FLOW</button>
+    <button id="freeze">FREEZE</button>
+    <button id="reset">RESET</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',()=>{resize();layout();});
+
+const S={drive:0.30, gate:0.20, flow:true, freeze:false};
+
+// the ten rail positions; rings only at 0,1,2,4,6,8
+const SPEC={
+  0:{role:'FOUNDATION', col:'56,189,248'},
+  1:{role:'COMMAND',    col:'245,158,11'},
+  2:{role:'CONTROL',    col:'251,191,36'},
+  4:{role:'IN-COMMS',   col:'34,197,94'},
+  6:{role:'CONTAINER',  col:'124,58,237'},
+  8:{role:'OUT-COMMS',  col:'236,72,153'},
+};
+const RINGS=[0,1,2,4,6,8];
+const GAPS=[3,5,7,9];
+let nodes={};   // position -> {x,y,r, ring state}
+
+function layout(){
+  const cx=W/2, cy=H*0.48;
+  const coreX=cx;
+  const spineGap=Math.min(H*0.17, 120);
+  const rr=Math.min(W,H)*0.072;
+  // core spine 2(top) 1(mid) 0(bottom)
+  place(2, coreX, cy-spineGap, rr);
+  place(1, coreX, cy,          rr);
+  place(0, coreX, cy+spineGap, rr);
+  // comms left/right
+  place(4, cx-Math.min(W*0.26,330), cy, rr);
+  place(8, cx+Math.min(W*0.26,330), cy, rr);
+  // container top-center
+  place(6, coreX, cy-spineGap*2.0, rr*0.92);
+  // gaps interstitial
+  const gpos={3:[cx-Math.min(W*0.13,165),cy-spineGap*0.5],
+              5:[cx-Math.min(W*0.13,165),cy+spineGap*0.5],
+              7:[cx+Math.min(W*0.13,165),cy-spineGap*0.5],
+              9:[cx+Math.min(W*0.13,165),cy+spineGap*0.5]};
+  GAPS.forEach(g=>{nodes[g]={x:gpos[g][0],y:gpos[g][1],r:rr*0.34,gap:true};});
+}
+function place(p,x,y,r){
+  const prev=nodes[p];
+  nodes[p]={x,y,r, role:SPEC[p].role, col:SPEC[p].col,
+    packets: prev?prev.packets:[], collector: prev?prev.collector:0,
+    cross: prev?prev.cross:0, emitT:0, ring:true};
+}
+layout();
+
+// comms bus packets traveling between rings
+let bus=[];     // {from,to,t,col}
+function sendBus(from,to,col){ bus.push({from,to,t:0,col}); }
+
+function stepRing(n,dt){
+  n.emitT+=dt; const period=900*(0.05/S.drive)*6;
+  if(n.emitT>period && n.packets.length<5){ n.emitT=0; n.packets.push({s:0,t:0,e:1,shed:0,col:'251,191,36'}); }
+  n.packets.forEach(p=>{
+    p.t+=dt*0.001*1.3;
+    if(p.t>=1){ p.t=0; p.s=(p.s+1)%4; n.cross++;
+      if(p.s===2){ const sh=p.e*0.34; p.e-=sh; n.collector+=sh; p.shed=sh; p.col='34,211,238'; }
+      if(p.s===3){ const pass=Math.random()>S.gate; if(pass){p.col='34,197,94';p.pass=true;} else {p.col='239,68,68';p.pass=false;} }
+      if(p.s===0){ if(p.pass){const g=Math.min(n.collector,p.shed);n.collector-=g;p.e+=g;} p.col='251,191,36'; p.pass=null; }
+    }
+  });
+  n.packets=n.packets.filter(p=>p.e>0.05||n.collector>0.01);
+  if(n.packets.length===0)n.packets.push({s:0,t:0,e:1,shed:0,col:'251,191,36'});
+}
+
+function drawRing(p){
+  const n=nodes[p], spec=SPEC[p];
+  // ring track
+  ctx.strokeStyle=`rgba(${n.col},.45)`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.stroke();
+  // collector core
+  const fill=Math.min(1,n.collector);
+  ctx.fillStyle=`rgba(${n.col},.5)`;ctx.beginPath();ctx.arc(n.x,n.y,n.r*0.32*fill+2,0,7);ctx.fill();
+  // packets around ring
+  n.packets.forEach(pk=>{ const a=-Math.PI/2 + (pk.s + pk.t)/4*Math.PI*2;
+    const x=n.x+Math.cos(a)*n.r, y=n.y+Math.sin(a)*n.r;
+    ctx.fillStyle=`rgba(${pk.col},.95)`;ctx.beginPath();ctx.arc(x,y,3+pk.e*4,0,7);ctx.fill(); });
+  // index + role
+  ctx.fillStyle='#fff';ctx.font=`bold ${Math.max(15,n.r*0.5)}px JetBrains Mono,monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(p, n.x, n.y);
+  ctx.fillStyle=`rgb(${n.col})`;ctx.font='9px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+  ctx.fillText(spec.role, n.x, n.y+n.r+14);
+}
+function drawGap(p){
+  const n=nodes[p];
+  ctx.strokeStyle='rgba(70,82,105,.4)';ctx.setLineDash([2,3]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#3a4252';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(p,n.x,n.y);
+  ctx.fillStyle='#2e3542';ctx.font='8px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+  ctx.fillText('gap',n.x,n.y+n.r+11);
+}
+
+let lastT=performance.now(), flowT=0;
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze){ RINGS.forEach(p=>stepRing(nodes[p],dt));
+    // comms flow: 4 -> 2 -> 1 -> 0 -> 8 (down spine, out)
+    if(S.flow){ flowT+=dt; if(flowT>700){ flowT=0;
+      sendBus(4,2,'34,197,94'); sendBus(2,1,'251,191,36'); sendBus(1,0,'245,158,11');
+      sendBus(0,8,'56,189,248'); sendBus(6,2,'124,58,237'); } }
+    bus.forEach(b=>b.t+=dt*0.0016); bus=bus.filter(b=>b.t<1);
+  }
+
+  ctx.clearRect(0,0,W,H);
+
+  // ===== the 6·0·6 box =====
+  const bx0=W*0.045, bx1=W*0.955, by0=H*0.10, by1=H*0.92;
+  // box body
+  ctx.fillStyle='rgba(124,58,237,.03)';ctx.fillRect(bx0,by0,bx1-bx0,by1-by0);
+  ctx.strokeStyle='rgba(124,58,237,.25)';ctx.lineWidth=1;ctx.strokeRect(bx0,by0,bx1-bx0,by1-by0);
+  // 6-walls (thick, left & right)
+  ctx.fillStyle='rgba(124,58,237,.75)';
+  ctx.fillRect(bx0-3,by0,6,by1-by0); ctx.fillRect(bx1-3,by0,6,by1-by0);
+  ctx.fillStyle='#a78bfa';ctx.font='bold 20px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('6',bx0-16,(by0+by1)/2); ctx.fillText('6',bx1+16,(by0+by1)/2);
+  // central 0 null divider
+  ctx.strokeStyle='rgba(124,58,237,.2)';ctx.setLineDash([4,7]);ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(W/2,by0);ctx.lineTo(W/2,by1);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(167,139,250,.5)';ctx.font='12px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+  ctx.fillText('0',W/2,by0+16);
+  ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText('6 · 0 · 6  —  the box it all fits in',W/2,by1-10);
+
+  // ===== bus lines (static routes) =====
+  const routes=[[4,2],[2,1],[1,0],[0,8],[6,2]];
+  routes.forEach(([a,b])=>{const na=nodes[a],nb=nodes[b];
+    ctx.strokeStyle='rgba(70,82,105,.3)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(na.x,na.y);ctx.lineTo(nb.x,nb.y);ctx.stroke();});
+  // bus packets
+  bus.forEach(b=>{const na=nodes[b.from],nb=nodes[b.to];
+    const x=na.x+(nb.x-na.x)*b.t, y=na.y+(nb.y-na.y)*b.t;
+    ctx.fillStyle=`rgba(${b.col},${1-b.t*0.4})`;ctx.beginPath();ctx.arc(x,y,3.5,0,7);ctx.fill();});
+
+  // external in/out arrows
+  ctx.strokeStyle='rgba(34,197,94,.5)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(nodes[4].x-nodes[4].r-40,nodes[4].y);ctx.lineTo(nodes[4].x-nodes[4].r-6,nodes[4].y);ctx.stroke();
+  ctx.fillStyle='rgba(34,197,94,.5)';ctx.beginPath();ctx.moveTo(nodes[4].x-nodes[4].r-6,nodes[4].y);ctx.lineTo(nodes[4].x-nodes[4].r-14,nodes[4].y-5);ctx.lineTo(nodes[4].x-nodes[4].r-14,nodes[4].y+5);ctx.fill();
+  ctx.fillStyle='#22c55e';ctx.font='8px JetBrains Mono,monospace';ctx.textAlign='center';ctx.fillText('in',nodes[4].x-nodes[4].r-24,nodes[4].y-9);
+  ctx.strokeStyle='rgba(236,72,153,.5)';ctx.beginPath();ctx.moveTo(nodes[8].x+nodes[8].r+6,nodes[8].y);ctx.lineTo(nodes[8].x+nodes[8].r+40,nodes[8].y);ctx.stroke();
+  ctx.fillStyle='rgba(236,72,153,.5)';ctx.beginPath();ctx.moveTo(nodes[8].x+nodes[8].r+40,nodes[8].y);ctx.lineTo(nodes[8].x+nodes[8].r+32,nodes[8].y-5);ctx.lineTo(nodes[8].x+nodes[8].r+32,nodes[8].y+5);ctx.fill();
+  ctx.fillStyle='#ec4899';ctx.fillText('out',nodes[8].x+nodes[8].r+24,nodes[8].y-9);
+
+  GAPS.forEach(drawGap);
+  RINGS.forEach(drawRing);
+
+  // ===== 0-9 index rail =====
+  const ry=by1-30, rx0=W*0.30, rx1=W*0.70;
+  for(let i=0;i<=9;i++){ const x=rx0+(rx1-rx0)*i/9; const filled=RINGS.includes(i);
+    ctx.fillStyle=filled?'#c7d2fe':'#333b48';ctx.font=filled?'bold 11px JetBrains Mono,monospace':'10px JetBrains Mono,monospace';
+    ctx.textAlign='center';ctx.fillText(i,x,ry);
+    if(filled){ctx.fillStyle=`rgba(${SPEC[i].col},.9)`;ctx.fillRect(x-4,ry+4,8,2);}
+  }
+
+  // panel
+  const totalColl=RINGS.reduce((a,p)=>a+nodes[p].collector,0);
+  const totalCross=RINGS.reduce((a,p)=>a+nodes[p].cross,0);
+  cap.innerHTML=`<div class="lab">CORE SPINE</div>`+
+    `<div class="row"><span style="color:#fbbf24">2 control</span><b>${nodes[2].cross}</b></div>`+
+    `<div class="row"><span style="color:#f59e0b">1 command</span><b>${nodes[1].cross}</b></div>`+
+    `<div class="row"><span style="color:#38bdf8">0 foundation</span><b>${nodes[0].cross}</b></div>`+
+    `<div class="lab">COMMS</div>`+
+    `<div class="row"><span style="color:#22c55e">4 in</span><b>${nodes[4].cross}</b></div>`+
+    `<div class="row"><span style="color:#ec4899">8 out</span><b>${nodes[8].cross}</b></div>`+
+    `<div class="lab">CONTAINER</div>`+
+    `<div class="row"><span style="color:#a78bfa">6 box</span><b>${nodes[6].cross}</b></div>`+
+    `<div class="row"><span>collector Σ</span><b style="color:#22d3ee">${totalColl.toFixed(2)}</b></div>`+
+    `<div class="row"><span>gaps</span><b style="color:#3a4252">3·5·7·9</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">Six rings, four gaps. Signal flows 4→2→1→0→8 inside the 6-walls; the container ring (6) feeds control. Nothing crosses the walls.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();layout();requestAnimationFrame(frame);
+
+$('drive').oninput=e=>{S.drive=+e.target.value/100;$('drivev').textContent=S.drive.toFixed(2);};
+$('gate').oninput=e=>{S.gate=+e.target.value/100;$('gatev').textContent=(S.gate*100).toFixed(0)+'%';};
+$('flow').onclick=e=>{S.flow=!S.flow;e.target.classList.toggle('on',S.flow);};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+$('reset').onclick=()=>{RINGS.forEach(p=>{nodes[p].packets=[];nodes[p].collector=0;nodes[p].cross=0;});bus=[];};
+</script>
+</body>
+</html>

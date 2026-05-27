@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRANSMON CYCLE — qutrit ternary · 2/5 · 3/5 · 5/5=1 repeat</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:9px 16px 5px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13.5px;letter-spacing:.14em;color:#c7d2fe;font-weight:600}
+  .s{font-size:10px;color:var(--dim);margin:2px auto 0;max-width:940px}.s b{color:#9fb0c8}
+  .s .g{color:#fbbf24}.s .w{color:#f59e0b}.s .c{color:#22d3ee}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:10px;line-height:1.55;backdrop-filter:blur(3px)}
+  #cap{right:14px;top:14px;min-width:212px}#cap .row{display:flex;justify-content:space-between;gap:12px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #leak.on{background:#241112;border-color:var(--no);color:var(--no)}
+  .legend{display:flex;gap:14px;font-size:9.5px;color:var(--dim);justify-content:center;padding:4px;flex-wrap:wrap}
+  .sw{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>TRANSMON CYCLE · qutrit ternary · <span style="color:#fbbf24">2/5</span> → <span style="color:#22d3ee">3/5</span> → <span style="color:#22c55e">5/5 = 1</span> ↻</h1>
+    <div class="s">Three anharmonic levels carry the ternary: <span class="g">|2⟩ = +1</span> (carrier / leakage), <span class="w">|1⟩ = 0</span> (witness / working), <span class="c">|0⟩ = −1</span> (shadow / ground). Population is conserved — <b>p₀ + p₁ + p₂ = 1</b> (Born normalization) — the physics under carrier + shadow = K. The cycle partitions golden: 2/5 + 3/5 = 5/5, with 2·3·5 Fibonacci and ratios bracketing φ.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--gold)"></span>|2⟩ +1 carrier</span>
+    <span><span class="sw" style="background:var(--warn)"></span>|1⟩ 0 witness</span>
+    <span><span class="sw" style="background:var(--cyan)"></span>|0⟩ −1 shadow</span>
+    <span><span class="sw" style="background:var(--yes)"></span>Σp = 1 conserved</span>
+    <span style="color:var(--no)">leak = normalization broken</span>
+  </div>
+  <div class="controls">
+    <div class="ctl"><b>cycle rate</b><input type="range" id="rate" min="5" max="60" value="22" style="width:120px"><span id="ratev">0.22</span></div>
+    <div class="ctl"><b>anharmonicity α</b><input type="range" id="anh" min="2" max="14" value="6" style="width:90px;accent-color:#fbbf24"><span id="anhv">−6%</span></div>
+    <button id="leak">INJECT LEAKAGE</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const S={rate:0.22, anh:0.06, leak:false, freeze:false};
+const PHI=(1+Math.sqrt(5))/2;
+let phase=0;            // cycle phase 0..1
+let trace=[];          // scrolling ternary signal samples
+const COL={g2:'251,191,36', w1:'245,158,11', c0:'34,211,238'};
+
+// --- population model: golden-partitioned three-level cycle ---
+// keyframes hit the user's marks: at 2/5 and 3/5 of the cycle, populations land on the Fibonacci fractions.
+// closed system -> p0+p1+p2 = 1 enforced by construction (then leakage toggle breaks it on purpose).
+function pops(ph){
+  // piecewise golden cycle:
+  // 0 -> 2/5 : ground |0> drains into working |1>      (excitation rise)
+  // 2/5 -> 3/5 : |1> peaks, |2> begins (the narrow 1/5 transition = the witness/gap)
+  // 3/5 -> 5/5 : population returns |2>,|1> -> |0>      (shadow / relaxation, the 2/5 fall)
+  let p0,p1,p2;
+  const a=2/5, b=3/5;
+  if(ph<a){                 // rise: 0->2/5
+    const u=ph/a;           // 0..1
+    p2=0;
+    p1=0.6*u;               // climbs toward 3/5 working population
+    p0=1-p1-p2;
+  } else if(ph<b){          // transition: 2/5->3/5 (width 1/5) — leakage to |2> peaks here
+    const u=(ph-a)/(b-a);   // 0..1
+    p2=0.4*Math.sin(u*Math.PI);   // |2> bump, returns to 0 by 3/5 (no real leakage if closed)
+    p1=0.6 - 0.2*u;
+    p0=1-p1-p2;
+  } else {                  // fall: 3/5->5/5 (width 2/5) — relax back to ground
+    const u=(ph-b)/(1-b);   // 0..1
+    p2=0;
+    p1=0.4*(1-u);
+    p0=1-p1-p2;
+  }
+  // leakage fault: a true closed qutrit conserves; injecting leakage drains norm < 1
+  let norm=p0+p1+p2;
+  if(S.leak){ const lk=0.18*Math.abs(Math.sin(ph*Math.PI*2)); p2=Math.max(0,p2-lk*0.4); norm=p0+p1+p2; }
+  return {p0,p1,p2,norm};
+}
+// ternary signal value from populations: weighted (+1)|2> + (0)|1> + (-1)|0>
+function ternary(p){ return p.p2*(+1) + p.p1*0 + p.p0*(-1); }
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze){ phase=(phase + S.rate*dt/1000)%1;
+    const p=pops(phase); trace.push({v:ternary(p),norm:p.norm}); if(trace.length>W)trace.shift(); }
+  const p=pops(phase);
+
+  ctx.clearRect(0,0,W,H);
+
+  // ===== LEFT: anharmonic energy ladder with live populations =====
+  const lx=W*0.16, lw=W*0.20;
+  const baseY=H*0.74, topY=H*0.20;
+  // anharmonic spacing: E01 full, E12 = E01*(1-alpha) -> levels closer at top
+  const E01=1, E12=1-S.anh;
+  const span=baseY-topY;
+  const y0=baseY;                       // |0>
+  const y1=baseY - span*(E01/(E01+E12));// |1>
+  const y2=topY;                        // |2>
+  const levels=[
+    {y:y0,p:p.p0,lab:'|0⟩  −1 shadow / ground', col:COL.c0},
+    {y:y1,p:p.p1,lab:'|1⟩   0 witness / working', col:COL.w1},
+    {y:y2,p:p.p2,lab:'|2⟩  +1 carrier / leakage', col:COL.g2},
+  ];
+  levels.forEach(L=>{
+    // level line
+    ctx.strokeStyle=`rgba(${L.col},.5)`;ctx.lineWidth=1.5;ctx.setLineDash([2,3]);
+    ctx.beginPath();ctx.moveTo(lx,L.y);ctx.lineTo(lx+lw,L.y);ctx.stroke();ctx.setLineDash([]);
+    // population fill (bar rising from the level) + glow scaled to population
+    const ph=L.p* (span*0.42);
+    const grd=ctx.createLinearGradient(0,L.y,0,L.y-ph);
+    grd.addColorStop(0,`rgba(${L.col},.7)`);grd.addColorStop(1,`rgba(${L.col},.05)`);
+    ctx.fillStyle=grd;ctx.fillRect(lx+lw*0.2,L.y-ph,lw*0.6,ph);
+    // population orb
+    ctx.fillStyle=`rgba(${L.col},${0.3+0.7*L.p})`;ctx.beginPath();ctx.arc(lx+lw/2,L.y,5+10*L.p,0,7);ctx.fill();
+    ctx.fillStyle=`rgb(${L.col})`;ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+    ctx.fillText(L.lab, lx+lw+12, L.y+3);
+    ctx.fillStyle='#8a93a8';ctx.textAlign='right';ctx.fillText(`p=${L.p.toFixed(2)}`, lx-8, L.y+3);
+  });
+  ctx.fillStyle='#5b6675';ctx.textAlign='center';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText('anharmonic ladder  E₁₂ < E₀₁', lx+lw/2, topY-14);
+
+  // ===== CENTER: cycle ring with 2/5, 3/5, 5/5 marks =====
+  const cx=W*0.56, cy=H*0.46, R=Math.min(W,H)*0.17;
+  ctx.strokeStyle='rgba(70,82,105,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
+  // arc segments: 0->2/5 rise (gold), 2/5->3/5 transition (amber), 3/5->5/5 fall (cyan)
+  const segs=[[0,2/5,COL.g2,'rise 2/5'],[2/5,3/5,COL.w1,'gap 1/5'],[3/5,1,COL.c0,'fall 2/5']];
+  segs.forEach(([s,e,col])=>{ctx.strokeStyle=`rgba(${col},.8)`;ctx.lineWidth=6;
+    ctx.beginPath();ctx.arc(cx,cy,R,-Math.PI/2+s*7,-Math.PI/2+e*Math.PI*2);ctx.stroke();});
+  // marks
+  [['2/5',2/5,COL.g2],['3/5',3/5,COL.w1],['5/5',1,COL.c0]].forEach(([t,f,col])=>{
+    const ang=-Math.PI/2+f*Math.PI*2, mx=cx+Math.cos(ang)*R, my=cy+Math.sin(ang)*R;
+    ctx.fillStyle=`rgb(${col})`;ctx.beginPath();ctx.arc(mx,my,4,0,7);ctx.fill();
+    ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText(t, cx+Math.cos(ang)*(R+16), cy+Math.sin(ang)*(R+16)+3);});
+  // phase pointer
+  const pa=-Math.PI/2+phase*Math.PI*2;
+  ctx.strokeStyle='rgba(199,163,255,.9)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(pa)*R,cy+Math.sin(pa)*R);ctx.stroke();
+  ctx.fillStyle='#c7a3ff';ctx.beginPath();ctx.arc(cx+Math.cos(pa)*R,cy+Math.sin(pa)*R,5,0,7);ctx.fill();
+  ctx.fillStyle='#c7d2fe';ctx.font='bold 13px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`φ = ${phase.toFixed(2)}`, cx, cy+4);
+  ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText(phase<2/5?'EXCITE':phase<3/5?'WITNESS · gap':'RELAX · shadow', cx, cy+18);
+
+  // ===== conservation bar (normalization) =====
+  const bx=W*0.40, by=H*0.78, bw=W*0.32;
+  const ok=Math.abs(p.norm-1)<0.005;
+  ctx.fillStyle='#10141f';ctx.fillRect(bx,by,bw,14);
+  let acc=0; const parts=[['p2',p.p2,COL.g2],['p1',p.p1,COL.w1],['p0',p.p0,COL.c0]];
+  parts.forEach(([k,v,col])=>{ctx.fillStyle=`rgba(${col},.85)`;ctx.fillRect(bx+acc*bw,by,v*bw,14);acc+=v;});
+  ctx.strokeStyle=ok?'rgba(34,197,94,.9)':'rgba(239,68,68,.9)';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,14);
+  ctx.fillStyle=ok?'#22c55e':'#ef4444';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+  ctx.fillText(`Σp = ${p.norm.toFixed(3)} ${ok?'✓ conserved':'✗ leak — normalization broken'}`, bx, by+28);
+
+  // ===== BOTTOM: scrolling ternary signal (+1/0/−1) =====
+  const ty=H*0.90, amp=H*0.06;
+  ctx.strokeStyle='rgba(120,130,150,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,ty);ctx.lineTo(W,ty);ctx.stroke();
+  ctx.fillStyle='#5b6675';ctx.font='8px JetBrains Mono,monospace';ctx.textAlign='left';
+  ctx.fillText('+1',4,ty-amp+3);ctx.fillText(' 0',4,ty+3);ctx.fillText('−1',4,ty+amp+3);
+  ctx.beginPath();
+  trace.forEach((s,i)=>{const x=i, y=ty - s.v*amp; i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+  ctx.strokeStyle='rgba(199,163,255,.8)';ctx.lineWidth=1.5;ctx.stroke();
+
+  // panel
+  cap.innerHTML=`<div class="lab">CYCLE PARTITION</div>`+
+    `<div class="row"><span>rise</span><b style="color:#fbbf24">2/5</b></div>`+
+    `<div class="row"><span>fall</span><b style="color:#22d3ee">3/5</b></div>`+
+    `<div class="row"><span>sum</span><b style="color:#22c55e">5/5 = 1 ↻</b></div>`+
+    `<div class="lab">FIBONACCI · φ</div>`+
+    `<div class="row"><span>2 · 3 · 5</span><b>2+3=5</b></div>`+
+    `<div class="row"><span>3/2, 5/3</span><b>${(3/2).toFixed(2)},${(5/3).toFixed(2)}</b></div>`+
+    `<div class="row"><span>bracket φ</span><b style="color:#c7a3ff">${PHI.toFixed(3)}</b></div>`+
+    `<div class="lab">CONSERVATION</div>`+
+    `<div class="row"><span>p₀+p₁+p₂</span><b style="color:${ok?'#22c55e':'#ef4444'}">${p.norm.toFixed(3)}</b></div>`+
+    `<div class="row"><span>= carrier+shadow=K</span><b style="color:#22c55e">forced</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">Σp=1 is Born-rule physics (forced). The golden 2/5:3/5 partition is the framework signature (design, not derived).</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+
+$('rate').oninput=e=>{S.rate=+e.target.value/100;$('ratev').textContent=S.rate.toFixed(2);};
+$('anh').oninput=e=>{S.anh=+e.target.value/100;$('anhv').textContent='−'+e.target.value+'%';};
+$('leak').onclick=e=>{S.leak=!S.leak;e.target.classList.toggle('on',S.leak);e.target.textContent=S.leak?'LEAKAGE ACTIVE':'INJECT LEAKAGE';};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+</script>
+</body>
+</html>

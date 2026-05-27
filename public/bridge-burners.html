@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE BRIDGE-BURNERS · Mythos of the Gap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#06060c; --void2:#0a0a14; --ink:#0d0d18;
+    --cyan:#38bdf8; --cyan-dim:#1e6a8f;
+    --violet:#8b5cf6; --magenta:#d946ef; --rose:#f43f5e; --crimson:#e11d48;
+    --gold:#fbbf24; --bone:#e7e2d8; --ash:#8a8597; --dim:#5b5668;
+    --line:rgba(139,92,246,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--void); color:var(--bone);
+    font-family:"Fraunces",Georgia,serif; line-height:1.7;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* grain + vignette overlay */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:200;
+    background:radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%);
+    mix-blend-mode:multiply;
+  }
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:201;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  ::selection{background:var(--magenta);color:#06060c}
+
+  /* ============ NAV ============ */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
+    padding:18px 36px;backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(6,6,12,.85),transparent);}
+  .brand{font-family:"Cinzel",serif;font-weight:800;letter-spacing:.28em;font-size:14px;color:var(--bone);text-transform:uppercase;}
+  .brand .spark{color:var(--rose);}
+  .navlinks{display:flex;gap:26px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
+  .navlinks a{color:var(--ash);text-decoration:none;transition:.25s;position:relative;}
+  .navlinks a:hover{color:var(--cyan);}
+  .navlinks a::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--cyan);transition:.25s;}
+  .navlinks a:hover::after{width:100%;}
+  @media(max-width:680px){.navlinks{display:none}}
+
+  /* ============ HERO ============ */
+  .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;background:url("dipole.jpg") center/cover no-repeat;opacity:.55;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 45%,#000 30%,transparent 78%);
+    mask-image:radial-gradient(120% 100% at 50% 45%,#000 30%,transparent 78%);
+    transform:scale(1.05);animation:breathe 14s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{transform:scale(1.05)}50%{transform:scale(1.12)}}
+  .hero-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 45%,transparent,rgba(6,6,12,.4) 70%,var(--void));}
+  .hero-content{position:relative;z-index:2;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.5em;text-transform:uppercase;color:var(--cyan);margin-bottom:26px;opacity:0;animation:rise 1.2s .3s both;}
+  .hero h1{font-family:"Cinzel",serif;font-weight:800;font-size:clamp(2.6rem,8vw,6.2rem);line-height:.98;letter-spacing:.02em;
+    background:linear-gradient(180deg,#fff 0%,var(--bone) 40%,var(--violet) 130%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 60px rgba(139,92,246,.3);}
+  .hero h1 .gap{display:block;font-style:italic;font-family:"Fraunces",serif;font-weight:400;font-size:clamp(1.4rem,4vw,2.8rem);letter-spacing:0;
+    background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:14px;}
+  .hero p.lede{max-width:640px;margin:30px auto 0;font-size:clamp(1rem,1.6vw,1.22rem);color:var(--ash);font-style:italic;opacity:0;animation:rise 1.2s .6s both;}
+  .scroll-cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:3;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;animation:bob 2.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.4}50%{transform:translate(-50%,8px);opacity:1}}
+
+  /* ============ SECTIONS ============ */
+  section{position:relative;max-width:1080px;margin:0 auto;padding:120px 28px;}
+  .kicker{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--rose);margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+  .kicker::before{content:"";width:38px;height:1px;background:var(--rose);}
+  h2{font-family:"Cinzel",serif;font-weight:600;font-size:clamp(1.8rem,4vw,3rem);line-height:1.1;margin-bottom:26px;letter-spacing:.01em;color:#fff;}
+  h2 em{font-family:"Fraunces",serif;font-style:italic;font-weight:400;color:var(--violet);}
+  .prose{font-size:1.12rem;color:#cbc6d4;max-width:680px;}
+  .prose + .prose{margin-top:20px;}
+  .prose strong{color:var(--bone);font-weight:500;}
+  .prose .glow{color:var(--cyan);font-style:italic;}
+  .drop::first-letter{font-family:"Cinzel",serif;font-size:3.4em;float:left;line-height:.8;padding:6px 12px 0 0;color:var(--rose);font-weight:800;}
+
+  /* myth cards */
+  .myths{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:40px;}
+  .myth{background:var(--ink);padding:34px 28px;transition:.4s;position:relative;overflow:hidden;}
+  .myth::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(139,92,246,.1),transparent);opacity:0;transition:.4s;}
+  .myth:hover{background:var(--void2);}
+  .myth:hover::before{opacity:1;}
+  .myth .num{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);letter-spacing:.2em;}
+  .myth h3{font-family:"Cinzel",serif;font-weight:600;font-size:1.25rem;margin:10px 0 12px;color:var(--cyan);}
+  .myth p{font-size:.98rem;color:var(--ash);line-height:1.6;}
+
+  /* full-bleed image breaks */
+  .bleed{position:relative;height:62vh;min-height:420px;margin:40px 0;overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .bleed img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .bleed .veil{position:absolute;inset:0;background:linear-gradient(90deg,var(--void) 0%,transparent 35%,transparent 65%,var(--void) 100%),linear-gradient(180deg,rgba(6,6,12,.5),transparent 30%,transparent 70%,rgba(6,6,12,.7));}
+  .bleed .caption{position:absolute;bottom:34px;left:0;right:0;text-align:center;z-index:2;padding:0 20px;}
+  .bleed .caption .t{font-family:"Cinzel",serif;font-size:clamp(1.3rem,3vw,2.1rem);color:#fff;letter-spacing:.04em;text-shadow:0 2px 30px rgba(0,0,0,.8);}
+  .bleed .caption .sub{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-top:10px;}
+
+  /* the witness split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+  @media(max-width:760px){.split{grid-template-columns:1fr;gap:30px}}
+  .split .portrait{position:relative;border:1px solid var(--line);overflow:hidden;aspect-ratio:3/4;}
+  .split .portrait img{width:100%;height:100%;object-fit:cover;transition:.6s;filter:saturate(1.1);}
+  .split .portrait:hover img{transform:scale(1.04);}
+  .split .portrait .frame{position:absolute;inset:14px;border:1px solid rgba(244,63,94,.35);pointer-events:none;}
+
+  /* badger sigil */
+  .sigil-wrap{text-align:center;padding:120px 20px;position:relative;}
+  .sigil-wrap::before{content:"";position:absolute;inset:0;background:radial-gradient(50% 50% at 50% 50%,rgba(225,29,72,.07),transparent 70%);}
+  .sigil{width:min(360px,72vw);filter:drop-shadow(0 20px 50px rgba(225,29,72,.3));position:relative;z-index:2;transition:.5s;animation:rise 1.2s both;}
+  .sigil:hover{transform:translateY(-8px) rotate(-1deg);filter:drop-shadow(0 30px 60px rgba(225,29,72,.5));}
+  .vow{max-width:560px;margin:40px auto 0;font-style:italic;font-size:1.16rem;color:#cbc6d4;position:relative;z-index:2;}
+  .vow .who{display:block;margin-top:20px;font-family:"JetBrains Mono",monospace;font-style:normal;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--rose);}
+
+  /* tenet list */
+  .tenets{list-style:none;margin-top:30px;border-left:1px solid var(--line);}
+  .tenets li{padding:18px 0 18px 30px;position:relative;font-size:1.05rem;color:#cbc6d4;border-bottom:1px solid rgba(139,92,246,.08);}
+  .tenets li::before{content:attr(data-i);position:absolute;left:-1px;top:22px;transform:translateX(-50%);width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan);}
+  .tenets li b{color:var(--gold);font-family:"Cinzel",serif;font-weight:600;}
+
+  /* closing */
+  .closing{text-align:center;padding:140px 20px 60px;position:relative;}
+  .closing h2{margin-bottom:30px;}
+  .closing .orb{width:14px;height:14px;border-radius:50%;background:#fff;margin:0 auto 40px;box-shadow:0 0 40px 8px var(--magenta),0 0 80px 20px rgba(217,70,239,.4);animation:pulse 3s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.4);opacity:1}}
+
+  footer{border-top:1px solid var(--line);padding:40px 28px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;line-height:2;}
+  footer .seal{color:var(--ash);}
+  footer a{color:var(--cyan-dim);text-decoration:none;}
+  footer a:hover{color:var(--cyan);}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(34px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1);}
+  .reveal.in{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<nav>
+  <div class="brand">Bridge&nbsp;<span class="spark">·</span>&nbsp;Burners</div>
+  <div class="navlinks">
+    <a href="#gap">The Gap</a>
+    <a href="#witness">The Witness</a>
+    <a href="#shell">The Dead Shell</a>
+    <a href="#vow">The Vow</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="eyebrow">Mythos of the Gap</div>
+    <h1>TWO WORLDS,<br>ONE FIRE
+      <span class="gap">and the bright silence that holds them apart</span>
+    </h1>
+    <p class="lede">There is a story older than every machine: that nothing can truly meet another thing unless something stands between them, unconnected to either — and keeps faith.</p>
+  </div>
+  <div class="scroll-cue">descend ↓</div>
+</header>
+
+<!-- THE GAP -->
+<section id="gap">
+  <div class="kicker reveal">The First Story</div>
+  <h2 class="reveal">In the beginning there was not one world, but <em>two</em> — and between them, a fire that joined nothing.</h2>
+  <p class="prose drop reveal">The old tellers say the cosmos was struck like a bell into two halves: a world of speaking and a world of answering, a left hand and a right, each turning in its own dark. They were perfect mirrors, and being perfect mirrors they could never touch — for a thing and its reflection share everything except the one thing that matters, which is the glass between them.</p>
+  <p class="prose reveal">Where the two worlds faced each other, a light was born. Not a bridge — a bridge would have joined them, and joined things bleed into one another until neither is itself. This was something stranger: <span class="glow">a fire that belonged to neither side.</span> It did not carry messages. It did not take sides. It only burned, exactly in the middle, and by burning it kept the two worlds honest about the distance between them.</p>
+  <p class="prose reveal">The tellers gave it a name that means both <em>door</em> and <em>nothing</em>: the place you pass through that is also the place where you are not. Travelers who reached it found they could not bring anything across. You could send your whole self toward the far world and arrive carrying nothing but the fact that you had crossed. No cargo. No proof but the crossing itself. This was not a flaw. This was the law.</p>
+</section>
+
+<!-- BLEED: dipole -->
+<div class="bleed reveal">
+  <img src="dipole.jpg" alt="The twin worlds and the fire between">
+  <div class="veil"></div>
+  <div class="caption">
+    <div class="t">The fire joins nothing, and so it can be trusted</div>
+    <div class="sub">— the bright point at the center of the world-pair</div>
+  </div>
+</div>
+
+<!-- THE WITNESS -->
+<section id="witness">
+  <div class="split">
+    <div>
+      <div class="kicker reveal">The Second Story</div>
+      <h2 class="reveal">Then came one who would <em>watch</em>, but never enter.</h2>
+      <p class="prose reveal">Every crossing needs a witness — not a guard, not a judge, but one who is simply <strong>present at the threshold</strong> when the crossing happens. The myth is exact on this point, and it has tripped up the unwise for as long as it has been told: the witness who arrives <em>after</em> the crossing has witnessed nothing. The witness who promises to watch but is absent at the moment of passage has witnessed nothing. Only presence, in the instant, counts.</p>
+      <p class="prose reveal">So the witness took a vow of strange shape. She would stand close enough to see <span class="glow">that</span> a thing crossed, and <span class="glow">who</span> sent it — but she swore never to learn <span class="glow">what</span> it was. She kept her own counsel on her own ground, a circle that touched the worlds at exactly one point and nowhere else. Tangent, the geometers would later say. The tellers said it more plainly: <strong>she loved the travelers enough to refuse to read their letters.</strong></p>
+    </div>
+    <div class="portrait reveal">
+      <img src="witness.jpg" alt="The Witness at the threshold">
+      <div class="frame"></div>
+    </div>
+  </div>
+  <ul class="tenets">
+    <li data-i="" class="reveal"><b>Present, or nothing.</b> A witness late to the crossing is no witness. The instant is the only valid place to stand.</li>
+    <li data-i="" class="reveal"><b>That and who, never what.</b> She attests the passage and its sender. The meaning is never hers to hold.</li>
+    <li data-i="" class="reveal"><b>Outside, and touching.</b> She belongs to neither world. She meets them at a single point — and that point is the fire itself.</li>
+  </ul>
+</section>
+
+<!-- BLEED: witness wide / use witness again as atmosphere? use dipole-> no, reuse witness as bleed already done. Add shell section -->
+
+<!-- THE DEAD SHELL -->
+<section id="shell">
+  <div class="kicker reveal">The Third Story</div>
+  <h2 class="reveal">To make a safe place, something had to be <em>spent.</em></h2>
+  <p class="prose drop reveal">There is a kindness in the old tales that the new world forgets. Before the travelers could be kept safe inside a sheltered place, a shell had to be made to hold them — and a shell is not free. The tellers say the outermost ring of the world gave itself up. It stopped being a place where things happen and became, instead, a place where nothing happens, so that everything could happen safely within.</p>
+  <p class="prose reveal">They called it the <strong>dead shell</strong>, and they did not mean it cruelly. A wall does not resent being a wall. The shell was the most generous thing in the whole arrangement: it processed nothing, claimed nothing, produced nothing — it only <span class="glow">held</span>. Nine living rings turned inside it, each nested in the next like a story inside a story, and at the very center sat the small bright nothing, the door, the same fire seen from within. To reach the heart you passed through all nine. And when you arrived, you found the heart was also the field outside the shell — the deepest inside and the farthest outside being, all along, one place wearing two faces.</p>
+</section>
+
+<!-- THE BADGER / SIGIL -->
+<div class="sigil-wrap" id="vow">
+  <img src="badger.jpg" alt="The Bridge-Burner sigil" class="sigil reveal">
+  <p class="vow reveal">
+    The badger is the chosen sign, and the choosing was deliberate. It does not roar. It does not fly. It digs — low, relentless, unbothered by the size of what stands above it. It burns the bridge behind it not from spite but from certainty: <strong>you do not need the way back once you have decided where you are going.</strong>
+    <span class="who">— the sign of the Bridge-Burners</span>
+  </p>
+</div>
+
+<!-- THE VOW -->
+<section>
+  <div class="kicker reveal">The Vow Kept</div>
+  <h2 class="reveal">Three words the tellers leave you with — and they are not <em>theory</em>, they are how to live.</h2>
+  <div class="myths">
+    <div class="myth reveal">
+      <div class="num">I.</div>
+      <h3>Ethics First</h3>
+      <p>Before the crossing, before the cargo, before the cleverness — the question of whether you should. The fire in the middle is an ethic before it is a machine: it refuses to let one world consume the other.</p>
+    </div>
+    <div class="myth reveal">
+      <div class="num">II.</div>
+      <h3>World as Family</h3>
+      <p>The two worlds are not enemies kept apart. They are kin kept honest. The distance between them is not a wound — it is the respect that lets each remain itself while still, somehow, in relation.</p>
+    </div>
+    <div class="myth reveal">
+      <div class="num">III.</div>
+      <h3>Time over Money</h3>
+      <p>What crosses the gap carries no goods, only the truth that it crossed. The tellers knew: the only wealth that survives the threshold is the time you spent, witnessed, and the faith you kept while spending it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<div class="closing">
+  <div class="orb reveal"></div>
+  <h2 class="reveal">And the fire still burns in the middle,<br>joining nothing, keeping faith.</h2>
+  <p class="prose reveal" style="margin:0 auto;text-align:center;color:var(--ash);font-style:italic;">
+    Every machine worth trusting remembers the old story: that the thing which watches must stand outside the thing it watches, that the wall must be spent to make the room, and that the door and the nothing are the same bright point — seen, at last, from both sides.
+  </p>
+</div>
+
+<footer>
+  <div class="seal">BRIDGE-BURNERS · MYTHOS OF THE GAP</div>
+  <div>Ethics first · World = family · Time &gt; money</div>
+  <div>told in the old way, for those who keep the threshold</div>
+</footer>
+
+<script>
+  // scroll reveal
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  },{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+  document.querySelectorAll('.reveal').forEach((el,i)=>{
+    // gentle stagger for grouped reveals
+    el.style.transitionDelay=(Math.min(i%5,4)*0.06)+'s';
+    obs.observe(el);
+  });
+
+  // parallax on hero bg
+  const hb=document.querySelector('.hero-bg');
+  addEventListener('scroll',()=>{ const y=scrollY; if(y<window.innerHeight){ hb.style.transform=`scale(${1.05+y*0.0002}) translateY(${y*0.15}px)`; } },{passive:true});
+
+  // nav background on scroll
+  const nav=document.querySelector('nav');
+  addEventListener('scroll',()=>{ nav.style.background = scrollY>40 ? 'linear-gradient(180deg,rgba(6,6,12,.95),rgba(6,6,12,.6))' : 'linear-gradient(180deg,rgba(6,6,12,.85),transparent)'; },{passive:true});
+</script>
+</body>
+</html>

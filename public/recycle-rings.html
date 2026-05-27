@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECYCLE RINGS — physics loop ∥ predictive-text loop, gate reflects to collector</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.12em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:960px}.s b{color:#9fb0c8}
+  .tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:4px;margin:0 3px}
+  .tag.real{background:#10241a;color:#22c55e;border:1px solid #1d3a2a}
+  .tag.hyp{background:#1a1422;color:#c7a3ff;border:1px solid #2a2342}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10px;line-height:1.5;backdrop-filter:blur(3px)}
+  #cap{right:12px;top:12px;min-width:210px}#cap .row{display:flex;justify-content:space-between;gap:10px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  .legend{display:flex;gap:12px;font-size:9px;color:var(--dim);justify-content:center;padding:3px;flex-wrap:wrap}
+  .sw{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>RECYCLE RINGS · physics loop <span class="tag real">conservation REAL</span> ∥ predictive-text loop <span class="tag hyp">analogy / HYPOTHESIS</span></h1>
+    <div class="s">Same loop shape, two substrates. Climb sheds energy → <b>Patricia collects</b> → recycled through a <b>safety/parse gate</b> back to ground to drive the next climb. The gate witnesses the return (closure law); a quantum that <b>fails reflects back to the collector</b> — never destroyed, never leaked, re-attempted next pass. Left ring is transmon physics (the conservation is real). Right ring is the autoregressive mapping drawn <b>as</b> a mapping — structurally parallel, not proven identical.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--gold)"></span>climb / generate</span>
+    <span><span class="sw" style="background:var(--pink)"></span>shed quantum</span>
+    <span><span class="sw" style="background:var(--cyan)"></span>collector → Patricia</span>
+    <span><span class="sw" style="background:var(--yes)"></span>passed gate → recycled</span>
+    <span><span class="sw" style="background:var(--no)"></span>failed → reflect to collector</span>
+  </div>
+  <div class="controls">
+    <div class="ctl"><b>drive</b><input type="range" id="drive" min="5" max="60" value="28" style="width:110px"><span id="drivev">.28</span></div>
+    <div class="ctl"><b>gate strictness</b><input type="range" id="gate" min="0" max="90" value="25" style="width:100px;accent-color:#ef4444"><span id="gatev">25%</span></div>
+    <button id="freeze">FREEZE</button>
+    <button id="reset">RESET</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const S={drive:0.28, gate:0.25, freeze:false};
+
+// Each ring is a state machine over stages on a circle. A "packet" travels the ring.
+// Stages: 0 GROUND/PROMPT -> 1 CLIMB/GENERATE (sheds) -> 2 COLLECT/Patricia -> 3 GATE/safety -> back to 0
+const STAGES_L=['|0⟩ ground','climb · shed','Patricia collect','safety gate'];
+const STAGES_R=['prompt','generate · emit','context pool','filter / align'];
+
+function makeRing(cx,cy,r,real){
+  return {cx,cy,r,real, packets:[], collector:0, recycled:0, reflected:0, leaked:0, crossings:0,
+    held:[], emitT:0};
+}
+let L,Rr;
+function layout(){ const r=Math.min(W,H)*0.20; const cy=H*0.46;
+  L=Object.assign(makeRing(W*0.29,cy,r,true), L?{packets:L.packets,collector:L.collector,recycled:L.recycled,reflected:L.reflected,crossings:L.crossings}:{});
+  Rr=Object.assign(makeRing(W*0.71,cy,r,false), Rr?{packets:Rr.packets,collector:Rr.collector,recycled:Rr.recycled,reflected:Rr.reflected,crossings:Rr.crossings}:{});
+}
+layout();
+
+function stageAngle(s){ return -Math.PI/2 + s/4*Math.PI*2; } // 4 stages around circle
+function stagePos(ring,s,off=0){ const a=stageAngle(s); return {x:ring.cx+Math.cos(a)*(ring.r+off), y:ring.cy+Math.sin(a)*(ring.r+off)}; }
+
+function spawnPacket(ring){ ring.packets.push({s:0, t:0, e:1.0, shed:0, state:'travel', col:'251,191,36'}); }
+
+function stepRing(ring,dt){
+  // emit a new packet from ground periodically
+  ring.emitT+=dt;
+  const period=900*(0.05/S.drive)*6;
+  if(ring.emitT>period && ring.packets.length<6){ ring.emitT=0; spawnPacket(ring); }
+
+  ring.packets.forEach(p=>{
+    p.t += dt*0.001*1.2;
+    if(p.t>=1){ p.t=0; p.s=(p.s+1)%4; ring.crossings++;
+      // stage transitions
+      if(p.s===2){ // arrived at COLLECT: shed energy into collector
+        const shed=p.e*0.35; p.e-=shed; ring.collector+=shed; p.shed=shed; p.col='34,211,238';
+      }
+      if(p.s===3){ // arrived at GATE: test
+        const pass = Math.random() > S.gate;
+        if(pass){ p.col='34,197,94'; p.gateResult='pass'; }
+        else { p.col='239,68,68'; p.gateResult='fail';
+          // reflect the collected portion back to collector (stays in pool), packet bounces
+          ring.reflected += p.shed; }
+      }
+      if(p.s===0){ // returned to GROUND
+        if(p.gateResult==='pass'){
+          // recycle: collector energy feeds back into the packet to drive next climb
+          const give=Math.min(ring.collector, p.shed); ring.collector-=give; p.e+=give; ring.recycled+=give;
+          p.col='251,191,36'; p.gateResult=null;
+        } else if(p.gateResult==='fail'){
+          // did NOT pass: re-enter pool, collector keeps the energy, packet continues but underfed
+          p.col='251,191,36'; p.gateResult=null;
+        }
+      }
+    }
+  });
+  // retire fully drained packets
+  ring.packets=ring.packets.filter(p=>p.e>0.05 || ring.collector>0.01);
+  if(ring.packets.length===0) spawnPacket(ring);
+}
+
+function drawRing(ring, stages, title, tag){
+  const {cx,cy,r}=ring;
+  // ring track
+  ctx.strokeStyle='rgba(70,82,105,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.stroke();
+  // directional arrows along ring
+  for(let i=0;i<4;i++){ const a=stageAngle(i)+0.3; const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+    ctx.save();ctx.translate(x,y);ctx.rotate(a+Math.PI/2);ctx.fillStyle='rgba(120,130,150,.5)';
+    ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-4,-4);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();ctx.restore();}
+  // stage nodes
+  stages.forEach((label,s)=>{
+    const pos=stagePos(ring,s);
+    const cols=['56,189,248','251,191,36','34,211,238','239,68,68'];
+    ctx.fillStyle=`rgba(${cols[s]},.18)`;ctx.strokeStyle=`rgba(${cols[s]},.8)`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(pos.x,pos.y,16,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle=`rgb(${cols[s]})`;ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+    // label outside
+    const a=stageAngle(s); const lx=cx+Math.cos(a)*(r+38), ly=cy+Math.sin(a)*(r+38);
+    ctx.fillText(label, lx, ly+3);
+  });
+  // collector reservoir at center
+  const fill=Math.min(1,ring.collector);
+  ctx.strokeStyle='rgba(34,211,238,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,26,0,7);ctx.stroke();
+  ctx.fillStyle='rgba(34,211,238,.5)';ctx.beginPath();ctx.arc(cx,cy,26*fill,0,7);ctx.fill();
+  ctx.fillStyle='#22d3ee';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(ring.real?'Patricia':'context', cx, cy-2);
+  ctx.fillText(ring.collector.toFixed(2), cx, cy+10);
+  // packets traveling between stages
+  ring.packets.forEach(p=>{
+    const from=stagePos(ring,p.s), to=stagePos(ring,(p.s+1)%4);
+    // arc interpolation along the circle
+    const a0=stageAngle(p.s), a1=stageAngle((p.s+1)%4 || 4); // ensure forward
+    let a1f=a0 + (Math.PI*2/4)*p.t;
+    const x=cx+Math.cos(a1f)*r, y=cy+Math.sin(a1f)*r;
+    ctx.fillStyle=`rgba(${p.col},.95)`;ctx.beginPath();ctx.arc(x,y,4+p.e*5,0,7);ctx.fill();
+    // shed sparkle when leaving climb
+    if(p.s===1 && p.t<0.3){ctx.fillStyle=`rgba(236,72,153,${1-p.t/0.3})`;ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fill();}
+  });
+  // title + tag
+  ctx.fillStyle='#c7d2fe';ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(title, cx, cy-r-44);
+  ctx.fillStyle=ring.real?'#22c55e':'#c7a3ff';ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText(tag, cx, cy-r-30);
+}
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze){ stepRing(L,dt); stepRing(Rr,dt); }
+  ctx.clearRect(0,0,W,H);
+
+  // mapping arrows between the two rings (the analogy, drawn AS analogy)
+  const maps=[['|0⟩ ground','prompt'],['climb · shed','generate'],['Patricia','context pool'],['safety gate','filter/align']];
+  ctx.strokeStyle='rgba(199,163,255,.18)';ctx.setLineDash([3,5]);ctx.lineWidth=1;
+  for(let s=0;s<4;s++){const lp=stagePos(L,s),rp=stagePos(Rr,s);
+    ctx.beginPath();ctx.moveTo(lp.x,lp.y);ctx.lineTo(rp.x,rp.y);ctx.stroke();}
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(199,163,255,.4)';ctx.font='8px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText('structural mapping (analogy, not identity)', W*0.5, H*0.46);
+
+  drawRing(L, STAGES_L, 'TRANSMON RING', 'physics · conservation real');
+  drawRing(Rr, STAGES_R, 'PREDICTIVE-TEXT RING', 'hypothesis · parallel structure');
+
+  // conservation readouts
+  const Ltot=L.packets.reduce((a,p)=>a+p.e,0)+L.collector;
+  cap.innerHTML=`<div class="lab">TRANSMON RING <span style="color:#22c55e">real</span></div>`+
+    `<div class="row"><span>crossings</span><b>${L.crossings}</b></div>`+
+    `<div class="row"><span>collector</span><b style="color:#22d3ee">${L.collector.toFixed(2)}</b></div>`+
+    `<div class="row"><span>recycled in</span><b style="color:#22c55e">${L.recycled.toFixed(2)}</b></div>`+
+    `<div class="row"><span>reflected back</span><b style="color:#ef4444">${L.reflected.toFixed(2)}</b></div>`+
+    `<div class="lab">PREDICTIVE RING <span style="color:#c7a3ff">hyp</span></div>`+
+    `<div class="row"><span>crossings</span><b>${Rr.crossings}</b></div>`+
+    `<div class="row"><span>context pool</span><b style="color:#22d3ee">${Rr.collector.toFixed(2)}</b></div>`+
+    `<div class="row"><span>recycled in</span><b style="color:#22c55e">${Rr.recycled.toFixed(2)}</b></div>`+
+    `<div class="lab">GATE</div>`+
+    `<div class="row"><span>strictness</span><b style="color:#ef4444">${(S.gate*100).toFixed(0)}%</b></div>`+
+    `<div class="row"><span>fail → </span><b>reflect to collector</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">Nothing leaves either loop: shed → collected → gated → recycled or reflected. Strict gate ⇒ collector pressure rises (energy backs up in Patricia). The left ring's conservation is physics; the right ring is the same bookkeeping applied to the token loop as a model.</div>`;
+
+  requestAnimationFrame(frame);
+}
+addEventListener('resize',()=>{layout();});
+resize();layout();requestAnimationFrame(frame);
+
+$('drive').oninput=e=>{S.drive=+e.target.value/100;$('drivev').textContent=S.drive.toFixed(2);};
+$('gate').oninput=e=>{S.gate=+e.target.value/100;$('gatev').textContent=(S.gate*100).toFixed(0)+'%';};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+$('reset').onclick=()=>{L=null;Rr=null;layout();};
+</script>
+</body>
+</html>

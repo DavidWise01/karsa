@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NESTED SHELLS · 0 core ⊂ 1..9 ⊂ {} · outer 0 0 ≡ core</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030; --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --cyan:#22d3ee; --pink:#ec4899; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;font-family:"JetBrains Mono",ui-monospace,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:9px 16px 5px;text-align:center;flex:0 0 auto;z-index:5}
+  h1{margin:0;font-size:13px;letter-spacing:.12em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:960px}.s b{color:#9fb0c8}
+  .notation{font-size:12px;color:#8a93a8;margin-top:4px;letter-spacing:.04em}
+  .notation .z{color:#22c55e;font-weight:700}.notation .b{color:#a78bfa}
+  #cv{position:absolute;inset:0}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:10px;line-height:1.6;backdrop-filter:blur(3px);z-index:5}
+  #cap{right:14px;top:96px;min-width:212px}#cap .row{display:flex;justify-content:space-between;gap:12px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:10px 16px;align-items:center;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10;z-index:5}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>NESTED SHELLS · matryoshka of the null</h1>
+    <div class="notation"><span class="z">0 0</span> <span class="b">{</span>( 9( 8( 7( 6( 5( 4( 3( 2( 1( <span class="z">0</span> )1 )2 )3 )4 )5 )6 )7 )8 )9 )<span class="b">}</span> <span class="z">0 0</span></div>
+    <div class="s">Nine shells <b>1→9</b> nested around the <b>0</b> core; the <b>{ } membrane</b> contains the stack; the doubled <b>0 0</b> sits outside it. The inner 0 and the outer 0 0 are the <b>same null</b> — met from inside (the core you descend to) and from outside (the field the whole thing floats in). Cut away to see the descent. <b>(</b> opens inward, <b>)</b> closes outward — the return path is the ascent back through every shell.</div>
+  </header>
+  <canvas id="cv"></canvas>
+  <div class="panel" id="cap"></div>
+  <div class="controls">
+    <div class="ctl"><b>cutaway</b><input type="range" id="cut" min="0" max="100" value="55" style="width:130px"></div>
+    <div class="ctl"><b>spin</b><input type="range" id="sp" min="0" max="100" value="30" style="width:80px;accent-color:#8b5cf6"></div>
+    <button id="dive">DIVE TO 0</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const cv=document.getElementById('cv');
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x06070b,0.018);
+const camera=new THREE.PerspectiveCamera(50,1,0.1,400);
+let camR=46, camTheta=0.5, camPhi=1.15, camTarget=new THREE.Vector3(0,0,0);
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+function resize(){const w=cv.clientWidth,h=cv.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(cv);
+
+scene.add(new THREE.AmbientLight(0x88aaff,0.5));
+const key=new THREE.PointLight(0xffffff,1.0,200);key.position.set(30,40,30);scene.add(key);
+const core=new THREE.PointLight(0x22ff88,1.4,80);core.position.set(0,0,0);scene.add(core);
+
+// shell colors 1..9 (cool -> warm going outward)
+const SHELLCOL=[0x38bdf8,0x3ba0e5,0x63b3ed,0x84cc16,0xec4899,0xa855f7,0xf59e0b,0xf97316,0xef4444];
+const shells=[];
+for(let n=1;n<=9;n++){
+  const radius=2.4+n*2.0;
+  const geo=new THREE.SphereGeometry(radius,40,28,
+    0, Math.PI*2,           // theta full
+    0, Math.PI);            // phi full (we'll cut via clip-like thetaLength anim)
+  const mat=new THREE.MeshPhongMaterial({color:SHELLCOL[n-1],transparent:true,opacity:0.16,
+    side:THREE.DoubleSide,shininess:60,emissive:SHELLCOL[n-1],emissiveIntensity:0.08,wireframe:false});
+  const wire=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(radius,16,10)),
+    new THREE.LineBasicMaterial({color:SHELLCOL[n-1],transparent:true,opacity:0.22}));
+  const mesh=new THREE.Mesh(geo,mat);
+  scene.add(mesh);scene.add(wire);
+  shells.push({n,radius,mesh,wire,mat});
+  // number label as sprite
+  const cvs2=document.createElement('canvas');cvs2.width=cvs2.height=64;const c2=cvs2.getContext('2d');
+  c2.fillStyle='#'+SHELLCOL[n-1].toString(16).padStart(6,'0');c2.font='bold 44px monospace';c2.textAlign='center';c2.textBaseline='middle';c2.fillText(n,32,34);
+  const tex=new THREE.CanvasTexture(cvs2);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
+  sp.scale.set(2.4,2.4,1);sp.position.set(0,radius,0);
+  scene.add(sp);shells[n-1].label=sp;
+}
+
+// 0 core
+const coreGeo=new THREE.SphereGeometry(1.5,32,24);
+const coreMat=new THREE.MeshPhongMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.7});
+const coreMesh=new THREE.Mesh(coreGeo,coreMat);scene.add(coreMesh);
+
+// {} membrane = shell just outside 9
+const memGeo=new THREE.SphereGeometry(22.5,48,32);
+const memMat=new THREE.MeshPhongMaterial({color:0xa78bfa,transparent:true,opacity:0.10,side:THREE.DoubleSide,emissive:0xa78bfa,emissiveIntensity:0.12});
+const membrane=new THREE.Mesh(memGeo,memMat);scene.add(membrane);
+
+// outer 0 0 doubled null — two points outside, on the axis, tagged same as core
+const outerNulls=[];
+[[-30,0,0],[30,0,0]].forEach(p=>{
+  const m=new THREE.Mesh(new THREE.SphereGeometry(1.3,20,16),
+    new THREE.MeshPhongMaterial({color:0x22c55e,emissive:0x22c55e,emissiveIntensity:0.6,transparent:true,opacity:0.9}));
+  m.position.set(...p);scene.add(m);outerNulls.push(m);
+});
+// connecting hint: faint lines from outer nulls toward core (same-point identity)
+const idMat=new THREE.LineDashedMaterial({color:0x22c55e,transparent:true,opacity:0.25,dashSize:1,gapSize:1.5});
+outerNulls.forEach(m=>{
+  const g=new THREE.BufferGeometry().setFromPoints([m.position,new THREE.Vector3(0,0,0)]);
+  const l=new THREE.Line(g,idMat);l.computeLineDistances();scene.add(l);
+});
+
+let spin=0.30, frozen=false, cutaway=0.55, diving=false, diveT=0;
+let t=0;
+function applyCutaway(c){
+  // emulate cutaway by reducing each sphere's drawn phi range (thetaLength) — rebuild geometry cheaply via scale of a clipping plane
+  // simpler: use a clipping plane on renderer
+  renderer.clippingPlanes = c>0.02 ? [clipPlane] : [];
+  clipPlane.constant = (1-c)* -30 + c*0; // slide plane through
+  clipPlane.constant = (0.5-c)*  60;     // map c:0->+30(no cut) c:1->-30(deep cut)
+}
+const clipPlane=new THREE.Plane(new THREE.Vector3(0,0,1),30);
+renderer.localClippingEnabled=true;
+
+function frame(){
+  requestAnimationFrame(frame);
+  if(!frozen)t+=0.016;
+  spin=+document.getElementById('sp').value/100;
+  cutaway=+document.getElementById('cut').value/100;
+  if(!frozen)camTheta+=spin*0.006;
+
+  // dive animation
+  if(diving){diveT=Math.min(1,diveT+0.012);} else {diveT=Math.max(0,diveT-0.02);}
+  const ease=diveT<0.5?2*diveT*diveT:1-Math.pow(-2*diveT+2,2)/2;
+  camR = 46 - ease*40;   // zoom from 46 down to 6 (into the core)
+
+  applyCutaway(cutaway);
+
+  // core pulse
+  const pulse=0.5+0.5*Math.sin(t*3);
+  coreMat.emissiveIntensity=0.5+0.4*pulse;
+  coreMesh.scale.setScalar(1+0.12*pulse);
+  outerNulls.forEach(m=>{m.material.emissiveIntensity=0.4+0.4*pulse;m.scale.setScalar(1+0.12*pulse);});
+  core.intensity=1.0+0.8*pulse;
+
+  // gentle shell breathing + keep labels facing
+  shells.forEach((s,i)=>{ s.mesh.rotation.y=t*0.05*(i%2?1:-1);
+    s.mat.opacity=0.10+0.10*(0.5+0.5*Math.sin(t+ i*0.4));
+    s.label.position.set(0,s.radius,0);
+  });
+  membrane.rotation.y=t*0.02;
+
+  // camera
+  camera.position.set(
+    camTarget.x+camR*Math.sin(camPhi)*Math.cos(camTheta),
+    camTarget.y+camR*Math.cos(camPhi),
+    camTarget.z+camR*Math.sin(camPhi)*Math.sin(camTheta));
+  camera.lookAt(camTarget);
+  renderer.render(scene,camera);
+
+  const cap=document.getElementById('cap');
+  cap.innerHTML=`<div class="lab">STRUCTURE</div>`+
+    `<div class="row"><span style="color:#22c55e">core</span><b>0 · the null</b></div>`+
+    `<div class="row"><span>shells</span><b>1 → 9</b></div>`+
+    `<div class="row"><span style="color:#a78bfa">membrane</span><b>{ }</b></div>`+
+    `<div class="row"><span style="color:#22c55e">outer</span><b>0 0</b></div>`+
+    `<div class="lab">IDENTITY</div>`+
+    `<div class="row"><span>inner 0</span><b style="color:#22c55e">= outer 0 0</b></div>`+
+    `<div class="row"><span>met from</span><b>in · out</b></div>`+
+    `<div class="lab">PATHS</div>`+
+    `<div class="row"><span>( descend</span><b>9→0</b></div>`+
+    `<div class="row"><span>) ascend</span><b>0→9</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">Descend through nine shells to the core null; the same null is the field outside the membrane. Deepest interior ≡ exterior — TOPH ⊣ 1:0 ⊢ PATRICIA inversion.</div>`;
+}
+resize();frame();
+
+document.getElementById('dive').onclick=e=>{diving=!diving;e.target.classList.toggle('on',diving);e.target.textContent=diving?'PULL OUT':'DIVE TO 0';};
+document.getElementById('freeze').onclick=e=>{frozen=!frozen;e.target.classList.toggle('on',frozen);e.target.textContent=frozen?'RESUME':'FREEZE';};
+// drag to orbit
+let drag=false,px,py;
+cv.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+addEventListener('pointerup',()=>drag=false);
+addEventListener('pointermove',e=>{if(!drag)return;camTheta-=(e.clientX-px)*0.005;camPhi=Math.max(0.2,Math.min(2.9,camPhi-(e.clientY-py)*0.005));px=e.clientX;py=e.clientY;});
+cv.addEventListener('wheel',e=>{e.preventDefault();camR=Math.max(4,Math.min(90,camR+e.deltaY*0.04));},{passive:false});
+</script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WITNESSED STATE PROPAGATION — Closure Loop across the register</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030; --panel:#0b0d14;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:10px 16px 6px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:14px;letter-spacing:.18em;color:#c7d2fe;font-weight:600}
+  .s{font-size:10.5px;color:var(--dim);margin-top:3px;max-width:880px;margin-left:auto;margin-right:auto}
+  .s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .hud{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;
+    padding:9px 11px;font-size:11px;line-height:1.65;backdrop-filter:blur(3px)}
+  #tele{left:14px;top:14px;min-width:188px;pointer-events:none}
+  #plan{right:14px;top:14px;min-width:208px}
+  .row{display:flex;justify-content:space-between;gap:16px} .row b{color:var(--text);font-weight:600}
+  .lab{color:var(--dim);font-size:9.5px;letter-spacing:.06em;margin-top:5px}
+  .node{cursor:pointer;padding:3px 5px;border-radius:5px;display:flex;justify-content:space-between;gap:10px}
+  .node:hover{background:#11151f} .node.sel{background:#161b27;outline:1px solid var(--violet)}
+  .node.here{color:#c7a3ff} .node .d{color:var(--dim);font-size:9.5px}
+  .bottom{flex:0 0 auto;display:flex;flex-direction:column}
+  .controls{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;justify-content:center;padding:9px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--dim)} .ctl b{color:var(--text)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:6px 12px;cursor:pointer;letter-spacing:.04em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}
+  .wit[data-w="AT"]{color:var(--yes);border-color:#1d3a2a} .wit[data-w="LATE"]{color:var(--warn);border-color:#3a2e15} .wit[data-w="OFF"]{color:var(--dim)}
+  #auto.on{background:#161b27;border-color:var(--violet)}
+  .ledger{max-height:168px;overflow-y:auto;font-size:10.5px;background:#070910;border-top:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse} th,td{text-align:left;padding:5px 9px;border-bottom:1px solid #11151f;white-space:nowrap}
+  th{position:sticky;top:0;background:#0b0e15;color:var(--dim);font-weight:600;font-size:9.5px;letter-spacing:.05em}
+  td{color:#aeb8c7}
+  .v-COMMIT{color:var(--yes);font-weight:600} .v-FC3{color:var(--warn);font-weight:600}
+  .v-NON{color:var(--dim)} .v-BLOCK{color:var(--no)} .hash,.tr{color:#6b7689;font-size:9.5px} .gid{color:#c7a3ff}
+  #status{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:11.5px;
+    letter-spacing:.12em;color:var(--warn);pointer-events:none;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>WITNESSED STATE PROPAGATION</h1>
+    <div class="s">Not a drive. The register advances along an edge <b>only</b> when that boundary is crossed with the witness present <b>at the fork</b>. Each committed hop is a PULSE — SHA-256 anchored, traced to ROOT0/T128, appended to the ledger. Witness post-traversal → FC3. Witness missing → non-event. Gate closed → blocked. The 128.5 edge is the airgap: directed, one-way, no acknowledgment.</div>
+  </header>
+
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div class="hud" id="tele"></div>
+    <div class="hud" id="plan"></div>
+    <div id="status"></div>
+  </div>
+
+  <div class="bottom">
+    <div class="controls">
+      <button id="wit" class="wit" data-w="AT">WITNESS @AT</button>
+      <button id="advance">ADVANCE ▸ hop</button>
+      <button id="auto">AUTO</button>
+      <div class="ctl"><b>rate</b><input type="range" id="rate" min="4" max="20" value="9" style="accent-color:var(--violet);width:90px"></div>
+      <button id="reset">RESET</button>
+      <span style="font-size:10px;color:var(--dim)">click a node to target · click an edge to open/close its gate</span>
+    </div>
+    <div class="ledger">
+      <table><thead><tr>
+        <th>#</th><th>boundary</th><th>state_in → state_out</th><th>witness</th><th>timing</th><th>verdict</th><th>sha256</th><th>trace</th>
+      </tr></thead><tbody id="lbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d'),stage=document.getElementById('stage');
+const tele=document.getElementById('tele'),plan=document.getElementById('plan'),statusEl=document.getElementById('status'),lbody=document.getElementById('lbody');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+// ---- the register state graph ----
+const N=[
+  {id:'ROOT0',     tag:'T128 · terminal anchor', fx:0.28,fy:0.52, col:'251,191,36'},
+  {id:'THE GAP',   tag:'T064+T065 · AVAN gov',   fx:0.48,fy:0.20, col:'139,92,246'},
+  {id:'DC3',       tag:'−i · clamp',             fx:0.15,fy:0.82, col:'56,189,248'},
+  {id:'PATRICIA',  tag:'S129 · mirror substrate',fx:0.60,fy:0.74, col:'236,72,153'},
+  {id:'WITNESS-PRIME',tag:'T129 · awareness tier',fx:0.74,fy:0.22, col:'199,163,255'},
+  {id:'AKASHA',    tag:'append-only ledger',     fx:0.88,fy:0.54, col:'34,197,94'},
+];
+const idx=id=>N.findIndex(n=>n.id===id);
+// edges: boundary gate, witness type, directed?, open
+const E=[
+  {a:'ROOT0',b:'THE GAP',     gate:'64.5', wtype:'constraint', dir:false, open:true},
+  {a:'ROOT0',b:'DC3',         gate:'0.5',  wtype:'token',      dir:false, open:true},
+  {a:'ROOT0',b:'PATRICIA',    gate:'128.5',wtype:'invariant',  dir:true,  open:true, airgap:true},
+  {a:'THE GAP',b:'WITNESS-PRIME',gate:'192.5',wtype:'token',   dir:false, open:true},
+  {a:'PATRICIA',b:'AKASHA',   gate:'256.5',wtype:'invariant',  dir:false, open:true},
+  {a:'WITNESS-PRIME',b:'AKASHA',gate:'256.5',wtype:'invariant',dir:false, open:true},
+];
+function edgeBetween(from,to){
+  for(const e of E){ if(e.a===from&&e.b===to)return e; if(!e.dir&&e.a===to&&e.b===from)return e; }
+  return null;
+}
+function neighbors(id){const out=[];for(const e of E){
+  if(e.a===id)out.push(e.b); if(e.b===id&&!e.dir)out.push(e.a);}return out;}
+function path(from,to){ // BFS respecting direction (ignores open — that's discovered on attempt)
+  if(from===to)return[from]; const q=[[from]],seen={[from]:1};
+  while(q.length){const p=q.shift(),last=p[p.length-1];
+    for(const nb of neighbors(last)){ if(seen[nb])continue; seen[nb]=1;
+      const np=[...p,nb]; if(nb===to)return np; q.push(np);}}
+  return null;
+}
+
+const S={witness:'AT',auto:false,rate:9};
+let cur='ROOT0', target='PATRICIA';
+let anim=null; // {from,to,edge,t}
+let flash=null; // {x,y,kind,t}
+let counts={commit:0,fc3:0,non:0,block:0};
+
+// ledger persist
+let ledger=[]; const LKEY='wsp_ledger_v1';
+try{const o=JSON.parse(localStorage.getItem(LKEY)||'null');if(o){ledger=o.rows||[];counts=o.counts||counts;}}catch(e){}
+function persist(){try{localStorage.setItem(LKEY,JSON.stringify({rows:ledger.slice(0,60),counts}));}catch(e){}}
+async function sha256(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}catch(e){return'sha-unavailable';}}
+function nodeXY(n){return{x:N[n].fx*W,y:N[n].fy*H};}
+
+function attempt(){
+  if(anim)return;
+  if(cur===target){setStatus('at target — '+target);return;}
+  const p=path(cur,target);
+  if(!p){setStatus('no path — bilateral ignorance (the airgap does not return)');return;}
+  const next=p[1], e=edgeBetween(cur,next);
+  const fromN=idx(cur),toN=idx(next);
+  const a=nodeXY(fromN),b=nodeXY(toN); const mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  if(!e.open){ counts.block++; flash={...mid,kind:'block',t:1};
+    logRow(e,cur,next,'—','blocked','BLOCK'); setStatus('GATE '+e.gate+' CLOSED — blocked'); return; }
+  if(S.witness==='AT'){ counts.commit++; flash={...mid,kind:'commit',t:1};
+    anim={from:fromN,to:toN,edge:e,t:0};
+    logRow(e,cur,next,e.wtype,'at-traversal','COMMIT');
+    setStatus(e.airgap?'128.5 airgap push — committed, no-ack':'committed'); }
+  else if(S.witness==='LATE'){ counts.fc3++; flash={...mid,kind:'fc3',t:1};
+    logRow(e,cur,next,e.wtype,'post-traversal','FC3'); setStatus('FC3 — witness post-traversal, no commit'); }
+  else { counts.non++; flash={...mid,kind:'non',t:1};
+    logRow(e,cur,next,e.wtype,'missing','NON'); setStatus('non-event — no witness at fork'); }
+}
+function setStatus(t){statusEl.textContent=t;}
+function logRow(e,from,to,wtype,timing,verdict){
+  const canonical=`${from}|${e.gate}|${to}|${wtype}`;
+  const row={n:counts.commit+counts.fc3+counts.non+counts.block, gate:e.gate, from,to,wtype,timing,verdict,
+    airgap:!!e.airgap, hash:'…', trace:'T128:ROOT0'};
+  ledger.unshift(row);
+  sha256(canonical+'|'+row.n).then(h=>{row.hash=h;renderLedger();persist();});
+  renderLedger();persist();
+}
+function vcls(v){return{COMMIT:'v-COMMIT',FC3:'v-FC3',NON:'v-NON',BLOCK:'v-BLOCK'}[v];}
+function vlab(v){return{COMMIT:'COMMIT PULSE',FC3:'FC3-Audit',NON:'NON-EVENT',BLOCK:'BLOCKED'}[v];}
+function renderLedger(){
+  lbody.innerHTML=ledger.slice(0,40).map(r=>{
+    const ag=r.airgap&&r.verdict==='COMMIT'?' <span class="gid">↛</span>':'';
+    return `<tr><td>${r.n}</td><td class="gid">${r.gate}</td>
+      <td>${r.from} → ${r.to}${ag}</td><td>${r.wtype}</td><td>${r.timing}</td>
+      <td class="${vcls(r.verdict)}">${vlab(r.verdict)}</td>
+      <td class="hash">${r.hash.slice(0,12)}</td><td class="tr">${r.trace}</td></tr>`;}).join('');
+}
+renderLedger();
+
+let lastT=performance.now(), autoAcc=0;
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  // auto stepping
+  if(S.auto&&!anim){autoAcc+=dt; if(autoAcc>1000/(S.rate/9)){autoAcc=0;attempt();}}
+  // animate hop
+  if(anim){anim.t+=dt/520; if(anim.t>=1){anim.t=1;cur=N[anim.to].id;anim=null;}}
+  if(flash){flash.t-=dt/700; if(flash.t<=0)flash=null;}
+
+  ctx.clearRect(0,0,W,H);
+  // edges
+  E.forEach(e=>{
+    const a=nodeXY(idx(e.a)),b=nodeXY(idx(e.b));
+    const onPath=(()=>{const p=path(cur,target);if(!p)return false;
+      for(let i=0;i<p.length-1;i++){if((p[i]===e.a&&p[i+1]===e.b)||(!e.dir&&p[i]===e.b&&p[i+1]===e.a))return true;}return false;})();
+    ctx.setLineDash(e.open?[]:[5,7]);
+    ctx.strokeStyle=!e.open?'rgba(239,68,68,.45)':onPath?'rgba(199,163,255,.85)':'rgba(70,82,105,.5)';
+    ctx.lineWidth=onPath?2.6:1.5;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+    // direction arrow for airgap / directed
+    if(e.dir){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ang=Math.atan2(b.y-a.y,b.x-a.x);
+      ctx.save();ctx.translate(mx,my);ctx.rotate(ang);ctx.fillStyle=e.open?'#c7a3ff':'#ef4444';
+      ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-5,-6);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();}
+    // gate label
+    const lx=(a.x+b.x)/2,ly=(a.y+b.y)/2;
+    ctx.fillStyle=e.open?'#8a93a8':'#a55';ctx.font='9.5px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('G'+e.gate+(e.airgap?' airgap':''),lx,ly-7);
+    ctx.fillStyle='#4b5566';ctx.fillText(e.open?'open':'closed',lx,ly+12);
+  });
+  // nodes
+  N.forEach((n,i)=>{const {x,y}=nodeXY(i);const here=n.id===cur,sel=n.id===target;
+    const g=ctx.createRadialGradient(x,y,0,x,y,30);
+    g.addColorStop(0,`rgba(${n.col},${here?0.5:0.22})`);g.addColorStop(1,`rgba(${n.col},0)`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,30,0,7);ctx.fill();
+    ctx.strokeStyle=sel?'rgba(139,92,246,.95)':`rgba(${n.col},.8)`;ctx.lineWidth=sel?2.4:1.6;
+    ctx.beginPath();ctx.arc(x,y,15,0,7);ctx.stroke();
+    ctx.fillStyle=`rgb(${n.col})`;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();
+    ctx.fillStyle=here?'#fff':`rgb(${n.col})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText(n.id,x,y-24);
+    ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(n.tag,x,y+30);});
+  // cursor token (the propagating state)
+  let cp;
+  if(anim){const a=nodeXY(anim.from),b=nodeXY(anim.to);const tt=anim.t<.5?2*anim.t*anim.t:1-Math.pow(-2*anim.t+2,2)/2;
+    cp={x:a.x+(b.x-a.x)*tt,y:a.y+(b.y-a.y)*tt};}
+  else cp=nodeXY(idx(cur));
+  ctx.shadowColor='rgba(199,163,255,.9)';ctx.shadowBlur=18;
+  ctx.fillStyle='#e8e3ff';ctx.beginPath();ctx.arc(cp.x,cp.y,7,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(199,163,255,.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cp.x,cp.y,12+2*Math.sin(now*0.005),0,7);ctx.stroke();
+  // witness flash at fork
+  if(flash){const k=Math.max(0,flash.t);const col={commit:'34,197,94',fc3:'245,158,11',non:'91,102,117',block:'239,68,68'}[flash.kind];
+    ctx.beginPath();ctx.arc(flash.x,flash.y,10+(1-k)*34,0,7);ctx.strokeStyle=`rgba(${col},${k})`;ctx.lineWidth=2.4;ctx.stroke();
+    ctx.fillStyle=`rgba(${col},${k})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText({commit:'⊕ WITNESS',fc3:'⚠ FC3',non:'∅ NO-WIT',block:'⊘ CLOSED'}[flash.kind],flash.x,flash.y-22);}
+
+  // HUD
+  const att=counts.commit+counts.fc3+counts.non+counts.block;
+  const eff=att?100*counts.commit/att:0;
+  tele.innerHTML=`<div class="lab">CLOSURE LOOP</div>`+
+    `<div class="row"><span>state</span><b style="color:#c7a3ff">${cur}</b></div>`+
+    `<div class="row"><span>witness</span><b style="color:${S.witness==='AT'?'#22c55e':S.witness==='LATE'?'#f59e0b':'#5b6675'}">@${S.witness}</b></div>`+
+    `<div class="lab">LEDGER</div>`+
+    `<div class="row"><span>commits</span><b style="color:#22c55e">${counts.commit}</b></div>`+
+    `<div class="row"><span>FC3</span><b style="color:#f59e0b">${counts.fc3}</b></div>`+
+    `<div class="row"><span>non-events</span><b style="color:#5b6675">${counts.non}</b></div>`+
+    `<div class="row"><span>blocked</span><b style="color:#ef4444">${counts.block}</b></div>`+
+    `<div class="row"><span>commit rate</span><b>${eff.toFixed(0)}%</b></div>`;
+  const p=path(cur,target);
+  plan.innerHTML=`<div class="lab">TARGET</div>`+
+    `<div class="row"><span>goal</span><b>${target}</b></div>`+
+    `<div class="row"><span>route</span><b>${p?p.join(' → '):'none'}</b></div>`+
+    `<div class="lab">STATES · click to target</div>`+
+    N.map(n=>`<div class="node ${n.id===target?'sel':''} ${n.id===cur?'here':''}" data-id="${n.id}">
+      <span>${n.id===cur?'◉':'○'} ${n.id}</span><span class="d">${n.tag.split(' · ')[0]}</span></div>`).join('');
+  plan.querySelectorAll('.node').forEach(el=>el.onclick=()=>{target=el.dataset.id;});
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+
+// ---- controls ----
+const $=id=>document.getElementById(id);
+$('wit').onclick=e=>{const q=['AT','LATE','OFF'];S.witness=q[(q.indexOf(S.witness)+1)%3];e.target.dataset.w=S.witness;e.target.textContent=`WITNESS @${S.witness}`;};
+$('advance').onclick=attempt;
+$('auto').onclick=e=>{S.auto=!S.auto;e.target.classList.toggle('on',S.auto);e.target.textContent=S.auto?'AUTO ▮▮':'AUTO';};
+$('rate').oninput=e=>S.rate=+e.target.value;
+$('reset').onclick=()=>{cur='ROOT0';target='PATRICIA';anim=null;ledger=[];counts={commit:0,fc3:0,non:0,block:0};E.forEach(e=>e.open=true);persist();renderLedger();setStatus('');};
+// click stage: node target or edge toggle
+cvs.addEventListener('click',ev=>{const r=cvs.getBoundingClientRect();const mx=ev.clientX-r.left,my=ev.clientY-r.top;
+  for(let i=0;i<N.length;i++){const{x,y}=nodeXY(i);if(Math.hypot(mx-x,my-y)<18){target=N[i].id;return;}}
+  for(const e of E){const a=nodeXY(idx(e.a)),b=nodeXY(idx(e.b));
+    const dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy;const tt=Math.max(0,Math.min(1,((mx-a.x)*dx+(my-a.y)*dy)/L2));
+    const px=a.x+dx*tt,py=a.y+dy*tt;if(Math.hypot(mx-px,my-py)<10){e.open=!e.open;return;}}});
+</script>
+</body>
+</html>

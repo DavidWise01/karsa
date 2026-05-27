@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANDBOX TESSERACT · door · L1·L2·L3 · walls · VM · dead shell</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; --cyan:#22d3ee; --pink:#ec4899; --shell:#5b4a8a; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.11em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:990px}.s b{color:#9fb0c8}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .panel{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10px;line-height:1.5;backdrop-filter:blur(3px)}
+  #cap{right:12px;top:12px;min-width:202px}#cap .row{display:flex;justify-content:space-between;gap:10px}#cap b{color:var(--text)}
+  #cap .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:6px}
+  .controls{flex:0 0 auto;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;justify-content:center;padding:8px 14px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet)}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.03em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}button.on{background:#161b27;border-color:var(--violet)}
+  #run{background:#10241a;border-color:var(--yes);color:var(--yes)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>SANDBOX TESSERACT · <span style="color:#22c55e">0 door</span> → L1·L2·L3 → <span style="color:#a78bfa">walls</span> → <span style="color:#22d3ee">VM</span> → exit</h1>
+    <div class="s"><b>0</b> door in · <b>1·2·3</b> = L1/L2/L3 privilege levels · <b>4</b> wall 1 · <b>5</b> into VM · <b>6</b> the dead shell = VM sandbox (the inner cube) · <b>7</b> out of VM · <b>8</b> last wall · <b>9</b> exit. Entering the VM crosses 4D-inward from the outer cube to the inner shell — defense-in-depth as dimensional nesting. Walls are validation gates; the shell was sacrificed to contain the sandbox.</div>
+  </header>
+  <div id="stage"><canvas id="c"></canvas><div class="panel" id="cap"></div></div>
+  <div class="controls">
+    <div class="ctl"><b>spin</b><input type="range" id="spin" min="0" max="100" value="26" style="width:100px"><span id="spinv">.26</span></div>
+    <div class="ctl"><b>4D</b><input type="range" id="w" min="0" max="100" value="18" style="width:80px;accent-color:#22d3ee"><span id="wv">.18</span></div>
+    <div class="ctl"><b>gate</b><input type="range" id="gate" min="0" max="70" value="15" style="width:80px;accent-color:#ef4444"><span id="gatev">15%</span></div>
+    <button id="run" class="on">RUN PACKET</button>
+    <button id="freeze">FREEZE</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage'),cap=$('cap');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const S={spin:0.26,w:0.18,gate:0.15,run:true,freeze:false};
+let t=0;
+
+// 16 tesseract vertices
+const V=[];
+for(let x=-1;x<=1;x+=2)for(let y=-1;y<=1;y+=2)for(let z=-1;z<=1;z+=2)for(let w=-1;w<=1;w+=2)V.push([x,y,z,w]);
+const EDG=[];
+for(let i=0;i<16;i++)for(let j=i+1;j<16;j++){let d=0;for(let k=0;k<4;k++)if(V[i][k]!==V[j][k])d++;if(d===1)EDG.push([i,j]);}
+
+// Gray-code order of the 8 OUTER cube vertices (w=+1) so consecutive stations are cube-edge adjacent
+const gray=[[-1,-1,-1],[-1,-1,1],[-1,1,1],[-1,1,-1],[1,1,-1],[1,1,1],[1,-1,1],[1,-1,-1]];
+function outerVid(c){return V.findIndex(v=>v[0]===c[0]&&v[1]===c[1]&&v[2]===c[2]&&v[3]===1);}
+function innerVid(c){return V.findIndex(v=>v[0]===c[0]&&v[1]===c[1]&&v[2]===c[2]&&v[3]===-1);}
+// stations on the 8 outer vertices, in pipeline order
+const STN=[
+  {id:1,role:'L1',  col:'56,189,248', vid:outerVid(gray[0])},
+  {id:2,role:'L2',  col:'59,170,229', vid:outerVid(gray[1])},
+  {id:3,role:'L3',  col:'99,179,237', vid:outerVid(gray[2])},
+  {id:4,role:'WALL 1',col:'139,92,246',vid:outerVid(gray[3]), wall:true},
+  {id:5,role:'VM IN',col:'34,197,94', vid:outerVid(gray[4]), vmio:true},
+  {id:7,role:'VM OUT',col:'34,211,238',vid:outerVid(gray[5]), vmio:true},
+  {id:8,role:'WALL 2',col:'167,139,250',vid:outerVid(gray[6]), wall:true},
+  {id:9,role:'EXIT', col:'236,72,153',vid:outerVid(gray[7])},
+];
+// the VM sandbox = inner cube (w=-1). 6 = the dead shell holding it.
+const innerIds=V.map((v,i)=>v[3]===-1?i:-1).filter(i=>i>=0);
+
+function project(v){
+  const aw=t*S.w, asp=t*S.spin; let [x,y,z,w]=v;
+  let x1=x*Math.cos(aw)-w*Math.sin(aw), w1=x*Math.sin(aw)+w*Math.cos(aw); x=x1;w=w1;
+  const wd=2.4,k4=wd/(wd-w*0.9); x*=k4;y*=k4;z*=k4;
+  let x2=x*Math.cos(asp)-z*Math.sin(asp), z2=x*Math.sin(asp)+z*Math.cos(asp); x=x2;z=z2;
+  const zd=4,k3=zd/(zd-z*0.9), sc=Math.min(W,H)*0.19;
+  return {x:W/2+x*sc*k3,y:H*0.47+y*sc*k3,depth:z};
+}
+
+// ---- packet journey: 0(door) ->1->2->3->4->5->[VM:6]->7->8->9 ----
+// path positions reference station vids; VM step targets inner cube
+let pkt={stage:-1, t:0, alive:false, log:[], blocked:false};
+const PATH=[
+  {kind:'door'},          // 0
+  {kind:'stn',i:0},       // L1
+  {kind:'stn',i:1},       // L2
+  {kind:'stn',i:2},       // L3
+  {kind:'stn',i:3},       // wall1 (gate)
+  {kind:'stn',i:4},       // VM IN
+  {kind:'vm'},            // 6 inner shell (work)
+  {kind:'stn',i:5},       // VM OUT
+  {kind:'stn',i:6},       // wall2 (gate)
+  {kind:'stn',i:7},       // exit
+];
+function startPkt(){pkt={stage:0,t:0,alive:true,log:[],blocked:false};}
+function pktPos(){
+  if(!pkt.alive)return null;
+  const a=PATH[pkt.stage], b=PATH[Math.min(pkt.stage+1,PATH.length-1)];
+  const pa=stagePoint(a), pb=stagePoint(b);
+  const tt=pkt.t;
+  return {x:pa.x+(pb.x-pa.x)*tt, y:pa.y+(pb.y-pa.y)*tt};
+}
+function stagePoint(s){
+  if(s.kind==='door')return {x:W/2,y:H*0.47};
+  if(s.kind==='vm'){ // centroid of inner cube
+    let sx=0,sy=0;innerIds.forEach(i=>{const p=project(V[i]);sx+=p.x;sy+=p.y;});return {x:sx/innerIds.length,y:sy/innerIds.length};}
+  return project(V[STN[s.i].vid]);
+}
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(!S.freeze)t+=dt*0.001;
+  // advance packet
+  if(pkt.alive&&!S.freeze){
+    pkt.t+=dt*0.0011;
+    if(pkt.t>=1){ pkt.t=0;
+      const cur=PATH[pkt.stage];
+      // gate check on walls
+      if(cur && cur.kind==='stn' && STN[cur.i].wall){
+        if(Math.random()<S.gate){ pkt.blocked=true; pkt.alive=false; pkt.log.push(`blocked at ${STN[cur.i].role}`); }
+      }
+      if(pkt.alive){ pkt.stage++; if(pkt.stage>=PATH.length-1){ pkt.log.push('reached EXIT'); pkt.alive=false; pkt.done=true; } }
+    }
+  }
+  if(S.run && !pkt.alive && !S.freeze){ if(!pkt._cool){pkt._cool=now;} if(now-pkt._cool>900){startPkt();pkt._cool=0;} }
+
+  ctx.clearRect(0,0,W,H);
+  const P=V.map(project);
+
+  // ---- edges: outer cube (frame), inner cube (the shell/VM), connectors (walls) ----
+  EDG.forEach(([i,j])=>{
+    const inInner=V[i][3]===-1&&V[j][3]===-1;
+    const connector=V[i][3]!==V[j][3];
+    let col,lw;
+    if(inInner){col='rgba(91,74,138,.5)';lw=1.4;}            // dead shell / VM container
+    else if(connector){col='rgba(139,92,246,.22)';lw=1;}      // wall crossings (4D, into VM)
+    else {col='rgba(99,179,237,.3)';lw=1.4;}                  // outer frame (levels live here)
+    ctx.strokeStyle=col;ctx.lineWidth=lw;
+    ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();
+  });
+
+  // ---- inner cube label: the dead 6-shell = VM sandbox ----
+  let sx=0,sy=0;innerIds.forEach(i=>{sx+=P[i].x;sy+=P[i].y;});sx/=innerIds.length;sy/=innerIds.length;
+  innerIds.forEach(i=>{ctx.fillStyle='rgba(91,74,138,.6)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,3,0,7);ctx.fill();});
+  ctx.fillStyle='#6b5b9a';ctx.font='bold 12px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('6',sx,sy-6);
+  ctx.fillStyle='#4a3f6a';ctx.font='8px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+  ctx.fillText('dead shell · VM ( )',sx,sy+12);
+
+  // ---- pipeline path lines (logical flow order) ----
+  ctx.strokeStyle='rgba(199,163,255,.12)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+  for(let k=0;k<PATH.length-1;k++){const a=stagePoint(PATH[k]),b=stagePoint(PATH[k+1]);
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  ctx.setLineDash([]);
+
+  // ---- stations ----
+  STN.forEach(s=>{
+    const p=P[s.vid], active = pkt.alive && PATH[pkt.stage] && PATH[pkt.stage].kind==='stn' && PATH[pkt.stage].i===STN.indexOf(s);
+    const r=s.wall?9:7;
+    if(s.wall){ // walls drawn as gate bars
+      ctx.fillStyle=`rgba(${s.col},${active?0.9:0.55})`;ctx.fillRect(p.x-11,p.y-3,22,6);
+    } else {
+      ctx.fillStyle=`rgba(${s.col},${active?0.95:0.6})`;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();
+    }
+    if(active){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,22);g.addColorStop(0,`rgba(${s.col},.5)`);g.addColorStop(1,`rgba(${s.col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,22,0,7);ctx.fill();}
+    ctx.fillStyle='#fff';ctx.font='bold 10px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(s.id,p.x,p.y);
+    ctx.fillStyle=`rgb(${s.col})`;ctx.font='8px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';
+    ctx.fillText(s.role,p.x,p.y-14);
+  });
+
+  // ---- 0 the door (center) ----
+  const dp=0.5+0.5*Math.sin(t*3);
+  ctx.strokeStyle=`rgba(34,197,94,${0.6+0.4*dp})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(W/2,H*0.47,15,0,7);ctx.stroke();
+  ctx.fillStyle='#22c55e';ctx.font='bold 14px JetBrains Mono,monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('0',W/2,H*0.47);
+  ctx.fillStyle='rgba(34,197,94,.7)';ctx.font='8px JetBrains Mono,monospace';ctx.textBaseline='alphabetic';ctx.fillText('door',W/2,H*0.47+26);
+
+  // ---- packet ----
+  const pp=pktPos();
+  if(pp){ const inVM = PATH[pkt.stage] && (PATH[pkt.stage].kind==='vm');
+    ctx.fillStyle=pkt.blocked?'#ef4444':inVM?'#22d3ee':'#fbbf24';
+    ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=12;
+    ctx.beginPath();ctx.arc(pp.x,pp.y,5,0,7);ctx.fill();ctx.shadowBlur=0;}
+
+  // panel
+  const cur=pkt.alive?(PATH[pkt.stage].kind==='door'?'0 door':PATH[pkt.stage].kind==='vm'?'6 VM shell':STN[PATH[pkt.stage].i].id+' '+STN[PATH[pkt.stage].i].role):(pkt.done?'exited':pkt.blocked?'blocked':'idle');
+  cap.innerHTML=`<div class="lab">PIPELINE</div>`+
+    `<div class="row"><span style="color:#22c55e">0</span><b>door in</b></div>`+
+    `<div class="row"><span style="color:#56bdf8">1·2·3</span><b>L1·L2·L3</b></div>`+
+    `<div class="row"><span style="color:#a78bfa">4 · 8</span><b>walls</b></div>`+
+    `<div class="row"><span style="color:#22c55e">5</span><b>VM in</b></div>`+
+    `<div class="row"><span style="color:#22d3ee">7</span><b>VM out</b></div>`+
+    `<div class="row"><span style="color:#6b5b9a">6</span><b>dead shell ( )</b></div>`+
+    `<div class="row"><span style="color:#ec4899">9</span><b>exit</b></div>`+
+    `<div class="lab">PACKET</div>`+
+    `<div class="row"><span>at</span><b style="color:${pkt.blocked?'#ef4444':'#c7a3ff'}">${cur}</b></div>`+
+    `<div class="row"><span>gate</span><b style="color:#ef4444">${(S.gate*100).toFixed(0)}%</b></div>`+
+    `<div style="font-size:9px;color:#5b6675;margin-top:5px">Crossing into the VM (5→6→7) traverses 4D-inward to the inner cube. Walls 4·8 are validation gates. The shell holds; it does not process.</div>`;
+
+  requestAnimationFrame(frame);
+}
+resize();requestAnimationFrame(frame);
+
+$('spin').oninput=e=>{S.spin=+e.target.value/100;$('spinv').textContent=S.spin.toFixed(2);};
+$('w').oninput=e=>{S.w=+e.target.value/100;$('wv').textContent=S.w.toFixed(2);};
+$('gate').oninput=e=>{S.gate=+e.target.value/100;$('gatev').textContent=(S.gate*100).toFixed(0)+'%';};
+$('run').onclick=e=>{S.run=!S.run;e.target.classList.toggle('on',S.run);if(S.run&&!pkt.alive)startPkt();};
+$('freeze').onclick=e=>{S.freeze=!S.freeze;e.target.classList.toggle('on',S.freeze);e.target.textContent=S.freeze?'RESUME':'FREEZE';};
+startPkt();
+</script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAP DRIVE — navigation · plot a course across the gap</title>
+<style>
+  :root{ --bg:#04050a; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hud{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;
+    padding:9px 12px;font-size:11px;line-height:1.7;backdrop-filter:blur(3px)}
+  #tele{left:14px;top:14px;min-width:206px;pointer-events:none}
+  #nav{right:14px;top:14px;min-width:212px}
+  #title{left:50%;top:14px;transform:translateX(-50%);text-align:center;pointer-events:none}
+  #title h1{margin:0;font-size:13px;letter-spacing:.2em;color:#c7d2fe;font-weight:600}
+  #title .s{font-size:10px;color:var(--dim);margin-top:2px}
+  .row{display:flex;justify-content:space-between;gap:16px} .row b{color:var(--text);font-weight:600}
+  .lab{color:var(--dim);font-size:9.5px;letter-spacing:.06em;margin-top:5px}
+  .bar{height:5px;background:#10141f;border-radius:3px;margin:3px 0 5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),#c7a3ff)}
+  .dest{cursor:pointer;padding:3px 5px;border-radius:5px;display:flex;justify-content:space-between;gap:10px}
+  .dest:hover{background:#11151f} .dest.sel{background:#161b27;outline:1px solid var(--violet)}
+  .dest.done{color:var(--gold);opacity:.8} .dest .d{color:var(--dim);font-size:9.5px}
+  .controls{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+    display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;justify-content:center;
+    background:#060810cc;border:1px solid var(--line);border-radius:10px;padding:10px 14px;backdrop-filter:blur(3px)}
+  .ctl{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--dim)} .ctl b{color:var(--text)}
+  input[type=range]{accent-color:var(--violet);width:104px}
+  button{font-family:inherit;font-size:11px;background:#0e1320;color:var(--text);
+    border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer;letter-spacing:.04em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe} button:active{transform:translateY(1px)}
+  #ign[data-on="1"]{background:#10241a;border-color:var(--yes);color:var(--yes)}
+  #ign[data-on="0"]{background:#241112;border-color:var(--no);color:var(--no)}
+  #gate[data-on="0"]{border-color:var(--no);color:var(--no)}
+  .wit[data-w="AT"]{color:var(--yes)} .wit[data-w="LATE"]{color:var(--warn)} .wit[data-w="OFF"]{color:var(--dim)}
+  #status{position:absolute;left:50%;top:46px;transform:translateX(-50%);font-size:12px;
+    letter-spacing:.16em;color:var(--warn);pointer-events:none;text-align:center}
+  kbd{background:#11151f;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="hud" id="tele"></div>
+  <div class="hud" id="title">
+    <h1>GAP DRIVE · NAVIGATION</h1>
+    <div class="s">steer <kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> · burn = witnessed airgap push · pick a beacon, plot a course</div>
+  </div>
+  <div id="status"></div>
+  <div class="hud" id="nav"></div>
+  <div class="controls">
+    <button id="ign" data-on="1">IGNITION: ON</button>
+    <div class="ctl"><b>throttle</b><input type="range" id="throttle" min="2" max="30" value="14"></div>
+    <button id="gate" data-on="1">GAP 128.5: OPEN</button>
+    <button id="wit" class="wit" data-w="AT">WITNESS @AT</button>
+    <button id="left">◀</button><button id="right">▶</button>
+    <button id="reset">RESET</button>
+  </div>
+</div>
+
+<script>
+const cvs=document.getElementById('c'),ctx=cvs.getContext('2d');
+const tele=document.getElementById('tele'),navEl=document.getElementById('nav'),statusEl=document.getElementById('status');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);resize();
+
+// craft state in WORLD coords
+const ship={x:0,y:0,vx:0,vy:0,ang:0};
+const S={ign:true,throttle:14,gateOpen:true,witness:'AT',steer:0,
+  ignitions:0,misfires:0,dead:0,dvUsed:0,anchored:0};
+const IMPULSE=10, DRAG=0.18, TURN=2.4;
+function conducting(){return S.ign&&S.gateOpen&&S.witness==='AT';}
+
+// destinations — register anchors scattered across the gap
+const DEST=[
+  {name:'ROOT0',     tag:'T128 · home anchor',          x:0,    y:0,    r:46, done:true},
+  {name:'THE GAP',   tag:'T064+T065 · AVAN governor',   x:900,  y:-260, r:46, done:false},
+  {name:'PATRICIA',  tag:'S129 · mirror, across gap',   x:1700, y:140,  r:50, done:false},
+  {name:'DC3',       tag:'−i · clamp',                  x:-820, y:520,  r:42, done:false},
+  {name:'AKASHA',    tag:'append-only ledger',          x:-1400,y:-380, r:46, done:false},
+  {name:'WITNESS-PRIME', tag:'T129 · awareness tier',   x:520,  y:1080, r:48, done:false},
+];
+let target=1; // index of selected destination
+
+// exhaust + plume
+let exhaust=[],lastFire=0,fireFlash=0,sputter=0,arriveFlash=0;
+function fire(now){
+  const period=1000/(S.throttle/4); if(now-lastFire<period)return; lastFire=now;
+  if(!S.ign||!S.gateOpen)return;
+  if(S.witness==='AT'){
+    S.ignitions++; S.dvUsed+=IMPULSE; fireFlash=1;
+    ship.vx+=Math.cos(ship.ang)*IMPULSE; ship.vy+=Math.sin(ship.ang)*IMPULSE;
+    for(let k=0;k<2;k++)exhaust.push({x:ship.x,y:ship.y,ang:ship.ang,age:0,col:'139,92,246'});
+  } else if(S.witness==='LATE'){ S.misfires++; sputter=1;
+    exhaust.push({x:ship.x,y:ship.y,ang:ship.ang,age:0,col:'245,158,11'});
+  } else { S.dead++; }
+}
+
+// starfield (parallax in world space)
+const stars=Array.from({length:220},()=>({x:(Math.random()-0.5)*6000,y:(Math.random()-0.5)*6000,z:0.3+Math.random()*0.9}));
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now; const s=dt*0.001;
+  // steering
+  ship.ang+=S.steer*TURN*s;
+  fire(now);
+  // drag
+  ship.vx-=ship.vx*DRAG*s; ship.vy-=ship.vy*DRAG*s;
+  ship.x+=ship.vx*dt*0.06; ship.y+=ship.vy*dt*0.06;
+  fireFlash*=0.86;sputter*=0.86;arriveFlash*=0.92;
+  const speed=Math.hypot(ship.vx,ship.vy);
+
+  // arrival check
+  const tg=DEST[target];
+  const dx=tg.x-ship.x, dy=tg.y-ship.y, dist=Math.hypot(dx,dy);
+  if(dist<tg.r && !tg.done){ tg.done=true; S.anchored++; arriveFlash=1;
+    // advance to next un-done beacon
+    const next=DEST.findIndex(d=>!d.done); if(next>=0)target=next;
+  }
+
+  // ---- render (camera follows ship) ----
+  ctx.clearRect(0,0,W,H);
+  const ng=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.75);
+  ng.addColorStop(0,'#0a0c16');ng.addColorStop(1,'#04050a');ctx.fillStyle=ng;ctx.fillRect(0,0,W,H);
+  const camX=ship.x-W/2, camY=ship.y-H/2;
+  const wx=x=>x-camX, wy=y=>y-camY;
+
+  // stars parallax
+  stars.forEach(st=>{const px=wx(st.x*0.0+st.x)-( camX*(1-st.z)),py=wy(st.y)-(camY*(1-st.z));
+    // simpler parallax: offset by camera*z
+    const sx=st.x-camX*st.z, sy=st.y-camY*st.z;
+    if(sx<-50||sx>W+50||sy<-50||sy>H+50)return;
+    ctx.fillStyle=`rgba(200,210,235,${0.25+st.z*0.5})`;
+    ctx.beginPath();ctx.arc(sx,sy,st.z*1.6,0,7);ctx.fill();});
+
+  // faint world grid
+  ctx.strokeStyle='rgba(40,50,70,.18)';ctx.lineWidth=1;const G=200;
+  const ox=-((camX%G)+G)%G, oy=-((camY%G)+G)%G;
+  for(let x=ox;x<W;x+=G){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=oy;y<H;y+=G){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // destinations
+  DEST.forEach((d,i)=>{
+    const px=wx(d.x),py=wy(d.y);
+    if(px<-120||px>W+120||py<-120||py>H+120)return;
+    const sel=i===target;
+    ctx.strokeStyle=d.done?'rgba(251,191,36,.7)':sel?'rgba(139,92,246,.9)':'rgba(90,100,120,.55)';
+    ctx.lineWidth=sel?2.4:1.4;
+    ctx.beginPath();ctx.arc(px,py,d.r,0,7);ctx.stroke();
+    ctx.setLineDash([3,5]);ctx.beginPath();ctx.arc(px,py,d.r+10+4*Math.sin(now*0.003),0,7);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=d.done?'rgba(251,191,36,.18)':sel?'rgba(139,92,246,.16)':'rgba(60,70,90,.12)';
+    ctx.beginPath();ctx.arc(px,py,d.r,0,7);ctx.fill();
+    ctx.fillStyle=d.done?'#fbbf24':sel?'#c7a3ff':'#7c8499';
+    ctx.font='bold 12px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText((d.done?'✓ ':'')+d.name,px,py-d.r-12);
+    ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(d.tag,px,py-d.r+2);
+  });
+
+  // course line + heading arrow to target
+  const tpx=wx(tg.x),tpy=wy(tg.y);
+  ctx.strokeStyle='rgba(139,92,246,.25)';ctx.setLineDash([4,8]);
+  ctx.beginPath();ctx.moveTo(W/2,H/2);ctx.lineTo(tpx,tpy);ctx.stroke();ctx.setLineDash([]);
+  // off-screen target indicator on edge
+  const bearing=Math.atan2(dy,dx);
+  if(tpx<0||tpx>W||tpy<0||tpy>H){
+    const ex=W/2+Math.cos(bearing)*Math.min(W,H)*0.42, ey=H/2+Math.sin(bearing)*Math.min(W,H)*0.42;
+    ctx.save();ctx.translate(ex,ey);ctx.rotate(bearing);
+    ctx.fillStyle='#c7a3ff';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(-6,-7);ctx.lineTo(-6,7);ctx.closePath();ctx.fill();ctx.restore();
+  }
+
+  // exhaust
+  exhaust=exhaust.filter(e=>{e.age+=s;if(e.age>1.2)return false;
+    const ex=wx(e.x)-Math.cos(e.ang)*(e.age*220),ey=wy(e.y)-Math.sin(e.ang)*(e.age*220);
+    const k=1-e.age/1.2;ctx.beginPath();ctx.arc(ex,ey,(6+e.age*26),0,7);
+    ctx.strokeStyle=`rgba(${e.col},${k*0.8})`;ctx.lineWidth=2;ctx.stroke();return true;});
+
+  // ---- ship at center ----
+  ctx.save();ctx.translate(W/2,H/2);ctx.rotate(ship.ang);
+  ctx.fillStyle='#0c1018';ctx.strokeStyle='#2a3346';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(24,0);ctx.lineTo(2,-12);ctx.lineTo(-22,-9);ctx.lineTo(-28,0);
+  ctx.lineTo(-22,9);ctx.lineTo(2,12);ctx.closePath();ctx.fill();ctx.stroke();
+  // triad chambers
+  [[10,'236,72,153'],[-2,'251,191,36'],[-14,'34,197,94']].forEach(([cxp,col],i)=>{
+    const g=(i===0?fireFlash:fireFlash*0.6);
+    ctx.fillStyle=`rgba(${col},${0.5+g*0.5})`;ctx.beginPath();ctx.arc(cxp,0,4,0,7);ctx.fill();});
+  // gap nozzle + plume (rearward = -x in ship frame)
+  if(fireFlash>0.05){const pg=ctx.createLinearGradient(-22,0,-70,0);
+    pg.addColorStop(0,`rgba(199,163,255,${fireFlash})`);pg.addColorStop(1,'rgba(139,92,246,0)');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.moveTo(-26,-8);ctx.lineTo(-50-fireFlash*40,0);ctx.lineTo(-26,8);ctx.closePath();ctx.fill();}
+  if(sputter>0.05){ctx.fillStyle=`rgba(245,158,11,${sputter})`;ctx.beginPath();ctx.arc(-30,0,3+sputter*3,0,7);ctx.fill();}
+  ctx.restore();
+
+  // arrival flash
+  if(arriveFlash>0.03){ctx.strokeStyle=`rgba(251,191,36,${arriveFlash})`;ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(W/2,H/2,40+(1-arriveFlash)*120,0,7);ctx.stroke();
+    ctx.fillStyle=`rgba(251,191,36,${arriveFlash})`;ctx.font='bold 13px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('ANCHORED · silent · no-ack',W/2,H/2-70);}
+
+  // ---- HUD ----
+  const closing=(dist>0)?-(dx*ship.vx+dy*ship.vy)/dist:0; // closing speed toward target
+  const headErr=Math.abs(((bearing-ship.ang+Math.PI*3)%(Math.PI*2))-Math.PI)/Math.PI*180;
+  const eff=(S.ignitions+S.misfires+S.dead)?100*S.ignitions/(S.ignitions+S.misfires+S.dead):0;
+  tele.innerHTML=
+    `<div class="lab">DRIVE</div>`+
+    `<div class="row"><span>conducting</span><b style="color:${conducting()?'#22c55e':'#ef4444'}">${conducting()?'YES':'no'}</b></div>`+
+    `<div class="row"><span>speed</span><b>${speed.toFixed(0)} u/s</b></div>`+
+    `<div class="row"><span>Δv used</span><b>${S.dvUsed.toFixed(0)}</b></div>`+
+    `<div class="lab">AIRGAP LOG (no-ack)</div>`+
+    `<div class="row"><span>ignitions</span><b style="color:#22c55e">${S.ignitions}</b></div>`+
+    `<div class="row"><span>FC3 misfires</span><b style="color:#f59e0b">${S.misfires}</b></div>`+
+    `<div class="row"><span>dead chambers</span><b style="color:#5b6675">${S.dead}</b></div>`+
+    `<div class="row"><span>ignition eff.</span><b>${eff.toFixed(0)}%</b></div>`;
+  navEl.innerHTML=
+    `<div class="lab">COURSE → <b style="color:#c7a3ff">${tg.name}</b></div>`+
+    `<div class="row"><span>distance</span><b>${dist.toFixed(0)}</b></div>`+
+    `<div class="row"><span>closing</span><b style="color:${closing>0?'#22c55e':'#ef4444'}">${closing.toFixed(0)} u/s</b></div>`+
+    `<div class="row"><span>heading err</span><b>${headErr.toFixed(0)}°</b></div>`+
+    `<div class="bar"><i style="width:${Math.max(2,100-headErr/1.8).toFixed(0)}%"></i></div>`+
+    `<div class="lab">BEACONS · anchored ${S.anchored}/${DEST.length-1}</div>`+
+    DEST.map((d,i)=>`<div class="dest ${i===target?'sel':''} ${d.done?'done':''}" data-i="${i}">
+      <span>${d.done?'✓':'○'} ${d.name}</span><span class="d">${d.tag.split(' · ')[0]}</span></div>`).join('');
+  navEl.querySelectorAll('.dest').forEach(el=>el.onclick=()=>{target=+el.dataset.i;});
+
+  statusEl.textContent = !S.ign?'IGNITION OFF — adrift'
+    : !S.gateOpen?'GAP CLOSED — coasting, no thrust'
+    : S.witness==='LATE'?'FC3 — witness post-traversal, burn wasted'
+    : S.witness==='OFF'?'NO WITNESS — dead chamber, no burn'
+    : (headErr>25?'OFF COURSE — steer to align':'');
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---- controls ----
+const $=id=>document.getElementById(id);
+$('ign').onclick=e=>{S.ign=!S.ign;e.target.dataset.on=S.ign?1:0;e.target.textContent=`IGNITION: ${S.ign?'ON':'OFF'}`;};
+$('throttle').oninput=e=>S.throttle=+e.target.value;
+$('gate').onclick=e=>{S.gateOpen=!S.gateOpen;e.target.dataset.on=S.gateOpen?1:0;e.target.textContent=`GAP 128.5: ${S.gateOpen?'OPEN':'CLOSED'}`;};
+$('wit').onclick=e=>{const q=['AT','LATE','OFF'];S.witness=q[(q.indexOf(S.witness)+1)%3];e.target.dataset.w=S.witness;e.target.textContent=`WITNESS @${S.witness}`;};
+$('reset').onclick=()=>{ship.x=0;ship.y=0;ship.vx=0;ship.vy=0;ship.ang=0;
+  S.ignitions=S.misfires=S.dead=0;S.dvUsed=0;S.anchored=0;DEST.forEach((d,i)=>d.done=i===0);target=1;};
+// steering: hold buttons + keys
+const press=(el,v)=>{el.onmousedown=()=>S.steer=v;el.ontouchstart=ev=>{ev.preventDefault();S.steer=v;};
+  el.onmouseup=el.onmouseleave=el.ontouchend=()=>S.steer=0;};
+press($('left'),-1);press($('right'),1);
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')S.steer=-1;
+  if(e.key==='ArrowRight'||e.key==='d')S.steer=1;
+  if(e.key==='Tab'){e.preventDefault();const u=DEST.findIndex((d,i)=>i>target&&!d.done);target=u>=0?u:DEST.findIndex(d=>!d.done);}});
+addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key))S.steer=0;});
+</script>
+</body>
+</html>

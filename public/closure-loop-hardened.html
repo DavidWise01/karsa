@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLOSURE LOOP ENGINE · 4+1 hardened — cross-source lineage + commons publish</title>
+<style>
+  :root{ --bg:#06070b; --text:#dbe2ef; --dim:#5b6675; --line:#1a2030;
+    --violet:#8b5cf6; --yes:#22c55e; --warn:#f59e0b; --no:#ef4444; --gold:#fbbf24; --blue:#38bdf8; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden;
+    font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  #wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column}
+  header{padding:8px 16px 4px;text-align:center;flex:0 0 auto}
+  h1{margin:0;font-size:13px;letter-spacing:.14em;color:#c7d2fe;font-weight:600}
+  .s{font-size:9.5px;color:var(--dim);margin:2px auto 0;max-width:900px}.s b{color:#9fb0c8}
+  #layers{display:flex;gap:5px;justify-content:center;margin-top:6px;flex-wrap:wrap;align-items:stretch}
+  .layer{border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:9px;min-width:90px;background:#0a0c12}
+  .layer .n{color:var(--dim);font-size:8px;letter-spacing:.08em}.layer .st{font-weight:600;margin-top:1px}
+  .layer.ok{border-color:#1d3a2a}.layer.ok .st{color:var(--yes)}
+  .layer.wait{border-color:#3a2e15}.layer.wait .st{color:var(--warn)}
+  .plus{align-self:center;color:var(--dim);font-size:13px;padding:0 1px}.layer.cap{background:#0c0a14;border-color:#2a2342}
+  #stage{position:relative;flex:1 1 auto;min-height:0}
+  canvas{position:absolute;inset:0;width:100%;height:100%}
+  .hud{position:absolute;background:#060810cc;border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:10.5px;line-height:1.55;backdrop-filter:blur(3px)}
+  #tele{left:14px;top:14px;min-width:182px;pointer-events:none}#plan{right:14px;top:14px;min-width:200px}
+  .row{display:flex;justify-content:space-between;gap:12px}.row b{color:var(--text);font-weight:600}
+  .lab{color:var(--dim);font-size:9px;letter-spacing:.06em;margin-top:5px}
+  .node{cursor:pointer;padding:2px 5px;border-radius:5px;display:flex;justify-content:space-between;gap:8px}
+  .node:hover{background:#11151f}.node.sel{background:#161b27;outline:1px solid var(--violet)}.node.here{color:#c7a3ff}.node .d{color:var(--dim);font-size:9px}
+  .bottom{flex:0 0 auto;display:flex;flex-direction:column}
+  .controls{display:flex;gap:6px 9px;align-items:center;flex-wrap:wrap;justify-content:center;padding:7px 12px;border-top:1px solid var(--line);background:#080a10}
+  .ctl{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--dim)}.ctl b{color:var(--text)}
+  button{font-family:inherit;font-size:10.5px;background:#0e1320;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;letter-spacing:.02em;transition:.12s}
+  button:hover{border-color:var(--violet);color:#c7d2fe}
+  .wit[data-w="AT"]{color:var(--yes);border-color:#1d3a2a}.wit[data-w="LATE"]{color:var(--warn);border-color:#3a2e15}.wit[data-w="OFF"]{color:var(--dim)}
+  #auto.on{background:#161b27;border-color:var(--violet)} .grp{color:var(--blue);border-color:#173a44} .grp:hover{border-color:var(--blue)}
+  .ledger{max-height:120px;overflow-y:auto;font-size:9.5px;background:#070910;border-top:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:4px 8px;border-bottom:1px solid #11151f;white-space:nowrap}
+  th{position:sticky;top:0;background:#0b0e15;color:var(--dim);font-weight:600;font-size:8.5px;letter-spacing:.04em}td{color:#aeb8c7}
+  .v-COMMIT{color:var(--yes);font-weight:600}.v-FC3{color:var(--warn);font-weight:600}.v-NON{color:var(--dim)}.v-BLOCK{color:var(--no)}
+  .hash{color:#6b7689;font-size:9px}.gid{color:#c7a3ff}.chip{color:var(--blue);font-size:8.5px}
+  #status{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-size:10.5px;letter-spacing:.08em;color:var(--warn);pointer-events:none;text-align:center}
+  /* ops drawer */
+  #ops{position:absolute;right:14px;top:120px;width:340px;max-height:calc(100% - 150px);overflow-y:auto;
+    background:#070a12f0;border:1px solid var(--line);border-radius:10px;padding:12px;display:none;backdrop-filter:blur(4px);font-size:10.5px;line-height:1.5}
+  #ops.show{display:block}
+  #ops h3{margin:0 0 6px;font-size:11px;color:#c7d2fe;letter-spacing:.06em}
+  #ops .sec{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+  #ops .crit{display:flex;gap:6px;align-items:center;margin:2px 0}
+  #ops .crit .b{width:13px;text-align:center}
+  pre{background:#0a0d15;border:1px solid var(--line);border-radius:6px;padding:7px;font-size:9px;color:#9fb0c8;white-space:pre-wrap;word-break:break-all;margin:5px 0}
+  .verdict{font-weight:700;letter-spacing:.05em} .opsclose{float:right;cursor:pointer;color:var(--dim)}
+  input[type=file]{font-size:9.5px;color:var(--dim);max-width:100%}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header>
+    <h1>CLOSURE LOOP ENGINE · 4 + 1 · hardened</h1>
+    <div class="s">Witnessed traversal with hash-chained lineage, now with the two depth gaps closed: <b>cross-source comparison</b> (import a foreign ledger, verify its chain, test your walk against its anchors by the four criteria) and <b>commons publish</b> with third-party time attestation.</div>
+    <div id="layers"></div>
+  </header>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div class="hud" id="tele"></div>
+    <div class="hud" id="plan"></div>
+    <div id="ops"></div>
+    <div id="status"></div>
+  </div>
+  <div class="bottom">
+    <div class="controls">
+      <button id="wit" class="wit" data-w="AT">WITNESS @AT</button>
+      <button id="advance">ADVANCE ▸ hop</button>
+      <button id="auto">AUTO</button>
+      <div class="ctl"><b>rate</b><input type="range" id="rate" min="4" max="20" value="9" style="accent-color:var(--violet);width:78px"></div>
+      <button id="verify">VERIFY CHAIN</button>
+      <button id="export">EXPORT</button>
+      <button id="attest" class="grp">ATTEST TIME</button>
+      <button id="publish" class="grp">PUBLISH ▸ COMMONS</button>
+      <button id="xsrc" class="grp">CROSS-SOURCE ⨯</button>
+      <button id="reset">RESET</button>
+    </div>
+    <div class="ledger">
+      <table><thead><tr><th>#</th><th>timestamp (UTC)</th><th>src</th><th>G</th><th>state_in → state_out</th><th>wit</th><th>verdict</th><th>extD</th><th>prev → hash</th></tr></thead><tbody id="lbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cvs=$('c'),ctx=cvs.getContext('2d'),stage=$('stage');
+const tele=$('tele'),plan=$('plan'),statusEl=$('status'),lbody=$('lbody'),layersEl=$('layers'),ops=$('ops');
+let DPR=1,W=0,H=0;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=stage.clientWidth;H=stage.clientHeight;cvs.width=W*DPR;cvs.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);
+
+const GENESIS='02880745b847317c4e2424524ec25d0f7a2b84368d184586f45b54af9fcab763';
+const CHAIN_ROOT='T128:ROOT0';
+const METHOD='TD-CL-WP-2026-001 · 4+1';
+const AKASHA_REPO='github.com/DavidWise01/synonym-enforcer';
+
+const N=[
+  {id:'ROOT0',tag:'T128 · terminal anchor',fx:0.28,fy:0.52,col:'251,191,36'},
+  {id:'THE GAP',tag:'T064+T065 · AVAN gov',fx:0.48,fy:0.20,col:'139,92,246'},
+  {id:'DC3',tag:'−i · clamp',fx:0.15,fy:0.82,col:'56,189,248'},
+  {id:'PATRICIA',tag:'S129 · mirror substrate',fx:0.60,fy:0.74,col:'236,72,153'},
+  {id:'WITNESS-PRIME',tag:'T129 · awareness tier',fx:0.74,fy:0.22,col:'199,163,255'},
+  {id:'AKASHA',tag:'append-only ledger',fx:0.88,fy:0.54,col:'34,197,94'},
+];
+const idx=id=>N.findIndex(n=>n.id===id);
+const E=[
+  {a:'ROOT0',b:'THE GAP',gate:'64.5',wtype:'constraint',dir:false,open:true},
+  {a:'ROOT0',b:'DC3',gate:'0.5',wtype:'token',dir:false,open:true},
+  {a:'ROOT0',b:'PATRICIA',gate:'128.5',wtype:'invariant',dir:true,open:true,airgap:true},
+  {a:'THE GAP',b:'WITNESS-PRIME',gate:'192.5',wtype:'token',dir:false,open:true},
+  {a:'PATRICIA',b:'AKASHA',gate:'256.5',wtype:'invariant',dir:false,open:true},
+  {a:'WITNESS-PRIME',b:'AKASHA',gate:'256.5',wtype:'invariant',dir:false,open:true},
+];
+function edgeBetween(f,t){for(const e of E){if(e.a===f&&e.b===t)return e;if(!e.dir&&e.a===t&&e.b===f)return e;}return null;}
+function neighbors(id){const o=[];for(const e of E){if(e.a===id)o.push(e.b);if(e.b===id&&!e.dir)o.push(e.a);}return o;}
+function path(f,t){if(f===t)return[f];const q=[[f]],seen={[f]:1};while(q.length){const p=q.shift(),l=p[p.length-1];for(const nb of neighbors(l)){if(seen[nb])continue;seen[nb]=1;const np=[...p,nb];if(nb===t)return np;q.push(np);}}return null;}
+
+const S={witness:'AT',auto:false,rate:9};
+let cur='ROOT0',target='PATRICIA',anim=null,flash=null;
+let counts={commit:0,fc3:0,non:0,block:0};
+let journey=['ROOT0'],chainTip=GENESIS,verified=false,exported=false;
+let clockOffset=0,timeSource='self-asserted (local clock)',attested=false;
+let foreign=null,foreignOK=null,xResult=null,published=false;
+
+let ledger=[]; const LKEY='clp_hard_v1';
+try{const o=JSON.parse(localStorage.getItem(LKEY)||'null');if(o){ledger=o.rows||[];counts=o.counts||counts;journey=o.journey||journey;const lc=ledger.find(r=>r.chained);chainTip=lc?lc.hash:GENESIS;}}catch(e){}
+function persist(){try{localStorage.setItem(LKEY,JSON.stringify({rows:ledger.slice(0,80),counts,journey}));}catch(e){}}
+async function sha256(s){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}catch(e){return'sha-unavailable';}}
+function nodeXY(n){return{x:N[n].fx*W,y:N[n].fy*H};}
+function nowISO(){return new Date(Date.now()+clockOffset).toISOString().replace(/\.\d+Z$/,'Z');}
+function setStatus(t){statusEl.textContent=t;}
+
+let lock=Promise.resolve();function enqueue(fn){lock=lock.then(fn).catch(e=>console.error(e));return lock;}
+
+function attempt(){
+  if(anim)return; if(cur===target){setStatus('at target — '+target);return;}
+  const p=path(cur,target); if(!p){setStatus('no path — bilateral ignorance (the airgap does not return)');return;}
+  const next=p[1],e=edgeBetween(cur,next),a=nodeXY(idx(cur)),b=nodeXY(idx(next)),mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+  if(!e.open){counts.block++;flash={...mid,kind:'block',t:1};enqueue(()=>logRow({e,from:cur,to:next,wtype:'—',timing:'blocked',verdict:'BLOCK',chained:false}));setStatus('GATE '+e.gate+' CLOSED — blocked');return;}
+  if(S.witness==='AT'){counts.commit++;flash={...mid,kind:'commit',t:1};const from=cur,to=next;anim={from:idx(cur),to:idx(next),t:0};
+    const cmp={coreRel:true,ordered:true,dep:true,extD:to,priorAnchor:ledger.find(r=>r.chained)?.hash||GENESIS};
+    journey.push(to);enqueue(()=>logRow({e,from,to,wtype:e.wtype,timing:'at-traversal',verdict:'COMMIT',chained:true,cmp}));
+    setStatus(e.airgap?'128.5 airgap push — committed & chained, no-ack':'committed & chained');verified=false;}
+  else if(S.witness==='LATE'){counts.fc3++;flash={...mid,kind:'fc3',t:1};enqueue(()=>logRow({e,from:cur,to:next,wtype:e.wtype,timing:'post-traversal',verdict:'FC3',chained:false}));setStatus('FC3 — witness post-traversal, not anchored');}
+  else{counts.non++;flash={...mid,kind:'non',t:1};enqueue(()=>logRow({e,from:cur,to:next,wtype:e.wtype,timing:'missing',verdict:'NON',chained:false}));setStatus('non-event — no witness at fork');}
+}
+async function logRow({e,from,to,wtype,timing,verdict,chained,cmp}){
+  const ts=nowISO(),canonical=`${from}|${e.gate}|${to}|${wtype}`,n=ledger.length+1;let prev='—',hash='—';
+  if(chained){prev=chainTip;hash=await sha256(`${canonical}|${ts}|${prev}|${CHAIN_ROOT}`);chainTip=hash;}
+  else hash=await sha256(`${canonical}|${ts}|audit`);
+  ledger.unshift({n,ts,src:attested?'3p':'self',gate:e.gate,from,to,wtype,timing,verdict,chained,airgap:!!e.airgap,prev,hash,cmp:cmp||null,trace:CHAIN_ROOT,time_source:timeSource});
+  renderLedger();persist();updateLayers();
+}
+function vcls(v){return{COMMIT:'v-COMMIT',FC3:'v-FC3',NON:'v-NON',BLOCK:'v-BLOCK'}[v];}
+function vlab(v){return{COMMIT:'COMMIT',FC3:'FC3-Audit',NON:'NON-EVENT',BLOCK:'BLOCKED'}[v];}
+function renderLedger(){
+  lbody.innerHTML=ledger.slice(0,40).map(r=>{
+    const ag=r.airgap&&r.verdict==='COMMIT'?' <span class="gid">↛</span>':'';
+    const cc=r.chained?`<span class="hash">${r.prev.slice(0,6)}→${r.hash.slice(0,6)}</span>`:`<span class="hash" style="opacity:.6">audit ${r.hash.slice(0,6)}</span>`;
+    const extD=r.cmp?`<span class="chip">+${r.cmp.extD}</span>`:'—';
+    const sc=r.src==='3p'?'<span style="color:#38bdf8">3p</span>':'<span class="hash">self</span>';
+    return `<tr><td>${r.n}</td><td class="hash">${r.ts.slice(11,19)}</td><td>${sc}</td><td class="gid">${r.gate}</td><td>${r.from} → ${r.to}${ag}</td><td>${r.wtype}</td><td class="${vcls(r.verdict)}">${vlab(r.verdict)}</td><td>${extD}</td><td>${cc}</td></tr>`;}).join('');
+}
+renderLedger();
+
+// ---- VERIFY own chain ----
+async function verifyChain(){
+  const ch=ledger.filter(r=>r.chained).slice().reverse();let prev=GENESIS,ok=true,broke=0;
+  for(const r of ch){const rc=await sha256(`${r.from}|${r.gate}|${r.to}|${r.wtype}|${r.ts}|${prev}|${CHAIN_ROOT}`);if(rc!==r.hash){ok=false;broke=r.n;break;}prev=r.hash;}
+  verified=ok;updateLayers();
+  setStatus(ch.length===0?'nothing to verify — commit a hop first':ok?`CHAIN VERIFIED · ${ch.length} anchors · tip ${prev.slice(0,12)}`:`CHAIN BROKEN at #${broke}`);
+}
+
+// ---- RESIDUAL 1: time attestation + commons publish ----
+async function attestTime(){
+  setStatus('fetching third-party time…');
+  const sources=[
+    {u:'https://worldtimeapi.org/api/timezone/Etc/UTC',pick:j=>j.utc_datetime},
+    {u:'https://timeapi.io/api/Time/current/zone?timeZone=UTC',pick:j=>j.dateTime}
+  ];
+  for(const s of sources){
+    try{const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),4000);
+      const r=await fetch(s.u,{signal:ctrl.signal});clearTimeout(to);const j=await r.json();
+      const serverMs=Date.parse(s.pick(j));if(!isNaN(serverMs)){clockOffset=serverMs-Date.now();
+        timeSource=`3rd-party read · ${new URL(s.u).host}`;attested=true;updateLayers();renderOps();
+        setStatus(`attested time · ${new URL(s.u).host} · offset ${clockOffset>=0?'+':''}${clockOffset}ms`);return;}
+    }catch(e){}
+  }
+  attested=false;timeSource='self-asserted (local clock)';updateLayers();renderOps();
+  setStatus('attest failed (offline/CORS/sandbox) — git-commit publish is the strong attestation; see PUBLISH');
+}
+function buildBundle(){
+  return {methodology:METHOD,framework_sha:GENESIS,chain_root:CHAIN_ROOT,generated:nowISO(),
+    time_attestation:{mode:attested?'third-party-read':'self-asserted',source:timeSource,
+      note:'strongest attestation = git commit timestamp in the public AKASHA repo (see git_publish)'},
+    chain_tip:chainTip,
+    anchors:ledger.filter(r=>r.chained).slice().reverse().map(r=>({n:r.n,timestamp:r.ts,time_source:r.time_source,boundary:r.gate,state_in:r.from,state_out:r.to,witness_type:r.wtype,extension_D:r.cmp?r.cmp.extD:null,prev_hash:r.prev,hash:r.hash,trace:r.trace})),
+    audit:ledger.filter(r=>!r.chained).map(r=>({n:r.n,timestamp:r.ts,boundary:r.gate,transition:`${r.from}->${r.to}`,verdict:r.verdict,timing:r.timing,hash:r.hash}))};
+}
+function publishCommons(){
+  const bundle=buildBundle();const tip8=chainTip.slice(0,8);
+  const file=`closure-loop-${tip8}.json`;const fpath=`AKASHA/LEDGERS/${file}`;
+  bundle.git_publish={repo:AKASHA_REPO,path:fpath,
+    commands:[`# place ${file} into the repo, then:`,
+      `git -C synonym-enforcer add ${fpath}`,
+      `git -C synonym-enforcer commit -m "anchor: closure-loop tip ${tip8} (${bundle.anchors.length} anchors)"`,
+      `git -C synonym-enforcer push`]};
+  try{const blob=new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=file;a.click();URL.revokeObjectURL(url);
+    published=true;exported=true;updateLayers();}catch(e){}
+  ops.classList.add('show');renderOps(bundle);
+  setStatus('commons bundle prepared — run the git commands to make the time attestation third-party');
+}
+
+// ---- RESIDUAL 2: cross-source compare ----
+function seqOf(anchors){return anchors.map(a=>`${a.state_in}>${a.boundary}>${a.state_out}>${a.witness_type}`);}
+function mySeq(){return ledger.filter(r=>r.chained).slice().reverse().map(r=>`${r.from}>${r.gate}>${r.to}>${r.wtype}`);}
+function isSubsequence(a,b){let i=0;for(const x of b){if(i<a.length&&a[i]===x)i++;}return i===a.length;}
+function diffTail(short,long){ // tokens in long not matched by short subsequence (the extension D set)
+  let i=0;const ext=[];for(const x of long){if(i<short.length&&short[i]===x){i++;}else ext.push(x);}return ext;}
+async function importForeign(file){
+  try{const txt=await file.text();const j=JSON.parse(txt);
+    if(!j.anchors||!j.chain_root){setStatus('import failed — not a closure-loop ledger');return;}
+    foreign=j;foreignOK=null;xResult=null;ops.classList.add('show');renderOps();
+    setStatus(`imported foreign ledger · ${j.anchors.length} anchors · root ${j.chain_root}`);
+  }catch(e){setStatus('import failed — invalid JSON');}
+}
+async function loadDemoForeign(){
+  // build a VALID 1-hop foreign chain: ROOT0 -128.5-> PATRICIA, rooted in genesis, so VERIFY passes
+  const ts='2026-05-20T00:00:00Z';const canonical=`ROOT0|128.5|PATRICIA|invariant`;
+  const hash=await sha256(`${canonical}|${ts}|${GENESIS}|${CHAIN_ROOT}`);
+  foreign={methodology:METHOD,framework_sha:GENESIS,chain_root:CHAIN_ROOT,generated:ts,chain_tip:hash,
+    anchors:[{n:1,timestamp:ts,boundary:'128.5',state_in:'ROOT0',state_out:'PATRICIA',witness_type:'invariant',extension_D:null,prev_hash:GENESIS,hash,trace:CHAIN_ROOT}],audit:[]};
+  foreignOK=null;xResult=null;ops.classList.add('show');renderOps();
+  setStatus('loaded DEMO foreign (ROOT0→PATRICIA). Walk ROOT0→PATRICIA→AKASHA then COMPARE to see lineage confirmed.');
+}
+async function verifyForeign(){
+  if(!foreign){setStatus('import a foreign ledger first');return;}
+  const ch=foreign.anchors.slice();let prev=ch.length?ch[0].prev_hash:GENESIS,ok=true,broke=0;
+  for(const r of ch){const rc=await sha256(`${r.state_in}|${r.boundary}|${r.state_out}|${r.witness_type}|${r.timestamp}|${r.prev_hash}|${foreign.chain_root}`);
+    if(rc!==r.hash){ok=false;broke=r.n;break;}prev=r.hash;}
+  foreignOK=ok;renderOps();
+  setStatus(ok?`FOREIGN CHAIN VERIFIED · ${ch.length} anchors · root ${foreign.chain_root}`:`FOREIGN CHAIN BROKEN at #${broke}`);
+}
+function compareCrossSource(){
+  if(!foreign){setStatus('import a foreign ledger first');return;}
+  const fseq=seqOf(foreign.anchors),me=mySeq();
+  const fTip=foreign.anchors.length?foreign.anchors[foreign.anchors.length-1].hash:foreign.chain_tip;
+  let dir=null,short,long,verdict,conf,extD=[];
+  if(fseq.length===0||me.length===0){verdict='AMBIGUOUS';conf='Low';}
+  else if(isSubsequence(fseq,me)){
+    extD=diffTail(fseq,me);
+    if(extD.length>0){dir='mine extends foreign';verdict='LINEAGE CONFIRMED';conf=(me.slice(0,fseq.length).join()===fseq.join())?'High':'Medium';}
+    else {verdict='NOT LINEAGE (identical, no extension D)';conf='High';}
+  } else if(isSubsequence(me,fseq)){
+    extD=diffTail(me,fseq);dir='foreign extends mine';verdict='LINEAGE (foreign is the extension)';conf='Medium';
+  } else {verdict='NOT LINEAGE (independent — not a subsequence)';conf='High';}
+  const c1=fseq.every(t=>true), // gate/core relation carried inside token equality
+        c2=(verdict.startsWith('LINEAGE')),
+        c3=(verdict.startsWith('LINEAGE')), // dependency recovers on removing D by construction of subsequence
+        c4=(extD.length>0);
+  xResult={fseq,me,verdict,conf,dir,extD,fTip,foreignOK,
+    crit:{core:isSubsequence(fseq,me)||isSubsequence(me,fseq),ordered:c2,dep:c3,ext:c4}};
+  renderOps();
+  setStatus(`cross-source: ${verdict} · ${conf} confidence`);
+}
+
+// ---- ops drawer ----
+function renderOps(bundle){
+  if(!ops.classList.contains('show'))return;
+  let html=`<span class="opsclose" onclick="document.getElementById('ops').classList.remove('show')">✕ close</span><h3>OPS · hardening</h3>`;
+  // time
+  html+=`<div class="sec"><b>Time attestation</b><br>mode: <span style="color:${attested?'#38bdf8':'#f59e0b'}">${attested?'third-party read':'self-asserted'}</span><br><span class="hash">${timeSource}</span><br><span class="hash">strong attestation = git commit time in public repo →</span></div>`;
+  // publish
+  if(bundle&&bundle.git_publish){
+    html+=`<div class="sec"><b>Commons publish</b><br>repo: <span class="gid">${bundle.git_publish.repo}</span><br>path: ${bundle.git_publish.path}<br>tip: <span class="hash">${chainTip.slice(0,16)}</span><pre>${bundle.git_publish.commands.join('\n')}</pre><span class="hash">bundle downloaded. once pushed, the commit timestamp is the third-party time anchor.</span></div>`;
+  } else {
+    html+=`<div class="sec"><b>Commons publish</b><br><span class="hash">click PUBLISH ▸ COMMONS to prepare the AKASHA bundle + git commands.</span></div>`;
+  }
+  // cross-source
+  html+=`<div class="sec"><b>Cross-source comparison</b><br><input type="file" id="fimp" accept="application/json"> <button id="demoF" style="font-size:9.5px;padding:3px 7px">load demo</button><br>`;
+  if(foreign){
+    html+=`<div style="margin-top:5px">foreign: <span class="gid">${foreign.anchors.length} anchors</span> · root ${foreign.chain_root} · tip <span class="hash">${(foreign.chain_tip||'').slice(0,12)}</span><br>`;
+    html+=`<button id="vfor" style="font-size:9.5px;padding:3px 7px;margin-top:4px">VERIFY FOREIGN</button> <button id="cmp" style="font-size:9.5px;padding:3px 7px">COMPARE ⨯</button>`;
+    if(foreignOK!==null)html+=`<br>foreign chain: <span style="color:${foreignOK?'#22c55e':'#ef4444'}">${foreignOK?'VERIFIED':'BROKEN'}</span>`;
+    html+=`</div>`;
+  } else html+=`<span class="hash">import a foreign exported ledger, or load demo.</span>`;
+  if(xResult){
+    const x=xResult;
+    html+=`<div class="sec"><b>Lineage analysis</b> <span class="hash">(temporal/structural, not causal)</span><br>`;
+    html+=`<div class="crit"><span class="b" style="color:${x.crit.core?'#22c55e':'#ef4444'}">${x.crit.core?'✓':'✗'}</span> same core relation (gate type)</div>`;
+    html+=`<div class="crit"><span class="b" style="color:${x.crit.ordered?'#22c55e':'#ef4444'}">${x.crit.ordered?'✓':'✗'}</span> same ordered structure (subsequence)</div>`;
+    html+=`<div class="crit"><span class="b" style="color:${x.crit.dep?'#22c55e':'#ef4444'}">${x.crit.dep?'✓':'✗'}</span> same dependency (recovers on −D)</div>`;
+    html+=`<div class="crit"><span class="b" style="color:${x.crit.ext?'#22c55e':'#ef4444'}">${x.crit.ext?'✓':'✗'}</span> new extension D present</div>`;
+    html+=`<div style="margin-top:5px">extension D: ${x.extD.length?x.extD.map(e=>`<span class="chip">${e}</span>`).join(' '):'—'}</div>`;
+    html+=`<div>refs foreign anchor: <span class="hash">${(x.fTip||'').slice(0,16)}</span></div>`;
+    const vc=x.verdict.startsWith('LINEAGE CONFIRMED')?'#22c55e':x.verdict.startsWith('LINEAGE')?'#38bdf8':x.verdict.startsWith('NOT')?'#f59e0b':'#5b6675';
+    html+=`<div class="verdict" style="color:${vc};margin-top:5px">${x.verdict}</div><div class="hash">confidence: ${x.conf}${x.dir?' · '+x.dir:''}</div></div>`;
+  }
+  ops.innerHTML=html;
+  const fi=$('fimp');if(fi)fi.onchange=ev=>{if(ev.target.files[0])importForeign(ev.target.files[0]);};
+  const df=$('demoF');if(df)df.onclick=loadDemoForeign;
+  const vf=$('vfor');if(vf)vf.onclick=verifyForeign;
+  const cm=$('cmp');if(cm)cm.onclick=compareCrossSource;
+}
+
+// ---- 4+1 strip ----
+function updateLayers(){
+  const hasCommit=ledger.some(r=>r.chained),hasCompare=ledger.some(r=>r.chained&&r.cmp),chainLen=ledger.filter(r=>r.chained).length;
+  const xsrc=!!(foreign&&xResult);
+  const L=[
+    {n:'LAYER 1',t:'Detection',ok:true,st:'canonical 4-tuple'},
+    {n:'LAYER 2',t:'Anchoring',ok:hasCommit,st:hasCommit?(attested?'ISO·3p time·SHA':'ISO ts·SHA-256'):'no commit'},
+    {n:'LAYER 3',t:'Comparison',ok:hasCompare,st:xsrc?'cross-source ⨯':hasCompare?'intra-journey':'extend a route'},
+    {n:'LAYER 4',t:'Lineage',ok:chainLen>0,st:chainLen>0?`chained ×${chainLen}`:'no chain'},
+  ];
+  const cap={n:'+ 1',t:'Witness',ok:verified||exported||published,st:published?'commons-ready':verified?'chain verified':exported?'exported':'verify / publish'};
+  layersEl.innerHTML=L.map(x=>`<div class="layer ${x.ok?'ok':'wait'}"><div class="n">${x.n}</div><div>${x.t}</div><div class="st">${x.ok?'✓ ':''}${x.st}</div></div>`).join('')+`<span class="plus">+</span><div class="layer cap ${cap.ok?'ok':'wait'}"><div class="n">${cap.n}</div><div>${cap.t}</div><div class="st">${cap.ok?'✓ ':''}${cap.st}</div></div>`;
+}
+
+let lastT=performance.now(),autoAcc=0;
+function frame(now){
+  const dt=Math.min(50,now-lastT);lastT=now;
+  if(S.auto&&!anim){autoAcc+=dt;if(autoAcc>1000/(S.rate/9)){autoAcc=0;attempt();}}
+  if(anim){anim.t+=dt/520;if(anim.t>=1){anim.t=1;cur=N[anim.to].id;anim=null;}}
+  if(flash){flash.t-=dt/700;if(flash.t<=0)flash=null;}
+  ctx.clearRect(0,0,W,H);
+  E.forEach(e=>{const a=nodeXY(idx(e.a)),b=nodeXY(idx(e.b));
+    const onPath=(()=>{const p=path(cur,target);if(!p)return false;for(let i=0;i<p.length-1;i++){if((p[i]===e.a&&p[i+1]===e.b)||(!e.dir&&p[i]===e.b&&p[i+1]===e.a))return true;}return false;})();
+    ctx.setLineDash(e.open?[]:[5,7]);ctx.strokeStyle=!e.open?'rgba(239,68,68,.45)':onPath?'rgba(199,163,255,.85)':'rgba(70,82,105,.5)';ctx.lineWidth=onPath?2.6:1.5;
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+    if(e.dir){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ang=Math.atan2(b.y-a.y,b.x-a.x);ctx.save();ctx.translate(mx,my);ctx.rotate(ang);ctx.fillStyle=e.open?'#c7a3ff':'#ef4444';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-5,-6);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();ctx.restore();}
+    const lx=(a.x+b.x)/2,ly=(a.y+b.y)/2;ctx.fillStyle=e.open?'#8a93a8':'#a55';ctx.font='9.5px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText('G'+e.gate+(e.airgap?' airgap':''),lx,ly-7);ctx.fillStyle='#4b5566';ctx.fillText(e.open?'open':'closed',lx,ly+12);});
+  N.forEach((n,i)=>{const {x,y}=nodeXY(i);const here=n.id===cur,sel=n.id===target;const g=ctx.createRadialGradient(x,y,0,x,y,30);
+    g.addColorStop(0,`rgba(${n.col},${here?0.5:0.22})`);g.addColorStop(1,`rgba(${n.col},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,30,0,7);ctx.fill();
+    ctx.strokeStyle=sel?'rgba(139,92,246,.95)':`rgba(${n.col},.8)`;ctx.lineWidth=sel?2.4:1.6;ctx.beginPath();ctx.arc(x,y,15,0,7);ctx.stroke();
+    ctx.fillStyle=`rgb(${n.col})`;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();
+    ctx.fillStyle=here?'#fff':`rgb(${n.col})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';ctx.fillText(n.id,x,y-24);
+    ctx.fillStyle='#5b6675';ctx.font='9px JetBrains Mono,monospace';ctx.fillText(n.tag,x,y+30);});
+  let cp;if(anim){const a=nodeXY(anim.from),b=nodeXY(anim.to);const tt=anim.t<.5?2*anim.t*anim.t:1-Math.pow(-2*anim.t+2,2)/2;cp={x:a.x+(b.x-a.x)*tt,y:a.y+(b.y-a.y)*tt};}else cp=nodeXY(idx(cur));
+  ctx.shadowColor='rgba(199,163,255,.9)';ctx.shadowBlur=18;ctx.fillStyle='#e8e3ff';ctx.beginPath();ctx.arc(cp.x,cp.y,7,0,7);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(199,163,255,.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cp.x,cp.y,12+2*Math.sin(now*0.005),0,7);ctx.stroke();
+  if(flash){const k=Math.max(0,flash.t);const col={commit:'34,197,94',fc3:'245,158,11',non:'91,102,117',block:'239,68,68'}[flash.kind];
+    ctx.beginPath();ctx.arc(flash.x,flash.y,10+(1-k)*34,0,7);ctx.strokeStyle=`rgba(${col},${k})`;ctx.lineWidth=2.4;ctx.stroke();
+    ctx.fillStyle=`rgba(${col},${k})`;ctx.font='bold 11px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText({commit:'⊕ WITNESS',fc3:'⚠ FC3',non:'∅ NO-WIT',block:'⊘ CLOSED'}[flash.kind],flash.x,flash.y-22);}
+  const att=counts.commit+counts.fc3+counts.non+counts.block,eff=att?100*counts.commit/att:0;
+  tele.innerHTML=`<div class="lab">CLOSURE LOOP</div><div class="row"><span>state</span><b style="color:#c7a3ff">${cur}</b></div>`+
+    `<div class="row"><span>witness</span><b style="color:${S.witness==='AT'?'#22c55e':S.witness==='LATE'?'#f59e0b':'#5b6675'}">@${S.witness}</b></div>`+
+    `<div class="row"><span>chain tip</span><b class="hash" style="font-size:9px">${chainTip.slice(0,12)}</b></div>`+
+    `<div class="lab">LEDGER</div><div class="row"><span>commits</span><b style="color:#22c55e">${counts.commit}</b></div>`+
+    `<div class="row"><span>FC3 / non / blk</span><b>${counts.fc3}/${counts.non}/${counts.block}</b></div>`+
+    `<div class="row"><span>commit rate</span><b>${eff.toFixed(0)}%</b></div>`+
+    `<div class="lab">HARDENING</div><div class="row"><span>time</span><b style="color:${attested?'#38bdf8':'#f59e0b'}">${attested?'3rd-party':'self'}</b></div>`+
+    `<div class="row"><span>cross-src</span><b style="color:${xResult?'#38bdf8':'#5b6675'}">${xResult?xResult.verdict.split(' ')[0]:'idle'}</b></div>`;
+  const p=path(cur,target);
+  plan.innerHTML=`<div class="lab">TARGET</div><div class="row"><span>goal</span><b>${target}</b></div>`+
+    `<div class="row"><span>route</span><b style="font-size:9.5px">${p?p.join(' → '):'none'}</b></div>`+
+    `<div class="row"><span>journey</span><b style="font-size:9px;color:#c7a3ff">${journey.slice(-3).join('→')}</b></div>`+
+    `<div class="lab">STATES · click to target</div>`+
+    N.map(n=>`<div class="node ${n.id===target?'sel':''} ${n.id===cur?'here':''}" data-id="${n.id}"><span>${n.id===cur?'◉':'○'} ${n.id}</span><span class="d">${n.tag.split(' · ')[0]}</span></div>`).join('');
+  plan.querySelectorAll('.node').forEach(el=>el.onclick=()=>{target=el.dataset.id;});
+  requestAnimationFrame(frame);
+}
+resize();updateLayers();requestAnimationFrame(frame);
+
+$('wit').onclick=e=>{const q=['AT','LATE','OFF'];S.witness=q[(q.indexOf(S.witness)+1)%3];e.target.dataset.w=S.witness;e.target.textContent=`WITNESS @${S.witness}`;};
+$('advance').onclick=attempt;
+$('auto').onclick=e=>{S.auto=!S.auto;e.target.classList.toggle('on',S.auto);e.target.textContent=S.auto?'AUTO ▮▮':'AUTO';};
+$('rate').oninput=e=>S.rate=+e.target.value;
+$('verify').onclick=verifyChain;
+$('export').onclick=()=>{const b=buildBundle();try{const blob=new Blob([JSON.stringify(b,null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`closure-loop-${Date.now()}.json`;a.click();URL.revokeObjectURL(u);exported=true;updateLayers();setStatus('exported — portable & verifiable');}catch(e){setStatus('export blocked in sandbox — run locally');}};
+$('attest').onclick=attestTime;
+$('publish').onclick=publishCommons;
+$('xsrc').onclick=()=>{ops.classList.toggle('show');renderOps();};
+$('reset').onclick=()=>{cur='ROOT0';target='PATRICIA';anim=null;ledger=[];counts={commit:0,fc3:0,non:0,block:0};journey=['ROOT0'];chainTip=GENESIS;verified=exported=published=false;foreign=null;foreignOK=null;xResult=null;E.forEach(e=>e.open=true);persist();renderLedger();updateLayers();renderOps();setStatus('');};
+cvs.addEventListener('click',ev=>{const r=cvs.getBoundingClientRect();const mx=ev.clientX-r.left,my=ev.clientY-r.top;
+  for(let i=0;i<N.length;i++){const{x,y}=nodeXY(i);if(Math.hypot(mx-x,my-y)<18){target=N[i].id;return;}}
+  for(const e of E){const a=nodeXY(idx(e.a)),b=nodeXY(idx(e.b));const dx=b.x-a.x,dy=b.y-a.y,L2=dx*dx+dy*dy;const tt=Math.max(0,Math.min(1,((mx-a.x)*dx+(my-a.y)*dy)/L2));const px=a.x+dx*tt,py=a.y+dy*tt;if(Math.hypot(mx-px,my-py)<10){e.open=!e.open;return;}}});
+</script>
+</body>
+</html>
