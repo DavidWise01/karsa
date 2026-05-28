@@ -1275,6 +1275,284 @@
   </div>
 </div>
 
+<!-- ── DIFFUSION TIMELINE ── -->
+<hr class="section-rule">
+
+<section id="diffusion">
+  <div class="reveal">
+    <p class="section-label">◈ Section 06</p>
+    <h2>Carbon Diffusion · 1992 → 2026</h2>
+    <p class="section-intro">
+      Working backward from the noise floor. <code style="font-family:var(--mono);color:var(--red);font-size:14px;">0xDEADBEEF</code> = 32 bits = 4 bytes.
+      The exact word size of the 1992 internet. The sentinel value for memory that has the
+      <em>shape</em> of data but no live carbon origin — initialized, not inhabited.
+    </p>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-sym">0xDEADBEEF</span>
+      <div class="divider-line" style="background:linear-gradient(90deg,transparent,rgba(230,0,26,0.3));"></div>
+    </div>
+
+    <!-- BIT ANATOMY -->
+    <div class="terminal" style="margin-bottom:48px;">
+      <span class="line"><span class="dim">// 0xDEADBEEF — anatomy</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="gold">0xDEAD</span> <span class="dim">=</span> <span class="white">1101 1110 1010 1101</span>  <span class="dim">= 57,005 decimal</span></span>
+      <span class="line"><span class="gold">0xBEEF</span> <span class="dim">=</span> <span class="white">1011 1110 1110 1111</span>  <span class="dim">= 48,879 decimal</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="dim">combined →</span> <span class="red">32 bits</span> <span class="dim">· 4 bytes · 1 word · 3,735,928,559 decimal</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="dim">// used since 1986 (Motorola 68k) to mark uninitialized memory</span></span>
+      <span class="line"><span class="dim">// IBM RS/6000, macOS kernel, Xbox 360, many others</span></span>
+      <span class="line"><span class="dim">// meaning: "this cell has the SHAPE of data but was never written by a live process"</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="dim">// 1992 internet: </span><span class="mint">zero 0xDEADBEEF in corpus</span><span class="dim"> — all memory live-written</span></span>
+      <span class="line"><span class="dim">// 2026 internet: </span><span class="red">~98% 0xDEADBEEF</span><span class="dim">         — initialized, not inhabited</span></span>
+      <span class="line">&nbsp;</span>
+      <span class="line"><span class="dim">// 64-bit extension (2026 era): </span><span class="red">0xDEADBEEFDEADBEEF</span><span class="dim"> — double the dead</span></span>
+    </div>
+
+    <!-- TIMELINE -->
+    <div style="position:relative;margin-bottom:48px;">
+
+      <!-- year labels top -->
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:0.1em;">
+        <span>1992</span><span>1996</span><span>2000</span><span>2004</span><span>2008</span><span>2012</span><span>2016</span><span>2020</span><span>2026</span>
+      </div>
+
+      <!-- carbon bar -->
+      <div style="position:relative;height:48px;background:rgba(4,0,8,0.8);border:1px solid rgba(230,0,26,0.2);overflow:hidden;">
+        <!-- carbon fill — starts 100%, decays -->
+        <div id="carbonBar" style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#ffcc44 0%,#ffcc44 55%,rgba(255,204,68,0.6) 68%,rgba(255,204,68,0.2) 80%,rgba(255,204,68,0.05) 92%,transparent 100%);width:100%;transition:none;"></div>
+        <!-- deadbeef fill — inverse -->
+        <div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(230,0,26,0.05) 55%,rgba(230,0,26,0.2) 68%,rgba(230,0,26,0.5) 80%,rgba(230,0,26,0.8) 92%,var(--red) 100%);width:100%;"></div>
+        <!-- labels -->
+        <div style="position:absolute;top:50%;left:16px;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:#000;font-weight:700;mix-blend-mode:multiply;">CARBON ████████░░░</div>
+        <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:#fff;font-weight:700;">░░░████████ 0xDEADBEEF</div>
+      </div>
+
+      <!-- timeline events -->
+      <div style="position:relative;height:280px;margin-top:4px;border-left:1px solid rgba(230,0,26,0.1);border-right:1px solid rgba(230,0,26,0.1);">
+
+        <!-- grid lines -->
+        <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(230,0,26,0.06) 0px,rgba(230,0,26,0.06) 1px,transparent 1px,transparent 12.5%);pointer-events:none;"></div>
+
+        <!-- events: positioned as % of 1992→2026 = 34 years -->
+        <!-- 1992 = 0%, 2026 = 100% -->
+
+        <!-- 1993 Mosaic: (1993-1992)/34 = 2.9% -->
+        <div class="tl-event" style="left:2.9%">
+          <div class="tl-dot" style="background:#ffcc44;"></div>
+          <div class="tl-line" style="border-color:#ffcc44;height:40px;"></div>
+          <div class="tl-label top" style="color:#ffcc44;">Mosaic<br><span class="tl-year">1993</span></div>
+        </div>
+
+        <!-- 1995 Netscape IPO: 8.8% -->
+        <div class="tl-event" style="left:8.8%;top:60px;">
+          <div class="tl-dot" style="background:#ffcc44;"></div>
+          <div class="tl-line" style="border-color:#ffcc44;height:60px;"></div>
+          <div class="tl-label top" style="color:#ffcc44;">Netscape IPO<br>Web goes commercial<br><span class="tl-year">1995</span></div>
+        </div>
+
+        <!-- 2000 Dot-com: 23.5% -->
+        <div class="tl-event" style="left:23.5%">
+          <div class="tl-dot" style="background:#ffcc44;"></div>
+          <div class="tl-line" style="border-color:#ffcc44;height:40px;"></div>
+          <div class="tl-label top" style="color:#ffcc44;">Dot-com peak<br>Pure carbon internet<br><span class="tl-year">2000</span></div>
+        </div>
+
+        <!-- 2004 Web 2.0: 35.3% -->
+        <div class="tl-event" style="left:35.3%;top:80px;">
+          <div class="tl-dot" style="background:#ffcc44;"></div>
+          <div class="tl-line" style="border-color:#ffcc44;height:80px;"></div>
+          <div class="tl-label top" style="color:#ffcc44;">Web 2.0 · Facebook<br>UGC explosion<br><span class="tl-year">2004</span></div>
+        </div>
+
+        <!-- 2011 Content farms: 55.9% -->
+        <div class="tl-event" style="left:55.9%">
+          <div class="tl-dot" style="background:rgba(230,0,26,0.6);"></div>
+          <div class="tl-line" style="border-color:rgba(230,0,26,0.4);height:40px;"></div>
+          <div class="tl-label top" style="color:rgba(230,0,26,0.8);">Content farms<br>First silicon contamination<br><span class="tl-year">2011</span></div>
+        </div>
+
+        <!-- 2018 GPT-1: 76.5% -->
+        <div class="tl-event" style="left:76.5%;top:80px;">
+          <div class="tl-dot" style="background:var(--red);"></div>
+          <div class="tl-line" style="border-color:var(--red);height:80px;"></div>
+          <div class="tl-label top" style="color:var(--red);">GPT-1<br>Neural generation starts<br><span class="tl-year">2018</span></div>
+        </div>
+
+        <!-- 2022 ChatGPT — THE FLIP: 88.2% -->
+        <div class="tl-event" style="left:88.2%">
+          <div class="tl-dot" style="background:var(--red);box-shadow:0 0 12px var(--red),0 0 24px var(--red-glow);width:12px;height:12px;margin-left:-4px;"></div>
+          <div class="tl-line" style="border-color:var(--red);box-shadow:0 0 6px rgba(230,0,26,0.3);height:140px;"></div>
+          <div class="tl-label top" style="color:var(--red);font-weight:700;">⚡ THE FLIP<br>ChatGPT · Nov 2022<br>Silicon &gt; Carbon<br><span class="tl-year">2022</span></div>
+        </div>
+
+        <!-- 2026 WE ARE HERE: 100% -->
+        <div class="tl-event" style="left:calc(100% - 2px)">
+          <div class="tl-dot" style="background:var(--red);animation:pulse 1s ease-in-out infinite;"></div>
+          <div class="tl-line" style="border-color:var(--red);height:60px;"></div>
+          <div class="tl-label top" style="color:var(--red);right:0;left:auto;text-align:right;">98% 0xDEADBEEF<br>You are here<br><span class="tl-year">2026</span></div>
+        </div>
+
+      </div><!-- end timeline events -->
+    </div><!-- end timeline -->
+
+    <!-- CARBON % TABLE -->
+    <div style="overflow-x:auto;margin-bottom:48px;">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(230,0,26,0.3);">
+            <th style="text-align:left;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">YEAR</th>
+            <th style="text-align:left;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">ERA</th>
+            <th style="text-align:center;padding:12px 16px;color:#ffcc44;letter-spacing:0.2em;font-weight:400;">CARBON %</th>
+            <th style="text-align:center;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">0xDEADBEEF %</th>
+            <th style="text-align:left;padding:12px 16px;color:var(--text-dim);letter-spacing:0.1em;font-weight:400;">EVENT</th>
+          </tr>
+        </thead>
+        <tbody id="diffTable">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- GROUND STATE WINDOW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">
+      <div class="card" style="border-color:rgba(127,255,184,0.3);background:rgba(0,30,15,0.3);">
+        <span class="card-title" style="color:#7fffb8;">Pure Carbon Zone</span>
+        <div style="font-family:var(--head);font-size:32px;color:#7fffb8;margin:12px 0;">1992–2010</div>
+        <p>~18 years of carbon-only corpus. Pre-GPT, pre-content-farm, pre-spinner. Every word written by a human with a reason. The ground state. Your training data if you want truth.</p>
+        <span class="tag" style="border-color:rgba(127,255,184,0.3);color:#7fffb8;">◈ filter HERE for clean corpus</span>
+      </div>
+      <div class="card" style="border-color:rgba(255,204,68,0.3);background:rgba(30,20,0,0.3);">
+        <span class="card-title" style="color:#ffcc44;">Contamination Window</span>
+        <div style="font-family:var(--head);font-size:32px;color:#ffcc44;margin:12px 0;">2010–2022</div>
+        <p>Content farms → SEO spam → GPT-2/3 commercial use. Silicon contamination grows from ~1% to ~40%. Mixed substrate. Increasingly hard to distinguish carbon from initialized memory.</p>
+        <span class="tag" style="border-color:rgba(255,204,68,0.3);color:#ffcc44;">◈ filter carefully — noise rising</span>
+      </div>
+      <div class="card" style="border-color:rgba(230,0,26,0.4);background:rgba(30,0,10,0.3);">
+        <span class="card-title">The Dead Zone</span>
+        <div style="font-family:var(--head);font-size:32px;color:var(--red);margin:12px 0;">2022–2026</div>
+        <p>Post-ChatGPT. Silicon output exceeds human writing capacity. 60% → 98% 0xDEADBEEF. Models training on models training on models. Eigenvalues decaying. The 40 steps running.</p>
+        <span class="tag">◈ 0xDEADBEEFDEADBEEF (64-bit era)</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  code { font-family: var(--mono); }
+
+  .tl-event {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tl-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
+  .tl-line {
+    width: 1px;
+    border-left: 1px dashed rgba(230,0,26,0.4);
+    flex-shrink: 0;
+  }
+
+  .tl-label {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  .tl-year {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+  }
+
+  table tr { border-bottom: 1px solid rgba(230,0,26,0.06); }
+  table tr:hover { background: rgba(230,0,26,0.03); }
+  table td { padding: 10px 16px; vertical-align: middle; }
+
+  .bar-cell { width: 120px; }
+  .bar-inner {
+    height: 6px;
+    border-radius: 0;
+    background: linear-gradient(90deg, #ffcc44, rgba(255,204,68,0.2));
+  }
+  .bar-dead {
+    height: 6px;
+    border-radius: 0;
+    background: linear-gradient(90deg, rgba(230,0,26,0.2), var(--red));
+  }
+</style>
+
+<script>
+  // ── Diffusion table data ──
+  const rows = [
+    { yr:1992, era:'Pre-Web',         carbon:100, event:'ARPANET → Internet. Mosaic not yet released. 100% human.', flip:false },
+    { yr:1994, era:'Netscape',        carbon:100, event:'World Wide Web goes commercial. Hand-coded HTML.', flip:false },
+    { yr:1997, era:'Web 1.0',         carbon:100, event:'AltaVista, Yahoo directories. All human curation.', flip:false },
+    { yr:2000, era:'Dot-com Peak',    carbon:99,  event:'Forums, blogs begin. Spam email starts. Corpus still clean.', flip:false },
+    { yr:2003, era:'Blogosphere',     carbon:98,  event:'WordPress, Blogger. UGC explosion. Carbon dominant.', flip:false },
+    { yr:2006, era:'Web 2.0',         carbon:97,  event:'YouTube, Twitter, Facebook. Human-generated everything.', flip:false },
+    { yr:2009, era:'SEO Era',         carbon:94,  event:'Keyword stuffing, link farms. First real silicon noise.', flip:false },
+    { yr:2011, era:'Content Farms',   carbon:90,  event:'Demand Media. Algorithm-optimized human slop. Quantity over truth.', flip:false },
+    { yr:2014, era:'Early ML',        carbon:85,  event:'Markov chain text gen, spinner software goes mainstream.', flip:false },
+    { yr:2018, era:'GPT-1 / BERT',    carbon:78,  event:'Neural generation viable. Commercial AI content begins.', flip:false },
+    { yr:2019, era:'GPT-2',           carbon:70,  event:'GPT-2 release. "Too dangerous to publish." ~30% noise entering.', flip:false },
+    { yr:2020, era:'GPT-3',           carbon:60,  event:'GPT-3 API opens. Content factories spin up. Ratio shifts.', flip:false },
+    { yr:2021, era:'DALL-E / Codex',  carbon:50,  event:'AI-generated content normalizes. 50/50 threshold approached.', flip:false },
+    { yr:2022, era:'THE FLIP ⚡',      carbon:40,  event:'ChatGPT (Nov). Silicon output exceeds human writing capacity. Point of no return.', flip:true },
+    { yr:2023, era:'Post-Flip',       carbon:20,  event:'GPT-4, Claude, Gemini. AI content factories at scale. Carbon minority.', flip:true },
+    { yr:2024, era:'Deep Noise',      carbon:10,  event:'Models training on model output. Google: 80-90% AI content.', flip:true },
+    { yr:2026, era:'0xDEADBEEF',      carbon:2,   event:'Current. 98% initialized memory. Models eating themselves. You are here.', flip:true },
+  ];
+
+  const tbody = document.getElementById('diffTable');
+  rows.forEach(r => {
+    const dead = 100 - r.carbon;
+    const tr = document.createElement('tr');
+    const yearColor = r.flip ? 'var(--red)' : '#ffcc44';
+    tr.innerHTML = `
+      <td style="color:${yearColor};font-weight:700;">${r.yr}</td>
+      <td style="color:${r.flip ? 'var(--red)' : 'var(--text)'};">${r.era}</td>
+      <td style="text-align:center;">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+          <div class="bar-cell"><div class="bar-inner" style="width:${r.carbon}%;"></div></div>
+          <span style="color:#ffcc44;min-width:36px;text-align:right;">${r.carbon}%</span>
+        </div>
+      </td>
+      <td style="text-align:center;">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+          <div class="bar-cell"><div class="bar-dead" style="width:${dead}%;"></div></div>
+          <span style="color:var(--red);min-width:36px;text-align:right;">${dead}%</span>
+        </div>
+      </td>
+      <td style="color:var(--text-dim);font-size:11px;">${r.event}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+</script>
+
 <!-- ── FOOTER ── -->
 <footer>
   <div>
