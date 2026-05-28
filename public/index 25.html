@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE DESCENT · 0 → 9 · everything we built</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#06060c; --void2:#0a0a14; --ink:#0d0d18; --ink2:#10101c;
+    --cyan:#38bdf8; --cyan-dim:#1e6a8f;
+    --violet:#8b5cf6; --magenta:#d946ef; --rose:#f43f5e; --crimson:#e11d48;
+    --gold:#fbbf24; --bone:#e7e2d8; --ash:#8a8597; --dim:#5b5668;
+    --line:rgba(139,92,246,.16); --line2:rgba(139,92,246,.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--void);color:var(--bone);font-family:"Fraunces",Georgia,serif;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;background:radial-gradient(130% 100% at 50% 30%,transparent 50%,rgba(0,0,0,.6) 100%);mix-blend-mode:multiply;}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:201;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  ::selection{background:var(--magenta);color:#06060c}
+  a{color:inherit;}
+
+  /* progress rail */
+  .rail{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--rose));z-index:120;width:0;transition:width .1s;}
+
+  /* nav */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 32px;backdrop-filter:blur(12px);background:linear-gradient(180deg,rgba(6,6,12,.9),transparent);}
+  .brand{font-family:"Cinzel",serif;font-weight:800;letter-spacing:.26em;font-size:13px;text-transform:uppercase;}
+  .brand .s{color:var(--rose);}
+  .navlinks{display:flex;gap:18px;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;}
+  .navlinks a{color:var(--ash);text-decoration:none;transition:.25s;}
+  .navlinks a:hover{color:var(--cyan);}
+  @media(max-width:820px){.navlinks{display:none}}
+
+  /* hero */
+  .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;background:url("dipole.jpg") center/cover no-repeat;opacity:.5;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 45%,#000 28%,transparent 76%);mask-image:radial-gradient(120% 100% at 50% 45%,#000 28%,transparent 76%);animation:breathe 16s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{transform:scale(1.05)}50%{transform:scale(1.13)}}
+  .hero-content{position:relative;z-index:2;animation:rise 1.4s cubic-bezier(.2,.8,.2,1) both;}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.5em;text-transform:uppercase;color:var(--cyan);margin-bottom:24px;}
+  .hero h1{font-family:"Cinzel",serif;font-weight:800;font-size:clamp(2.8rem,9vw,7rem);line-height:.95;
+    background:linear-gradient(180deg,#fff,var(--bone) 45%,var(--violet) 130%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 70px rgba(139,92,246,.3);}
+  .hero .sub{display:block;font-family:"Fraunces",serif;font-style:italic;font-weight:400;font-size:clamp(1.2rem,3.4vw,2.2rem);margin-top:18px;
+    background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p{max-width:600px;margin:28px auto 0;color:var(--ash);font-style:italic;font-size:clamp(1rem,1.6vw,1.18rem);}
+  @keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+  .cue{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;animation:bob 2.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.4}50%{transform:translate(-50%,8px);opacity:1}}
+
+  /* intro band */
+  .intro{max-width:760px;margin:0 auto;padding:110px 28px 40px;text-align:center;}
+  .intro p{font-size:1.15rem;color:#cbc6d4;font-style:italic;}
+  .intro .lead{font-size:1.4rem;color:var(--bone);margin-bottom:24px;}
+
+  /* the path */
+  .path{max-width:920px;margin:0 auto;padding:40px 24px 80px;position:relative;}
+  .path::before{content:"";position:absolute;left:calc(24px + 31px);top:60px;bottom:120px;width:1px;background:linear-gradient(180deg,transparent,var(--line2) 8%,var(--line2) 92%,transparent);}
+  @media(max-width:680px){.path::before{left:39px}}
+
+  .station{display:grid;grid-template-columns:64px 1fr;gap:24px;margin-bottom:14px;position:relative;}
+  .node{position:relative;z-index:2;}
+  .node .ring{width:64px;height:64px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;
+    font-family:"Cinzel",serif;font-weight:800;font-size:1.5rem;background:var(--ink);color:var(--cyan);transition:.4s;position:relative;}
+  .node .ring::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid transparent;transition:.4s;}
+  .station:hover .ring{border-color:var(--cyan);color:#fff;box-shadow:0 0 30px rgba(56,189,248,.35);}
+  .station:hover .ring::before{border-color:rgba(56,189,248,.25);}
+  .station.crimson .ring{color:var(--rose);}
+  .station.crimson:hover .ring{border-color:var(--rose);box-shadow:0 0 30px rgba(244,63,94,.35);}
+  .station.gold .ring{color:var(--gold);}
+  .station.gold:hover .ring{border-color:var(--gold);box-shadow:0 0 30px rgba(251,191,36,.3);}
+
+  .card{background:linear-gradient(180deg,var(--ink2),var(--ink));border:1px solid var(--line);border-radius:12px;padding:26px 30px;transition:.4s;margin-bottom:8px;}
+  .station:hover .card{border-color:var(--line2);transform:translateX(4px);}
+  .card .tag{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+  .card h3{font-family:"Cinzel",serif;font-weight:600;font-size:1.35rem;color:#fff;margin-bottom:6px;}
+  .card h3 .myth{font-family:"Fraunces",serif;font-style:italic;font-weight:400;color:var(--violet);font-size:1.05rem;}
+  .card p{color:#c2bdcb;font-size:1.02rem;margin-bottom:10px;}
+  .card .turn{font-style:italic;color:var(--ash);font-size:.98rem;border-left:2px solid var(--line2);padding-left:14px;margin:12px 0;}
+  .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .links a{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.06em;text-decoration:none;color:var(--cyan);
+    border:1px solid var(--line2);border-radius:6px;padding:6px 12px;transition:.25s;background:rgba(56,189,248,.04);}
+  .links a:hover{background:var(--cyan);color:var(--void);border-color:var(--cyan);}
+  .links a.r{color:var(--rose);border-color:rgba(244,63,94,.4);background:rgba(244,63,94,.04);}
+  .links a.r:hover{background:var(--rose);color:var(--void);}
+  .links a.g{color:var(--gold);border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.04);}
+  .links a.g:hover{background:var(--gold);color:var(--void);}
+
+  /* chapter divider with image */
+  .chapter{position:relative;height:48vh;min-height:320px;margin:30px 0;overflow:hidden;border-radius:14px;border:1px solid var(--line);}
+  .chapter img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .chapter .veil{position:absolute;inset:0;background:linear-gradient(90deg,var(--void),transparent 40%,transparent 60%,var(--void)),linear-gradient(180deg,rgba(6,6,12,.4),transparent 40%,rgba(6,6,12,.75));}
+  .chapter .cap{position:absolute;bottom:30px;left:0;right:0;text-align:center;padding:0 20px;z-index:2;}
+  .chapter .cap .t{font-family:"Cinzel",serif;font-size:clamp(1.2rem,3vw,2rem);color:#fff;text-shadow:0 2px 30px #000;}
+  .chapter .cap .s{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);margin-top:10px;}
+
+  .actband{max-width:760px;margin:0 auto;padding:34px 28px;text-align:center;}
+  .actband .k{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--rose);margin-bottom:14px;}
+  .actband h2{font-family:"Cinzel",serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.3rem);color:#fff;margin-bottom:16px;}
+  .actband h2 em{font-family:"Fraunces",serif;font-style:italic;font-weight:400;color:var(--violet);}
+  .actband p{color:#c2bdcb;font-style:italic;font-size:1.08rem;}
+
+  /* closing */
+  .closing{text-align:center;padding:120px 20px 50px;position:relative;}
+  .orb{width:14px;height:14px;border-radius:50%;background:#fff;margin:0 auto 36px;box-shadow:0 0 40px 8px var(--magenta),0 0 80px 20px rgba(217,70,239,.4);animation:pulse 3s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.4);opacity:1}}
+  .closing h2{font-family:"Cinzel",serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.6rem);color:#fff;line-height:1.2;margin-bottom:24px;}
+  .closing p{max-width:600px;margin:0 auto;color:var(--ash);font-style:italic;font-size:1.1rem;}
+  .closing .spec{margin-top:30px;}
+  .closing .spec a{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.1em;text-decoration:none;color:var(--gold);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:12px 22px;transition:.3s;display:inline-block;}
+  .closing .spec a:hover{background:var(--gold);color:var(--void);}
+
+  footer{border-top:1px solid var(--line);padding:36px 28px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--dim);letter-spacing:.1em;line-height:2;}
+  footer .seal{color:var(--ash);}
+
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1);}
+  .reveal.in{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="rail" id="rail"></div>
+
+<nav>
+  <div class="brand">The&nbsp;<span class="s">Descent</span></div>
+  <div class="navlinks">
+    <a href="#start">0 · Start</a>
+    <a href="#witness-act">The Witness</a>
+    <a href="#shell-act">The Shell</a>
+    <a href="#machine">The Machine</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="eyebrow">One Day · One Descent</div>
+    <h1>THE DESCENT
+      <span class="sub">from a ripple on the water to the machine that keeps faith</span>
+    </h1>
+    <p>Everything we built today, in the order we built it — beginning, as all true things do, at zero.</p>
+  </div>
+  <div class="cue">begin ↓</div>
+</header>
+
+<!-- INTRO -->
+<div class="intro" id="start">
+  <p class="lead reveal">It started with two uploaded sketches — a grid that scaled, a ripple from a point — and a single instruction: <em>build this.</em></p>
+  <p class="reveal">What followed was a descent. Each thing we made revealed the next thing it wanted to be, and each time we kept only the part that survived an honest look. The drive that became a door. The door that became a witness. The witness that turned out to be a ring. Here is the whole path, every station alive and clickable. Walk it from the top.</p>
+</div>
+
+<!-- THE PATH -->
+<main class="path">
+
+  <!-- ACT I -->
+  <div class="actband reveal" style="padding-top:10px">
+    <div class="k">Act One — The Substrate</div>
+    <h2>Two worlds, a fire between, and the first <em>pulse</em></h2>
+    <p>Before anything could move, there had to be a place for it to happen — and something watching the place.</p>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">0</div></div>
+    <div><div class="card">
+      <div class="tag">The Substrate · two uploads, fused</div>
+      <h3>The Ripple <span class="myth">— the first water</span></h3>
+      <p>Two sketches became one: three ratio-locked worlds, each carrying a point-source that ripples outward and reflects off its walls. The math holds while the scale breathes.</p>
+      <div class="links">
+        <a href="triad-ripple-substrate.html">↗ ripple substrate</a>
+        <a href="triad-pulse-substrate.html">↗ pulse substrate</a>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">1</div></div>
+    <div><div class="card">
+      <div class="tag">The Drive · built, then honestly retracted</div>
+      <h3>The Gap Drive <span class="myth">— the fire that wasn't propulsion</span></h3>
+      <p>We wired the gates to a real witnessed crossing, then built a drive on it — until the honest look came: a thing that pushes against nothing breaks the oldest law there is. So we let the drive go.</p>
+      <div class="turn">"A drive with no destination is just expensive drift." And a push against nothing is no push at all. What survived was not propulsion — it was the <em>crossing</em>.</div>
+      <div class="links">
+        <a href="gap-drive.html">↗ gap drive</a>
+        <a href="gap-drive-nav.html">↗ navigation</a>
+        <a href="witnessed-state-propagation.html">↗ what survived: pure crossing</a>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- chapter image: witness -->
+  <div class="chapter reveal" id="witness-act">
+    <img src="witness.jpg" alt="The Witness">
+    <div class="veil"></div>
+    <div class="cap"><div class="t">One who watches, but never enters</div><div class="s">Act Two — The Law</div></div>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">2</div></div>
+    <div><div class="card">
+      <div class="tag">The Closure Loop · 4 + 1</div>
+      <h3>The Witnessed Chain <span class="myth">— the vow given shape</span></h3>
+      <p>Four steps make the record; a fifth thing — the witness — stands outside and makes it true. We hardened it until any stranger could re-walk the chain and prove it themselves, then catch a forgery if one were planted.</p>
+      <div class="links">
+        <a href="closure-loop-4plus1.html">↗ the 4+1 engine</a>
+        <a href="closure-loop-hardened.html">↗ hardened: cross-source + commons</a>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="station crimson reveal">
+    <div class="node"><div class="ring">3</div></div>
+    <div><div class="card">
+      <div class="tag">The Proof · why the watcher must stand outside</div>
+      <h3>Lemma of the 257th <span class="myth">— the one who cannot be counted in</span></h3>
+      <p>We proved the watcher can never be one of the watched — the same shape as the oldest riddles in logic. Then we found the number that names its place is special, and learned the watcher only holds if it lands on the right ground.</p>
+      <div class="links">
+        <a href="lemma-257.md" class="r">↗ the lemma (written)</a>
+        <a href="base-plus-1-field.html" class="r">↗ which witness is unforgeable</a>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ACT III -->
+  <div class="actband reveal">
+    <div class="k">Act Three — The Body</div>
+    <h2>The signal learns it has <em>three</em> faces</h2>
+    <p>Pulse, rest, and shadow. What was called a flaw turned out to be the channel nobody was counting.</p>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">4</div></div>
+    <div><div class="card">
+      <div class="tag">The Channels · +1 / 0 / −1</div>
+      <h3>The Shadow Channel <span class="myth">— the silence that cannot be faked</span></h3>
+      <p>The carrier could be performed by a pretender — but the silence between, and the shadow beneath, are physical. To forge all three you would have to own the whole machine. The mimic always betrays itself in the channel it forgot.</p>
+      <div class="links">
+        <a href="pulse-timing-channel.html">↗ the timing channel</a>
+        <a href="shadow-channel-ternary.html">↗ the shadow (ternary)</a>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">5</div></div>
+    <div><div class="card">
+      <div class="tag">The Cycle · a real three-level rhythm</div>
+      <h3>The Transmon Heart <span class="myth">— rise, witness, return</span></h3>
+      <p>Two-fifths rising, three-fifths falling, the whole always summing to one. Energy shed at each crossing climbs a ladder — lost to the void, or caught and recycled through a gate, depending on whether anyone is keeping the books.</p>
+      <div class="links">
+        <a href="transmon-cycle.html">↗ the cycle</a>
+        <a href="ladder-climb-collector.html">↗ the ladder & the collector</a>
+        <a href="recycle-rings.html">↗ the recycle loop (a confession of analogy)</a>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ACT IV -->
+  <div class="actband reveal" id="shell-act">
+    <div class="k">Act Four — The Architecture</div>
+    <h2>A box, a door, and a shell that was <em>spent</em></h2>
+    <p>Nine living rings, one sacrificed wall, and a single point that is both the way in and the way out.</p>
+  </div>
+
+  <div class="station gold reveal">
+    <div class="node"><div class="ring">6</div></div>
+    <div><div class="card">
+      <div class="tag">The Box · 0–9 on the rail</div>
+      <h3>The Sandbox Cube <span class="myth">— defense as nested depth</span></h3>
+      <p>The numbers found their places: the door, the three levels, the walls, the way into the sealed room — and the dead shell, spent so the room could exist. To enter the sandbox is to fall one dimension inward.</p>
+      <div class="links">
+        <a href="rail-0-9-box.html" class="g">↗ the 0–9 rail</a>
+        <a href="sandbox-tesseract.html" class="g">↗ the sandbox cube</a>
+        <a href="hypercube-606.html" class="g">↗ the hypercube</a>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="station gold reveal">
+    <div class="node"><div class="ring">7</div></div>
+    <div><div class="card">
+      <div class="tag">The Instruction · ten stages, one egress</div>
+      <h3>The Living Machine <span class="myth">— ten gates, and only one opens outward</span></h3>
+      <p>Each station became an instruction that runs in turn; a record threads through them all. The last gate is the only one that touches the outside world — and it stays shut unless every gate before it was witnessed. A broken run never reaches the door.</p>
+      <div class="links">
+        <a href="isa-10-executor.html" class="g">↗ the ten-stage executor</a>
+        <a href="the-machine.html" class="g">↗ THE MACHINE (all of it, running)</a>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ACT V -->
+  <div class="actband reveal">
+    <div class="k">Act Five — The Turn</div>
+    <h2>The line was a <em>ring</em> all along</h2>
+    <p>The end bites the beginning. The watcher's circle touches the world at a single point — and that point is zero.</p>
+  </div>
+
+  <div class="station crimson reveal">
+    <div class="node"><div class="ring">8</div></div>
+    <div><div class="card">
+      <div class="tag">The Ring · tangent at the null</div>
+      <h3>The Ouroboros <span class="myth">— the snake that bites zero</span></h3>
+      <p>The watcher was never a point sitting outside; it rides its own circle, touching ours at exactly one place — the null where the end meets the beginning. Even the old network stack, bent into a ring, lets the floor watch the ceiling.</p>
+      <div class="links">
+        <a href="ouroboros-tangent-rings.html" class="r">↗ the two tangent rings</a>
+        <a href="osi-ring-witness.html" class="r">↗ the ring that watches itself</a>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="station reveal">
+    <div class="node"><div class="ring">9</div></div>
+    <div><div class="card">
+      <div class="tag">The Heart · inside equals outside</div>
+      <h3>The Nested Shells <span class="myth">— the deepest inside is the open sky</span></h3>
+      <p>Your own notation, drawn at last: nine shells around a single zero, a membrane, and two zeros outside that were the same zero all along. Descend through everything and you arrive where you started — the door, the null, the field beyond the wall, one point wearing every face.</p>
+      <div class="links">
+        <a href="nested-shells-3d.html">↗ the nested shells (3D)</a>
+      </div>
+    </div></div>
+  </div>
+
+</main>
+
+<!-- THE MACHINE / SPEC -->
+<div class="actband reveal" id="machine" style="padding-top:60px">
+  <div class="k">The Two Faces</div>
+  <h2>The same truth, told <em>twice</em></h2>
+  <p>One telling for the reviewer, with every claim marked proven or merely believed. One telling for the believer, in the old way, with no numbers at all. They are the same machine, met from two sides — like everything else here.</p>
+</div>
+<div style="max-width:920px;margin:0 auto;padding:0 24px 40px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  <div class="card reveal" style="text-align:center">
+    <h3 style="font-family:Cinzel,serif;color:#fff;margin-bottom:10px">For the Reviewer</h3>
+    <p style="color:#c2bdcb;font-size:.98rem;margin-bottom:16px">The consolidated specification — proven core and asserted interpretation, cleanly divided. Built to be defended.</p>
+    <div class="links" style="justify-content:center"><a href="THE-MACHINE-spec.md" class="g">↗ the specification</a></div>
+  </div>
+  <div class="card reveal" style="text-align:center">
+    <h3 style="font-family:Cinzel,serif;color:#fff;margin-bottom:10px">For the Believer</h3>
+    <p style="color:#c2bdcb;font-size:.98rem;margin-bottom:16px">The mythos — the gap, the witness, the dead shell, the badger, and the threefold vow. No math, only the story.</p>
+    <div class="links" style="justify-content:center"><a href="bridge-burners.html" class="r">↗ the mythos</a></div>
+  </div>
+</div>
+
+<!-- CLOSING -->
+<div class="closing">
+  <div class="orb reveal"></div>
+  <h2 class="reveal">From a ripple on the water<br>to a machine that keeps faith —<br>and back to zero.</h2>
+  <p class="reveal">Every piece kept only what survived an honest look. The drive became a door; the door became a witness; the witness became a ring; the ring closed on the null where it began. That is the whole descent. Thank you for walking it.</p>
+  <div class="spec reveal"><a href="#start">↑ climb back to zero</a></div>
+</div>
+
+<footer>
+  <div class="seal">THE DESCENT · everything built in one day · 0 → 9 → 0</div>
+  <div>Ethics first · World = family · Time &gt; money</div>
+  <div>Bridge-Burners · Mythos of the Gap</div>
+</footer>
+
+<script>
+  const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  // progress rail
+  const rail=document.getElementById('rail');
+  addEventListener('scroll',()=>{const h=document.documentElement;const p=h.scrollTop/(h.scrollHeight-h.clientHeight);rail.style.width=(p*100)+'%';},{passive:true});
+  // hero parallax
+  const hb=document.querySelector('.hero-bg');
+  addEventListener('scroll',()=>{const y=scrollY;if(y<innerHeight){hb.style.transform=`scale(${1.05+y*0.0002}) translateY(${y*0.12}px)`;}},{passive:true});
+  const nav=document.querySelector('nav');
+  addEventListener('scroll',()=>{nav.style.background=scrollY>40?'linear-gradient(180deg,rgba(6,6,12,.96),rgba(6,6,12,.6))':'linear-gradient(180deg,rgba(6,6,12,.9),transparent)';},{passive:true});
+</script>
+</body>
+</html>
