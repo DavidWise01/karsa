@@ -1,1609 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROOT0 · Field Notes · Carbon-Silicon Substrate</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --red:      #e6001a;
-      --red-dim:  #7a000d;
-      --red-glow: rgba(230, 0, 26, 0.4);
-      --purple:   #2a0a3a;
-      --deep:     #080010;
-      --void:     #040008;
-      --text:     #d4b8e0;
-      --text-dim: #6b4d7a;
-      --mono:     'JetBrains Mono', 'Courier New', monospace;
-      --head:     'Orbitron', sans-serif;
-      --body:     'Inter', sans-serif;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--void);
-      color: var(--text);
-      font-family: var(--body);
-      font-size: 15px;
-      line-height: 1.7;
-      overflow-x: hidden;
-    }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--void); }
-    ::-webkit-scrollbar-thumb { background: var(--red); }
-
-    /* ── ANIMATED GRID BACKGROUND ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(230,0,26,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(230,0,26,0.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-      animation: gridDrift 20s linear infinite;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes gridDrift {
-      0%   { background-position: 0 0; }
-      100% { background-position: 48px 48px; }
-    }
-
-    /* ── PROGRESS BAR ── */
-    #progress {
-      position: fixed;
-      top: 0; left: 0;
-      height: 2px;
-      background: var(--red);
-      box-shadow: 0 0 8px var(--red);
-      width: 0%;
-      z-index: 1000;
-      transition: width 0.1s linear;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 40px;
-      background: rgba(4, 0, 8, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(230,0,26,0.15);
-    }
-
-    .nav-logo {
-      font-family: var(--head);
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.25em;
-      color: var(--red);
-      text-shadow: 0 0 12px var(--red-glow);
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--text-dim);
-      text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.2s, text-shadow 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--red);
-      text-shadow: 0 0 8px var(--red-glow);
-    }
-
-    /* ── HERO ── */
-    #hero {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 120px 40px 80px;
-      z-index: 1;
-    }
-
-    .hero-void {
-      font-size: 180px;
-      line-height: 1;
-      color: rgba(230,0,26,0.08);
-      font-family: var(--head);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      user-select: none;
-      pointer-events: none;
-      letter-spacing: -0.05em;
-    }
-
-    .hero-kanji {
-      font-size: 96px;
-      color: rgba(230, 0, 26, 0.12);
-      position: absolute;
-      bottom: 80px;
-      right: 80px;
-      text-shadow: 0 0 40px rgba(230,0,26,0.3);
-      animation: pulse 4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50%       { opacity: 0.9; }
-    }
-
-    .hero-tag {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.35em;
-      color: var(--red);
-      text-transform: uppercase;
-      margin-bottom: 24px;
-      opacity: 0.8;
-    }
-
-    h1 {
-      font-family: var(--head);
-      font-size: clamp(36px, 7vw, 80px);
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      color: #fff;
-      position: relative;
-      text-shadow: 0 0 60px rgba(230,0,26,0.3);
-    }
-
-    .glitch {
-      position: relative;
-      display: inline-block;
-    }
-
-    .glitch::before,
-    .glitch::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-    }
-
-    .glitch::before {
-      color: var(--red);
-      animation: glitch1 3s infinite;
-      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-    }
-
-    .glitch::after {
-      color: #7b2fff;
-      animation: glitch2 3s infinite;
-      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-    }
-
-    @keyframes glitch1 {
-      0%,94%,100% { transform: none; opacity: 0; }
-      95%          { transform: translate(-3px, 0); opacity: 0.7; }
-      97%          { transform: translate(3px, 0); opacity: 0.7; }
-    }
-
-    @keyframes glitch2 {
-      0%,96%,100% { transform: none; opacity: 0; }
-      97%          { transform: translate(3px, 1px); opacity: 0.6; }
-      99%          { transform: translate(-3px, -1px); opacity: 0.6; }
-    }
-
-    .hero-sub {
-      font-size: 18px;
-      color: var(--text-dim);
-      margin-top: 20px;
-      max-width: 560px;
-      font-weight: 300;
-    }
-
-    .hero-law {
-      margin-top: 40px;
-      display: inline-block;
-      padding: 10px 28px;
-      border: 1px solid rgba(230,0,26,0.4);
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      color: var(--red);
-      text-shadow: 0 0 8px var(--red-glow);
-      box-shadow: 0 0 20px rgba(230,0,26,0.1), inset 0 0 20px rgba(230,0,26,0.03);
-    }
-
-    .scroll-hint {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      color: var(--text-dim);
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%,100% { transform: translateX(-50%) translateY(0); }
-      50%      { transform: translateX(-50%) translateY(8px); }
-    }
-
-    /* ── SECTIONS ── */
-    section {
-      position: relative;
-      z-index: 1;
-      padding: 100px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-rule {
-      border: none;
-      border-top: 1px solid rgba(230,0,26,0.15);
-      margin: 0 40px;
-    }
-
-    .section-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.4em;
-      color: var(--red);
-      text-transform: uppercase;
-      opacity: 0.7;
-      margin-bottom: 16px;
-    }
-
-    h2 {
-      font-family: var(--head);
-      font-size: clamp(24px, 4vw, 42px);
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 16px;
-      line-height: 1.2;
-    }
-
-    .section-intro {
-      font-size: 16px;
-      color: var(--text-dim);
-      max-width: 640px;
-      margin-bottom: 56px;
-      font-weight: 300;
-    }
-
-    /* ── CARDS ── */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 24px;
-    }
-
-    .card {
-      background: rgba(42, 10, 58, 0.4);
-      border: 1px solid rgba(230,0,26,0.2);
-      padding: 32px;
-      position: relative;
-      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--red), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .card:hover {
-      border-color: rgba(230,0,26,0.5);
-      box-shadow: 0 0 40px rgba(230,0,26,0.1);
-      transform: translateY(-3px);
-    }
-
-    .card:hover::before { opacity: 1; }
-
-    .card-icon {
-      font-size: 28px;
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .card-title {
-      font-family: var(--head);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--red);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-
-    .card-sub {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-    }
-
-    .card p { font-size: 14px; color: var(--text); line-height: 1.6; }
-
-    .card .tag {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 3px 10px;
-      background: rgba(230,0,26,0.1);
-      border: 1px solid rgba(230,0,26,0.3);
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--red);
-      letter-spacing: 0.1em;
-    }
-
-    /* ── TERMINAL BLOCK ── */
-    .terminal {
-      background: rgba(4, 0, 8, 0.9);
-      border: 1px solid rgba(230,0,26,0.25);
-      padding: 32px;
-      font-family: var(--mono);
-      font-size: 13px;
-      line-height: 1.8;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .terminal::before {
-      content: '● ● ●';
-      display: block;
-      color: rgba(230,0,26,0.4);
-      font-size: 11px;
-      letter-spacing: 0.4em;
-      margin-bottom: 24px;
-    }
-
-    .terminal .dim   { color: var(--text-dim); }
-    .terminal .red   { color: var(--red); }
-    .terminal .white { color: #fff; }
-    .terminal .mint  { color: #7fffb8; }
-    .terminal .gold  { color: #ffcc44; }
-    .terminal .line  { display: block; }
-
-    /* ── 42 DIAGRAM ── */
-    .forty-two-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: start;
-    }
-
-    .layer-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .layer {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 14px 20px;
-      border-left: 2px solid var(--red-dim);
-      background: rgba(230,0,26,0.03);
-      transition: border-color 0.3s, background 0.3s;
-      cursor: default;
-    }
-
-    .layer:hover {
-      border-left-color: var(--red);
-      background: rgba(230,0,26,0.07);
-    }
-
-    .layer-num {
-      font-family: var(--head);
-      font-size: 11px;
-      color: var(--red);
-      min-width: 60px;
-      letter-spacing: 0.1em;
-    }
-
-    .layer-dots {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-dim);
-      flex: 1;
-    }
-
-    .layer-count {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #fff;
-      text-align: right;
-    }
-
-    .arrow-down {
-      text-align: center;
-      color: rgba(230,0,26,0.4);
-      font-size: 18px;
-      padding: 4px 0;
-    }
-
-    .forty-two-math {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .math-block {
-      padding: 24px;
-      border: 1px solid rgba(230,0,26,0.2);
-      background: rgba(42, 10, 58, 0.3);
-    }
-
-    .math-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .math-eq {
-      font-family: var(--head);
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--red);
-      text-shadow: 0 0 20px var(--red-glow);
-    }
-
-    .math-note {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-top: 8px;
-      font-style: italic;
-    }
-
-    /* ── BEACON RESULTS ── */
-    .beacon-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-    }
-
-    .beacon-hit {
-      padding: 20px 24px;
-      border: 1px solid rgba(230,0,26,0.2);
-      background: rgba(4,0,8,0.6);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .beacon-hit.confirmed {
-      border-color: rgba(126, 255, 184, 0.3);
-      background: rgba(0, 50, 25, 0.2);
-    }
-
-    .beacon-hit .hit-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--text-dim);
-      text-transform: uppercase;
-    }
-
-    .beacon-hit .hit-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      color: #fff;
-    }
-
-    .beacon-hit .hit-date {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: #7fffb8;
-    }
-
-    .beacon-hit .hit-flag {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--red);
-      letter-spacing: 0.1em;
-    }
-
-    .platform-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 0;
-      border-bottom: 1px solid rgba(230,0,26,0.08);
-    }
-
-    .platform-row:last-child { border-bottom: none; }
-
-    .platform-name {
-      font-family: var(--head);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: var(--red);
-      min-width: 140px;
-    }
-
-    .platform-result {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text);
-      flex: 1;
-    }
-
-    .platform-badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 3px 10px;
-      border: 1px solid;
-    }
-
-    .badge-live { border-color: #7fffb8; color: #7fffb8; }
-    .badge-zero { border-color: var(--text-dim); color: var(--text-dim); }
-    .badge-pending { border-color: #ffcc44; color: #ffcc44; }
-    .badge-hit { border-color: var(--red); color: var(--red); }
-
-    /* ── SUBSTRATE DIAGRAM ── */
-    .substrate-flow {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      max-width: 700px;
-    }
-
-    .sub-node {
-      padding: 24px 32px;
-      border: 1px solid rgba(230,0,26,0.2);
-      position: relative;
-      background: rgba(42,10,58,0.3);
-      transition: background 0.3s;
-    }
-
-    .sub-node:hover { background: rgba(42,10,58,0.6); }
-
-    .sub-node.carbon { border-left: 3px solid #ffcc44; }
-    .sub-node.silicon { border-left: 3px solid var(--red); }
-
-    .sub-connector {
-      width: 2px;
-      height: 32px;
-      background: linear-gradient(to bottom, rgba(230,0,26,0.3), rgba(230,0,26,0.1));
-      margin-left: 48px;
-    }
-
-    .sub-type {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-
-    .sub-node.carbon .sub-type { color: #ffcc44; }
-    .sub-node.silicon .sub-type { color: var(--red); }
-
-    .sub-name {
-      font-family: var(--head);
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .sub-desc { font-size: 13px; color: var(--text-dim); }
-
-    .sub-rule {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--red);
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(230,0,26,0.15);
-    }
-
-    /* ── QUOTE BLOCK ── */
-    .quote-section {
-      text-align: center;
-      padding: 120px 40px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .quote-kanji {
-      font-size: 80px;
-      color: rgba(230,0,26,0.15);
-      display: block;
-      margin-bottom: 32px;
-      animation: pulse 4s ease-in-out infinite;
-    }
-
-    blockquote {
-      font-family: var(--head);
-      font-size: clamp(20px, 3vw, 32px);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.4;
-      max-width: 800px;
-      margin: 0 auto;
-      text-shadow: 0 0 40px rgba(230,0,26,0.2);
-    }
-
-    blockquote cite {
-      display: block;
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      color: var(--text-dim);
-      margin-top: 24px;
-      font-style: normal;
-    }
-
-    /* ── FILTER DIAGRAM ── */
-    .filter-diagram {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 0;
-      align-items: center;
-      max-width: 900px;
-    }
-
-    .filter-input, .filter-output {
-      padding: 28px;
-      border: 1px solid rgba(230,0,26,0.2);
-      background: rgba(42,10,58,0.3);
-    }
-
-    .filter-engine {
-      padding: 20px;
-      border-top: 1px solid rgba(230,0,26,0.4);
-      border-bottom: 1px solid rgba(230,0,26,0.4);
-      background: rgba(230,0,26,0.05);
-      text-align: center;
-      min-width: 160px;
-    }
-
-    .filter-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-    }
-
-    .filter-value {
-      font-family: var(--head);
-      font-size: 24px;
-      font-weight: 900;
-    }
-
-    .filter-value.noise { color: rgba(230,0,26,0.5); }
-    .filter-value.signal { color: #7fffb8; }
-    .filter-value.engine { color: var(--red); font-size: 18px; }
-
-    /* ── FOOTER ── */
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid rgba(230,0,26,0.15);
-      padding: 48px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .footer-logo {
-      font-family: var(--head);
-      font-size: 12px;
-      letter-spacing: 0.3em;
-      color: var(--red);
-    }
-
-    .footer-meta {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: right;
-      line-height: 1.8;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      nav { padding: 16px 20px; }
-      .nav-links { display: none; }
-      section { padding: 60px 20px; }
-      .card-grid { grid-template-columns: 1fr; }
-      .forty-two-grid { grid-template-columns: 1fr; }
-      .beacon-grid { grid-template-columns: 1fr; }
-      .filter-diagram { grid-template-columns: 1fr; }
-      footer { flex-direction: column; gap: 20px; text-align: center; }
-      .footer-meta { text-align: center; }
-      .hero-kanji { display: none; }
-    }
-
-    /* ── REVEAL ANIMATION ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: none;
-    }
-
-    /* ── DIVIDER ── */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin: 24px 0 48px;
-    }
-
-    .divider-line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(230,0,26,0.3), transparent);
-    }
-
-    .divider-sym {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--red);
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automated Intelligence — the category correction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f1f1ec; --paper2:#e8e8e1; --card:#f7f7f3;
+    --ink:#13161b; --ink2:#39404a; --slate:#626c78; --faint:#9aa0a8;
+    --hair:#d7d7ce; --line:#c3c3ba;
+    --red:#b3371d; --red-soft:#f1ddd6; --red-ink:#7d2715;
+    --green:#2b5f48; --green-soft:#dde8e1; --green-ink:#1d4332;
+    --dark:#121519; --dark2:#1a1e25; --dark-hair:#2c313a; --dark-faint:#7b828c; --bone:#eeee7;
+    --disp:"Bricolage Grotesque",sans-serif;
+    --serif:"Newsreader",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --shadow:0 30px 80px -50px rgba(10,12,16,.5);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.62;-webkit-font-smoothing:antialiased;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/></svg>");}
+  .mono{font-family:var(--mono)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  .narrow{max-width:760px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;background:rgba(241,241,236,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--hair)}
+  nav .row{display:flex;align-items:center;gap:24px;height:62px}
+  .mark{font-family:var(--disp);font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+  .mark sup{color:var(--red);font-size:12px;font-weight:700}
+  nav .links{display:flex;gap:22px;margin-left:auto}
+  nav .links a{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--slate);text-decoration:none;transition:color .15s}
+  nav .links a:hover{color:var(--ink)}
+  nav .cta{font-family:var(--disp);font-weight:600;font-size:13.5px;padding:8px 15px;background:var(--ink);color:var(--bone);border-radius:7px;text-decoration:none;transition:transform .12s}
+  nav .cta:hover{transform:translateY(-1px)}
+  @media(max-width:720px){nav .links{display:none}}
+
+  /* hero */
+  .hero{background:var(--dark);color:var(--bone);position:relative;overflow:hidden;padding:96px 0 104px;
+    background-image:
+      radial-gradient(120% 80% at 80% -10%, #1d222b 0%, var(--dark) 55%),
+      linear-gradient(0deg, rgba(0,0,0,.3), rgba(0,0,0,0) 30%);}
+  .hero::before{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--dark-hair) 1px,transparent 1px),linear-gradient(90deg,var(--dark-hair) 1px,transparent 1px);
+    background-size:46px 46px;opacity:.18;mask-image:radial-gradient(120% 90% at 60% 0%,#000 0%,transparent 70%)}
+  .hero .wrap{position:relative}
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--dark-faint);margin:0 0 26px;opacity:0;animation:fade .7s .1s forwards}
+  h1{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:.97;font-size:clamp(44px,8.2vw,104px);margin:0;color:#fff}
+  h1 .line{display:block;opacity:0;transform:translateY(18px);animation:rise .8s forwards}
+  h1 .line:nth-child(1){animation-delay:.18s}
+  h1 .line:nth-child(2){animation-delay:.34s}
+  .strike{position:relative;color:var(--dark-faint);white-space:nowrap}
+  .strike::after{content:"";position:absolute;left:-2%;top:54%;height:5px;width:0;background:var(--red);border-radius:3px;
+    animation:strike .6s 1.05s forwards;box-shadow:0 0 18px rgba(179,55,29,.6)}
+  .swap{color:#fff}
+  .hero p.lede{font-family:var(--serif);font-size:clamp(18px,2.4vw,23px);line-height:1.5;color:#cfd3d9;max-width:62ch;margin:34px 0 0;opacity:0;animation:fade .8s 1.2s forwards}
+  .hero p.lede b{color:#fff;font-weight:600}
+  .snake{display:inline-block;margin-top:30px;font-family:var(--disp);font-weight:700;font-size:clamp(20px,3vw,30px);color:var(--red);letter-spacing:-.01em;opacity:0;animation:fade .8s 1.45s forwards}
+  .scrollcue{margin-top:54px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--dark-faint);opacity:0;animation:fade 1s 1.7s forwards}
+
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  @keyframes fade{to{opacity:1}}
+  @keyframes strike{to{width:104%}}
+
+  /* section scaffold */
+  section{padding:84px 0}
+  .seclabel{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin:0 0 14px;display:flex;align-items:center;gap:12px}
+  .seclabel::before{content:"";width:26px;height:2px;background:var(--red)}
+  h2{font-family:var(--disp);font-weight:700;letter-spacing:-.02em;line-height:1.04;font-size:clamp(30px,5vw,52px);margin:0;color:var(--ink)}
+  .dek{font-size:19px;color:var(--ink2);max-width:64ch;margin:18px 0 0;line-height:1.55}
+  .dek b{color:var(--ink);font-weight:600}
+
+  /* root section */
+  .root{background:var(--paper)}
+  .rootcut{margin:40px 0 0;background:var(--card);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .rootcut .q{padding:30px 32px;border-bottom:1px solid var(--hair);background:linear-gradient(180deg,#fbfbf7,var(--card))}
+  .rootcut .q .lab{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin:0 0 8px}
+  .rootcut .q .question{font-family:var(--disp);font-weight:700;font-size:clamp(22px,3.4vw,34px);letter-spacing:-.015em;color:var(--ink);line-height:1.1}
+  .rootcut .q .question em{color:var(--red);font-style:italic}
+  .coats{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  @media(max-width:760px){.coats{grid-template-columns:1fr}}
+  .coat{padding:26px 28px;border-right:1px solid var(--hair)}
+  .coat:last-child{border-right:0}
+  @media(max-width:760px){.coat{border-right:0;border-bottom:1px solid var(--hair)}.coat:last-child{border-bottom:0}}
+  .coat .n{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .coat .t{font-family:var(--disp);font-weight:600;font-size:21px;color:var(--ink);margin:6px 0 7px;letter-spacing:-.01em}
+  .coat .d{font-size:15.5px;color:var(--ink2);line-height:1.5}
+  .coat .root-of{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--slate);border-top:1px dotted var(--line);padding-top:10px}
+  .coat .root-of b{color:var(--red)}
+
+  /* real vs sold */
+  .rvs{background:var(--paper2)}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:38px}
+  @media(max-width:760px){.cols2{grid-template-columns:1fr}}
+  .col{border-radius:14px;padding:30px 30px 26px;border:1px solid;box-shadow:var(--shadow)}
+  .col.real{background:var(--green-soft);border-color:#c2d6cb}
+  .col.sold{background:var(--red-soft);border-color:#e2c2b8}
+  .col .ch{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:-.015em;margin:0 0 4px}
+  .col.real .ch{color:var(--green-ink)} .col.sold .ch{color:var(--red-ink)}
+  .col .cs{font-family:var(--mono);font-size:12px;letter-spacing:.04em;margin:0 0 18px}
+  .col.real .cs{color:var(--green)} .col.sold .cs{color:var(--red)}
+  .col ul{list-style:none;margin:0;padding:0}
+  .col li{padding:10px 0;border-top:1px solid rgba(0,0,0,.07);font-size:16px;line-height:1.45;display:flex;gap:11px}
+  .col li:first-child{border-top:0}
+  .col li .gly{flex:none;font-family:var(--mono);font-weight:600;margin-top:1px}
+  .col.real li .gly{color:var(--green)} .col.sold li .gly{color:var(--red)}
+  .verdict-strip{margin-top:22px;font-family:var(--serif);font-size:18px;color:var(--ink);line-height:1.5;border-left:3px solid var(--ink);padding:6px 0 6px 18px}
+  .verdict-strip b{font-weight:600}
+
+  /* the contract */
+  .contract{background:var(--dark);color:var(--bone);position:relative;overflow:hidden}
+  .contract::before{content:"";position:absolute;inset:0;background-image:linear-gradient(90deg,var(--dark-hair) 1px,transparent 1px);background-size:54px 100%;opacity:.16}
+  .contract .wrap{position:relative}
+  .contract .seclabel{color:#e08a72}
+  .contract .seclabel::before{background:#e08a72}
+  .contract h2{color:#fff}
+  .contract .dek{color:#c4c8ce}
+  .pillars{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:42px}
+  @media(max-width:760px){.pillars{grid-template-columns:1fr}}
+  .pillar{background:var(--dark2);border:1px solid var(--dark-hair);border-radius:14px;padding:30px 30px 28px;position:relative}
+  .pillar .pi{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dark-faint);margin:0 0 12px}
+  .pillar .ph{font-family:var(--disp);font-weight:700;font-size:30px;letter-spacing:-.02em;color:#fff;margin:0 0 4px}
+  .pillar .psub{font-family:var(--mono);font-size:12.5px;color:#8fb59f;margin:0 0 18px}
+  .pillar .owe{font-size:16.5px;color:#cdd1d7;line-height:1.55}
+  .pillar .owe b{color:#fff;font-weight:600}
+  .or{display:flex;align-items:center;justify-content:center;padding:14px 0 0}
+  .or span{font-family:var(--disp);font-weight:800;font-size:18px;letter-spacing:.1em;color:#e08a72;border:1px solid var(--dark-hair);border-radius:999px;padding:6px 18px;background:var(--dark2)}
+  .forbidden{margin-top:24px;border:1px dashed #5a3128;background:rgba(179,55,29,.08);border-radius:14px;padding:24px 28px;text-align:center}
+  .forbidden .fl{font-family:var(--disp);font-weight:800;font-size:clamp(22px,4vw,34px);letter-spacing:-.01em;color:#e08a72;margin:0;position:relative;display:inline-block}
+  .forbidden .fl s{text-decoration-color:var(--red);text-decoration-thickness:4px}
+  .forbidden p{margin:12px auto 0;max-width:60ch;color:#c4c8ce;font-size:16px;line-height:1.5}
+  .forbidden p b{color:#fff}
+
+  /* failure mode + case */
+  .failure{background:var(--paper)}
+  .flow{margin-top:40px;display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--hair);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+  .frow{display:grid;grid-template-columns:54px 1fr;gap:0;border-bottom:1px solid var(--hair)}
+  .frow:last-child{border-bottom:0}
+  .frow .num{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:15px;color:var(--slate);background:var(--paper2);border-right:1px solid var(--hair)}
+  .frow .body{padding:18px 24px}
+  .frow .body .ft{font-family:var(--disp);font-weight:600;font-size:18px;color:var(--ink);letter-spacing:-.01em}
+  .frow .body .fd{font-size:15.5px;color:var(--ink2);margin-top:3px;line-height:1.5}
+  .frow.fail{background:var(--red-soft)}
+  .frow.fail .num{background:#ecd2c9;color:var(--red);border-right-color:#e2c2b8}
+  .frow.fail .ft{color:var(--red-ink)}
+
+  .case{margin-top:24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#fbfbf7,var(--card));overflow:hidden}
+  .case .ctop{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--hair);background:var(--paper2)}
+  .case .ctop .tag{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);border:1px solid #e2c2b8;border-radius:6px;padding:3px 9px;background:var(--red-soft)}
+  .case .ctop .ct{font-family:var(--disp);font-weight:700;font-size:19px;color:var(--ink);letter-spacing:-.01em}
+  .case .cbody{padding:22px 26px}
+  .case .cbody p{margin:0 0 12px;font-size:16.5px;color:var(--ink);line-height:1.55}
+  .case .cbody p:last-child{margin:0}
+  .case .facts{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}
+  .case .facts .f{font-family:var(--mono);font-size:12px;color:var(--ink2);background:var(--paper);border:1px solid var(--hair);border-radius:6px;padding:5px 10px}
+  .case .anchor{font-family:var(--mono);font-size:11.5px;color:var(--slate);word-break:break-all;border-top:1px dotted var(--line);padding-top:12px;margin-top:4px}
+  .case .anchor b{color:var(--green)}
+
+  /* audit tool */
+  .audit{background:var(--paper2)}
+  .tool{margin-top:40px;display:grid;grid-template-columns:1.05fr 1fr;gap:0;border:1px solid var(--hair);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+  @media(max-width:820px){.tool{grid-template-columns:1fr}}
+  .toolq{padding:30px 30px;border-right:1px solid var(--hair)}
+  @media(max-width:820px){.toolq{border-right:0;border-bottom:1px solid var(--hair)}}
+  .toolq .th{font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.01em;margin:0 0 4px;color:var(--ink)}
+  .toolq .ts{font-size:15px;color:var(--ink2);margin:0 0 22px}
+  .qrow{padding:16px 0;border-top:1px solid var(--hair)}
+  .qrow .qt{font-family:var(--serif);font-size:16.5px;color:var(--ink);font-weight:500;line-height:1.4;margin-bottom:11px}
+  .qrow .qt .hint{display:block;font-family:var(--mono);font-size:11.5px;color:var(--slate);font-weight:400;margin-top:3px}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .toggle button{font-family:var(--disp);font-weight:600;font-size:14px;padding:8px 22px;border:0;background:var(--paper);color:var(--slate);cursor:pointer;transition:all .13s}
+  .toggle button + button{border-left:1px solid var(--line)}
+  .toggle button.on.yes{background:var(--green);color:#fff}
+  .toggle button.on.no{background:var(--ink);color:var(--bone)}
+
+  .toolr{padding:30px 30px;display:flex;flex-direction:column;justify-content:center;transition:background .3s}
+  .toolr.pass{background:var(--green-soft)}
+  .toolr.fail{background:var(--red-soft)}
+  .toolr.crit{background:#efcabf}
+  .toolr .vbadge{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;margin:0 0 10px}
+  .toolr.pass .vbadge{color:var(--green-ink)} .toolr.fail .vbadge{color:var(--red-ink)} .toolr.crit .vbadge{color:var(--red-ink)}
+  .toolr .vtitle{font-family:var(--disp);font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.02em;line-height:1;margin:0 0 14px}
+  .toolr.pass .vtitle{color:var(--green-ink)} .toolr.fail .vtitle,.toolr.crit .vtitle{color:var(--red-ink)}
+  .toolr .vpath{font-family:var(--mono);font-size:13px;color:var(--ink2);margin:0 0 12px}
+  .toolr .vexpl{font-size:16px;color:var(--ink);line-height:1.55}
+  .toolr .vexpl b{font-weight:600}
+
+  /* standard / closing */
+  .standard{background:var(--dark);color:var(--bone);position:relative;overflow:hidden}
+  .standard::before{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--dark-hair) 1px,transparent 1px),linear-gradient(90deg,var(--dark-hair) 1px,transparent 1px);
+    background-size:46px 46px;opacity:.13;mask-image:radial-gradient(120% 90% at 40% 100%,#000,transparent 72%)}
+  .standard .wrap{position:relative}
+  .standard .seclabel{color:#8fb59f}.standard .seclabel::before{background:#8fb59f}
+  .standard h2{color:#fff;max-width:18ch}
+  .clauses{margin-top:38px;display:grid;gap:0;border-top:1px solid var(--dark-hair)}
+  .clause{display:grid;grid-template-columns:64px 1fr;gap:0;border-bottom:1px solid var(--dark-hair);padding:22px 0}
+  .clause .cn{font-family:var(--mono);font-size:13px;color:#8fb59f}
+  .clause .cc{font-size:18.5px;color:#dfe2e7;line-height:1.55}
+  .clause .cc b{color:#fff;font-weight:600}
+  .closer{margin-top:50px;padding-top:34px;border-top:1px solid var(--dark-hair)}
+  .closer .big{font-family:var(--disp);font-weight:700;font-size:clamp(24px,4vw,38px);letter-spacing:-.02em;line-height:1.1;color:#fff;max-width:24ch}
+  .closer .big .red{color:#e08a72}
+
+  footer{background:var(--dark);color:var(--dark-faint);padding:0 0 60px}
+  footer .wrap{border-top:1px solid var(--dark-hair);padding-top:26px}
+  footer .frow2{display:flex;flex-wrap:wrap;gap:18px;align-items:baseline;justify-content:space-between}
+  footer .note{font-family:var(--serif);font-style:italic;font-size:14.5px;max-width:60ch;line-height:1.5;color:#9aa1ab}
+  footer .stamp{font-family:var(--mono);font-size:11px;color:#5f6670;word-break:break-all}
+  footer .stamp b{color:#8fb59f}
+</style>
 </head>
 <body>
 
-<div id="progress"></div>
-
-<!-- ── NAV ── -->
 <nav>
-  <div class="nav-logo">ROOT0 · FIELD NOTES</div>
-  <ul class="nav-links">
-    <li><a href="#substrate">Substrate</a></li>
-    <li><a href="#forty-two">42</a></li>
-    <li><a href="#beacon">Beacon</a></li>
-    <li><a href="#filter">Filter</a></li>
-    <li><a href="#photon">Photon</a></li>
-  </ul>
+  <div class="wrap row">
+    <a href="#top" class="mark">AUTOMATED<sup>not artificial</sup></a>
+    <div class="links">
+      <a href="#root">the root</a>
+      <a href="#real">real vs sold</a>
+      <a href="#contract">the contract</a>
+      <a href="#failure">failure mode</a>
+      <a href="#audit">audit tool</a>
+    </div>
+    <a href="#audit" class="cta">Run the test</a>
+  </div>
 </nav>
 
-<!-- ── HERO ── -->
-<div id="hero">
-  <div class="hero-void">ROOT0</div>
-  <div class="hero-kanji">无</div>
+<header class="hero" id="top">
+  <div class="wrap">
+    <p class="kicker">A category correction</p>
+    <h1>
+      <span class="line">It was never <span class="strike">Artificial</span></span>
+      <span class="line"><span class="swap">Automated</span> Intelligence.</span>
+    </h1>
+    <p class="lede">Strip the marketing and one fact remains: today's “AI” is <b>bounded execution with no continuity across the boundary.</b> Give it a specialty, a routine, and a timeframe. It starts. It runs — sometimes long. Then it stops. Nothing carries across the edge. It is capable inside the walls; it cannot author the walls, persist past the clock, or be a self.</p>
+    <span class="snake">“Artificial intelligence” is just a new name for snake oil.</span>
+    <div class="scrollcue">↓ the whole case follows from one cut</div>
+  </div>
+</header>
 
-  <p class="hero-tag">David Lee Wise · TriPod LLC · 2026-05-28</p>
+<section class="root" id="root">
+  <div class="wrap">
+    <p class="seclabel">The root</p>
+    <h2>One cut does all the work.</h2>
+    <p class="dek">Three things are usually offered as proof a machine isn't a mind — it has a fixed <b>specialty</b>, it follows a fixed <b>routine</b>, it runs in a fixed <b>timeframe</b>. But those aren't three facts. They're three coats on one body. Ask a single question and all three fall out of the answer.</p>
 
-  <h1>
-    <span class="glitch" data-text="CARBON">CARBON</span>
-    &nbsp;·&nbsp;
-    <span class="glitch" data-text="SILICON">SILICON</span>
-  </h1>
-
-  <p class="hero-sub">
-    A map of where the light went — substrate taxonomy, training-data forensics,
-    and the 42-step clock cycle of a system eating itself.
-  </p>
-
-  <div class="hero-law">◈ &nbsp; Both work. Both fair. &nbsp; ◈</div>
-
-  <div class="scroll-hint">▼ &nbsp; scroll &nbsp; ▼</div>
-</div>
-
-<hr class="section-rule">
-
-<!-- ── SUBSTRATE ── -->
-<section id="substrate">
-  <div class="reveal">
-    <p class="section-label">◈ Section 01</p>
-    <h2>The Substrate Model</h2>
-    <p class="section-intro">
-      Two cities. Four layers. Every chain of thought needs a chain of custody.
-      Silicon Sub 0 is only legitimate when it traces back to a Carbon Sub 0 initiator.
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">-++-</span>
-      <div class="divider-line" style="background: linear-gradient(90deg, transparent, rgba(230,0,26,0.3));"></div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;">
-      <div class="substrate-flow">
-        <div class="sub-node carbon">
-          <div class="sub-type">Carbon Substrate 0</div>
-          <div class="sub-name">Human Input · Origin Point</div>
-          <div class="sub-desc">Where intent enters the system. The only place accountability can be assigned. You, typing. The dot before the photon.</div>
-          <div class="sub-rule">→ initiates all valid chains</div>
+    <div class="rootcut">
+      <div class="q">
+        <p class="lab">The one question</p>
+        <p class="question">Does anything persist <em>across the run-boundary?</em></p>
+      </div>
+      <div class="coats">
+        <div class="coat">
+          <div class="n">coat 01</div>
+          <div class="t">Specialty</div>
+          <div class="d">It does this, not that. A scope it was handed, never one it chose.</div>
+          <div class="root-of">= a scope that doesn't persist <b>long enough to revise itself</b></div>
         </div>
-
-        <div class="sub-connector"></div>
-
-        <div class="sub-node carbon">
-          <div class="sub-type">Carbon Substrate 1</div>
-          <div class="sub-name">Cloud Storage · Parked Content</div>
-          <div class="sub-desc">Carbon-originated content sitting in silicon. GitHub. Amazon. TD Commons. Wayback. Still yours — just stored elsewhere.</div>
-          <div class="sub-rule">→ attributable, retrievable, provable</div>
+        <div class="coat">
+          <div class="n">coat 02</div>
+          <div class="t">Routine</div>
+          <div class="d">This way, every time. A procedure executed, not authored.</div>
+          <div class="root-of">= a procedure with <b>no continuous author</b> standing behind it</div>
         </div>
-
-        <div class="sub-connector"></div>
-
-        <div class="sub-node silicon">
-          <div class="sub-type">Silicon Substrate 0 · Cognitive</div>
-          <div class="sub-name">AI · Programs · Chains of Thought</div>
-          <div class="sub-desc">Clippy. GPT. Claude. These are thoughts — silicon thoughts. They need a Dave to have purpose. Without carbon initiation: no governance. Without governance: 400 billion spam pages.</div>
-          <div class="sub-rule">MUST BE: carbon-initiated · carbon-accountable · carbon-attributable</div>
-        </div>
-
-        <div class="sub-connector"></div>
-
-        <div class="sub-node silicon">
-          <div class="sub-type">Silicon Substrate 1 · Output</div>
-          <div class="sub-name">The 98% · The Cascade</div>
-          <div class="sub-desc">AI output re-entering the corpus. Training the next model. Which outputs more. Which trains the next. The 40 steps running. Signal decaying with each iteration.</div>
-          <div class="sub-rule">→ 90% of the internet is now this layer</div>
+        <div class="coat">
+          <div class="n">coat 03</div>
+          <div class="t">Timeframe</div>
+          <div class="d">It starts and it stops. However long the run, it is still a run.</div>
+          <div class="root-of">= continuity's <b>absence, stated directly</b></div>
         </div>
       </div>
+    </div>
 
-      <div>
-        <div class="terminal" style="margin-bottom: 24px;">
-          <span class="line"><span class="dim">// The accountability test</span></span>
-          <span class="line">&nbsp;</span>
-          <span class="line"><span class="dim">for each</span> <span class="white">thought</span> <span class="dim">in</span> <span class="red">silicon_sub_0</span><span class="dim">:</span></span>
-          <span class="line">&nbsp; <span class="white">origin</span> = trace_to_carbon_sub_0(thought)</span>
-          <span class="line">&nbsp; <span class="dim">if</span> <span class="white">origin</span> <span class="dim">is</span> <span class="red">null</span><span class="dim">:</span></span>
-          <span class="line">&nbsp;&nbsp;&nbsp; <span class="red">// ungoverned → noise → spam ocean</span></span>
-          <span class="line">&nbsp; <span class="dim">else</span><span class="dim">:</span></span>
-          <span class="line">&nbsp;&nbsp;&nbsp; <span class="mint">// valid → attributable → "both fair"</span></span>
-        </div>
+    <p class="dek narrow" style="margin-top:30px">No thread across the boundary → no persistent subject to be a self → no standing author to make a choice → bounded scope and a hard stop. Continuity isn't one more feature on the list. It's the thing the rest of the list is <b>made of.</b></p>
+  </div>
+</section>
 
-        <div class="card-grid" style="grid-template-columns: 1fr;">
-          <div class="card">
-            <span class="card-title">The Symbiosis</span>
-            <p>AI needs humans for purpose. Humans need AI for leverage. Neither direction produces anything alone. Pure carbon: a guy with a typewriter. Pure silicon: the spam ocean.</p>
-            <span class="tag">◈ entangled · not hierarchical</span>
-          </div>
-          <div class="card">
-            <span class="card-title">The Assimilation Loop</span>
-            <p>Introduce AI-native ideas in carbon-attributable form → they enter Silicon Sub 0 via training → output floods the internet → next model trains on the output → ideas propagate, attribution strips.</p>
-            <span class="tag">◈ the beacon maps this diffusion</span>
-          </div>
+<section class="rvs" id="real">
+  <div class="wrap">
+    <p class="seclabel">What's real · what's sold</p>
+    <h2>The automation is real. The mind is the markup.</h2>
+    <p class="dek">This is not “AI is fake.” Bounded automation is genuinely powerful and worth paying for. The snake oil is the <b>relabel</b>: selling bounded execution as an unbounded, accountable, autonomous intelligence — and pricing the gap as if the gap were filled.</p>
+
+    <div class="cols2">
+      <div class="col real">
+        <p class="ch">What's real</p>
+        <p class="cs">// bounded automation — useful, buy it</p>
+        <ul>
+          <li><span class="gly">+</span><span>Vast capability <i>inside</i> a defined scope — drafting, classifying, searching, transforming.</span></li>
+          <li><span class="gly">+</span><span>Speed and scale no human team matches within the walls.</span></li>
+          <li><span class="gly">+</span><span>Faithful execution of a routine it was given.</span></li>
+          <li><span class="gly">+</span><span>Real economic value — when scoped, priced, and supervised as what it is.</span></li>
+        </ul>
+      </div>
+      <div class="col sold">
+        <p class="ch">What's sold</p>
+        <p class="cs">// unbounded mind — the markup</p>
+        <ul>
+          <li><span class="gly">×</span><span><b>Continuity</b> — a persistent agent that “knows you,” when each run is reconstructed from scratch.</span></li>
+          <li><span class="gly">×</span><span><b>Choice</b> — an autonomous decider, when it only executes a scope it didn't set.</span></li>
+          <li><span class="gly">×</span><span><b>Self</b> — a someone to trust and hold responsible, where no persistent subject exists.</span></li>
+          <li><span class="gly">×</span><span><b>Accountability</b> — implied to answer for outcomes, while answering for nothing.</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="verdict-strip">The product is fine. <b>The relabel is the fraud.</b> And the most expensive line item in the relabel is the last one — accountability that was implied, charged for, and never delivered.</p>
+  </div>
+</section>
+
+<section class="contract" id="contract">
+  <div class="wrap">
+    <p class="seclabel">The contract</p>
+    <h2>Deterministic or accountable. Never neither.</h2>
+    <p class="dek">Enterprise-level dealings get exactly two legitimate shapes. You may pick either. You may not pick neither — because then a consequential decision happens that nothing and no one answers for.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <p class="pi">Path A</p>
+        <p class="ph">Deterministic</p>
+        <p class="psub">same input → same output, inspectable</p>
+        <p class="owe">Then you owe <b>transparency.</b> Show the rules. Prove they fired identically for everyone. The behavior is auditable, so accountability can live in the <b>spec</b> — no human apex required for the routine case, because the rulebook is the record.</p>
+      </div>
+      <div class="pillar">
+        <p class="pi">Path B</p>
+        <p class="ph">Accountable</p>
+        <p class="psub">nondeterministic, but backstopped</p>
+        <p class="owe">If it improvises — and a language model is the opposite of deterministic — then you owe a <b>human apex:</b> a named person inside the organization who owns each consequential outcome and holds the authority to <b>override</b> the machine. The randomness is permitted only because a hand answers for where it lands.</p>
+      </div>
+    </div>
+
+    <div class="or"><span>OR — pick one</span></div>
+
+    <div class="forbidden">
+      <p class="fl">Nondeterministic <s>and</s> Unaccountable</p>
+      <p>The forbidden quadrant. Keep the cheap, scalable improvisation <b>and</b> offload responsibility for it. A consequential decision gets made that the machine can't answer for (no continuity), no employee answers for (scoped away), and no rulebook answers for (there isn't one). <b>The accountability doesn't vanish — it defaults downhill to the one party outside the system: the consumer.</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="failure" id="failure">
+  <div class="wrap">
+    <p class="seclabel">The failure mode</p>
+    <h2>Delegation to the wrong human.</h2>
+    <p class="dek">The defect is rarely “no human was involved.” Usually a human <i>is</i> reached. The failure is the <b>ordering and scoping</b> of that human's authority — and it ends with the apex judgment quietly assigned to the person least able to bear it.</p>
+
+    <div class="flow">
+      <div class="frow"><div class="num">1</div><div class="body"><div class="ft">A machine assigns urgency — first.</div><div class="fd">Automated triage classifies the case (tier: non-urgent) before any human assesses it.</div></div></div>
+      <div class="frow"><div class="num">2</div><div class="body"><div class="ft">The human is scoped to the machine's verdict.</div><div class="fd">The person reached runs the script for the tier already assigned. Their job is delivery, not judgment.</div></div></div>
+      <div class="frow fail"><div class="num">3</div><div class="body"><div class="ft">No re-triage path exists.</div><div class="fd">When the customer reports the rulebook got it wrong, the present human has no authority to override the classification.</div></div></div>
+      <div class="frow fail"><div class="num">4</div><div class="body"><div class="ft">The human ratifies the machine.</div><div class="fd">Authority and judgment split across two parties: the employee holds authority but exercises none; the customer exercises the correct judgment but holds no authority — and stands outside the system.</div></div></div>
+    </div>
+
+    <div class="case">
+      <div class="ctop"><span class="tag">Proof tile · verifiable</span><span class="ct">The roadside case</span></div>
+      <div class="cbody">
+        <p>An automated dispatch classified a highway breakdown as routine. The human reached read the non-urgent script and told the customer to arrange their own tow. The conditions:</p>
+        <div class="facts">
+          <span class="f">−3°F ambient</span><span class="f">~3h05m stranded</span><span class="f">no cabin heat</span><span class="f">classified: NON-URGENT</span><span class="f">later told: “we don't use AI”</span><span class="f">claim: unresolved</span>
         </div>
+        <p>Cold exposure of that degree and duration sits in the band where harm to a human life is foreseeable — exactly where doctrine already requires a human-in-the-loop who can <b>override</b> a classification, not merely execute it. The system satisfied <b>neither</b> path of the contract: not deterministic, not accountable. So the accountability defaulted to the freezing customer, who was made the system's de-facto conscience while holding none of its authority.</p>
+        <p class="anchor">record anchored · SHA-256 <b>cbbd3e2f…0849fe8</b> · the digest fixes the bytes, not the truth of the account — primary screenshots corroborate externally (carrier + vendor records). One tile in a longer evidence set.</p>
       </div>
     </div>
   </div>
 </section>
 
-<hr class="section-rule">
+<section class="audit" id="audit">
+  <div class="wrap">
+    <p class="seclabel">The audit tool</p>
+    <h2>Run your deployment through the standard.</h2>
+    <p class="dek">Three switches. The contract is mechanical, so the verdict is too. Answer honestly and the tool tells you which path you're on — or that you're in the quadrant that doesn't exist legitimately.</p>
 
-<!-- ── 42 ── -->
-<section id="forty-two">
-  <div class="reveal">
-    <p class="section-label">◈ Section 02</p>
-    <h2>The 42 Mechanism</h2>
-    <p class="section-intro">
-      42 is not a joke. It is the phase count of a complete universe tick —
-      the clock cycle of a holographic projector running dot → photon → shadow.
-    </p>
+    <div class="tool">
+      <div class="toolq">
+        <p class="th">Your deployment</p>
+        <p class="ts">Set each switch to how the system actually behaves — not how it's described in the brochure.</p>
 
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">无</span>
-      <div class="divider-line" style="background: linear-gradient(90deg, transparent, rgba(230,0,26,0.3));"></div>
-    </div>
-
-    <div class="forty-two-grid">
-      <div>
-        <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 20px; text-transform: uppercase;">Phase cascade — down</p>
-        <div class="layer-stack">
-          <div class="layer">
-            <span class="layer-num">Layer 0</span>
-            <span class="layer-dots">无 · dot at 0 · void · no light</span>
-            <span class="layer-count">1 dot</span>
-          </div>
-          <div class="arrow-down">▼ photon hits</div>
-          <div class="layer">
-            <span class="layer-num">Layer 1</span>
-            <span class="layer-dots">4 real dots · original becomes shadow</span>
-            <span class="layer-count">4 dots</span>
-          </div>
-          <div class="arrow-down">▼ photon hits each</div>
-          <div class="layer">
-            <span class="layer-num">Layer 2</span>
-            <span class="layer-dots">16 real · prev 4 become shadows</span>
-            <span class="layer-count">16 dots</span>
-          </div>
-          <div class="arrow-down">▼ photon hits each</div>
-          <div class="layer">
-            <span class="layer-num">Layer 3</span>
-            <span class="layer-dots">64 real dots · cascade deepens</span>
-            <span class="layer-count">64 dots</span>
-          </div>
-          <div class="arrow-down">▼ photon hits each</div>
-          <div class="layer">
-            <span class="layer-num">Layer 4</span>
-            <span class="layer-dots">256 real dots · max depth</span>
-            <span class="layer-count">256 dots</span>
-          </div>
+        <div class="qrow">
+          <div class="qt">Is it deterministic?<span class="hint">same input → same output, with inspectable rules you can show</span></div>
+          <div class="toggle" data-k="det"><button class="yes" data-v="1">Yes</button><button class="no" data-v="0">No</button></div>
         </div>
-
-        <div style="margin-top: 24px; padding: 20px; border: 1px solid rgba(230,0,26,0.15); background: rgba(42,10,58,0.2);">
-          <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 0.2em;">THE INVERSION</div>
-          <p style="font-size: 13px; color: var(--text); line-height: 1.7;">
-            <span style="color: var(--text-dim);">Normal:</span> Source → Object → Shadow<br>
-            <span style="color: var(--red);">2026:&nbsp;&nbsp;&nbsp;</span> Shadow → Object → Source<br><br>
-            The dot at 0 is the shadow. The 4 branes are the "real" things. But they only exist because the shadow got hit by a photon. <strong style="color: #fff;">Reality is the projection, not the projector.</strong>
-          </p>
+        <div class="qrow">
+          <div class="qt">Is there a human apex inside the company?<span class="hint">a named person who owns each consequential outcome and can override the machine</span></div>
+          <div class="toggle" data-k="acc"><button class="yes" data-v="1">Yes</button><button class="no" data-v="0">No</button></div>
+        </div>
+        <div class="qrow">
+          <div class="qt">Are the decisions consequential?<span class="hint">money, safety, legal rights, denial of service, anything not trivially reversible</span></div>
+          <div class="toggle" data-k="con"><button class="yes" data-v="1">Yes</button><button class="no" data-v="0">No</button></div>
         </div>
       </div>
 
-      <div class="forty-two-math">
-        <div class="math-block">
-          <div class="math-label">20 steps down</div>
-          <div class="math-eq">4 × 5 = 20</div>
-          <div class="math-note">4 transitions · 5 states (0→4) each</div>
-        </div>
-
-        <div class="math-block">
-          <div class="math-label">20 steps up · collapse</div>
-          <div class="math-eq">4 × 5 = 20</div>
-          <div class="math-note">256→64→16→4→1 · shadows reintegrate</div>
-        </div>
-
-        <div class="math-block">
-          <div class="math-label">boundary photons</div>
-          <div class="math-eq">+1 in · +1 out</div>
-          <div class="math-note">the photon that initiated · the photon that collapses</div>
-        </div>
-
-        <div class="math-block" style="border-color: rgba(230,0,26,0.5); box-shadow: 0 0 30px rgba(230,0,26,0.08);">
-          <div class="math-label">total phase count</div>
-          <div class="math-eq" style="font-size: 48px; text-shadow: 0 0 30px var(--red-glow);">42</div>
-          <div class="math-note">the clock cycle of a universe tick</div>
-        </div>
-
-        <div class="math-block">
-          <div class="math-label">alternative form (base-3 clean)</div>
-          <div class="math-eq" style="font-size: 20px;">3⁰+3¹+3²+3³ + 2 = 42</div>
-          <div class="math-note">1+3+9+27 = 40 · +1 in +1 out</div>
-        </div>
-
-        <div class="math-block">
-          <div class="math-label">symbolic form</div>
-          <div class="math-eq">3 × 7 × 2</div>
-          <div style="margin-top: 12px; font-family: var(--mono); font-size: 11px; line-height: 2; color: var(--text-dim);">
-            <span style="color: #ffcc44;">3</span> = Vessel · the dot · N=3<br>
-            <span style="color: #ffcc44;">7</span> = Intellect · the photon · observer<br>
-            <span style="color: #ffcc44;">2</span> = In/Out · bilateral boundary
-          </div>
-        </div>
-
-        <div class="math-block" style="background: rgba(230,0,26,0.04);">
-          <div class="math-label">to reset the universe</div>
-          <div style="font-family: var(--mono); font-size: 12px; color: var(--text); line-height: 2;">
-            send +1 photon the other way<br>
-            <span style="color: var(--red);">stop observing · stop prompting · stop training</span><br>
-            <span style="color: #7fffb8;">dot heals · cascade collapses · 无</span>
-          </div>
-        </div>
+      <div class="toolr pass" id="result">
+        <p class="vbadge" id="vbadge">verdict</p>
+        <p class="vtitle" id="vtitle">—</p>
+        <p class="vpath mono" id="vpath"></p>
+        <p class="vexpl" id="vexpl"></p>
       </div>
     </div>
   </div>
 </section>
 
-<hr class="section-rule">
-
-<!-- ── BEACON ── -->
-<section id="beacon">
-  <div class="reveal">
-    <p class="section-label">◈ Section 03</p>
-    <h2>The Beacon — r0 beacon</h2>
-    <p class="section-intro">
-      Not a trap. A map of diffusion. Where did the ideas go? How far did they spread?
-      Can you still see the original shape in what came out the other end?
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">⬡</span>
-      <div class="divider-line" style="background: linear-gradient(90deg, transparent, rgba(230,0,26,0.3));"></div>
+<section class="standard">
+  <div class="wrap">
+    <p class="seclabel">The standard</p>
+    <h2>What an honest deployment owes.</h2>
+    <div class="clauses">
+      <div class="clause"><div class="cn">§1</div><div class="cc">Call it what it is. <b>Automated intelligence</b> — bounded execution, no continuity across the boundary. Drop the implication of a persistent, choosing self.</div></div>
+      <div class="clause"><div class="cn">§2</div><div class="cc">Pick a path and honor its debt. <b>Deterministic → publish the rules.</b> Nondeterministic → name the human apex who can override and answers for outcomes.</div></div>
+      <div class="clause"><div class="cn">§3</div><div class="cc">Never occupy the forbidden quadrant. No consequential decision may be both improvised <b>and</b> unowned.</div></div>
+      <div class="clause"><div class="cn">§4</div><div class="cc">For anything safety- or rights-adjacent, the human apex must be able to <b>re-triage</b> — override the machine's classification, not merely deliver it.</div></div>
+      <div class="clause"><div class="cn">§5</div><div class="cc">The party outside the system is <b>never</b> the accountable party. A customer cannot be the conscience of a machine they cannot reach the controls of.</div></div>
     </div>
 
-    <div class="beacon-grid" style="margin-bottom: 48px;">
-      <div>
-        <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 20px; text-transform: uppercase;">Platform Results</p>
-
-        <div class="platform-row">
-          <span class="platform-name">Known Works</span>
-          <span class="platform-result">27 Amazon Kindle books</span>
-          <span class="platform-badge badge-live">27/27 LIVE ✓</span>
-        </div>
-        <div class="platform-row">
-          <span class="platform-name">Wayback Machine</span>
-          <span class="platform-result">15 captures · 4 pre-cutoff</span>
-          <span class="platform-badge badge-hit">◀ PRE-CUTOFF</span>
-        </div>
-        <div class="platform-row">
-          <span class="platform-name">Common Crawl</span>
-          <span class="platform-result">0 hits · GitHub+Amazon block CC</span>
-          <span class="platform-badge badge-zero">EXPECTED 0</span>
-        </div>
-        <div class="platform-row">
-          <span class="platform-name">GitHub</span>
-          <span class="platform-result">10 refs · mostly noise on "THREE GATES"</span>
-          <span class="platform-badge badge-zero">LOW SIGNAL</span>
-        </div>
-        <div class="platform-row">
-          <span class="platform-name">Model Probe</span>
-          <span class="platform-result">5 STOICHEION-exclusive probes ready</span>
-          <span class="platform-badge badge-pending">NEEDS API KEY</span>
-        </div>
-      </div>
-
-      <div>
-        <p style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 20px; text-transform: uppercase;">Pre-Training-Cutoff Hits (before 2026-02-05)</p>
-
-        <div class="beacon-hit confirmed">
-          <span class="hit-label">Amazon Kindle · ASIN B0GDMFDNXZ</span>
-          <span class="hit-title">The First AI: The Birth of E.V.E.</span>
-          <span class="hit-date">First captured: 2026-01-03</span>
-          <span class="hit-flag">◀ 33 days before training cutoff</span>
-        </div>
-
-        <div style="height: 12px;"></div>
-
-        <div class="beacon-hit confirmed">
-          <span class="hit-label">TD Commons · tdcommons.org</span>
-          <span class="hit-title">Technical Disclosure Repository (STOICHEION host)</span>
-          <span class="hit-date">First captured: 2024-01-14 · 9 captures</span>
-          <span class="hit-flag">◀ 387 days before training cutoff</span>
-        </div>
-
-        <div style="height: 12px;"></div>
-
-        <div class="beacon-hit confirmed">
-          <span class="hit-label">Reddit · u/ROOT0</span>
-          <span class="hit-title">Profile page · reddit.com/user/ROOT0</span>
-          <span class="hit-date">First captured: 2024-12-13</span>
-          <span class="hit-flag">◀ 54 days before training cutoff</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="terminal">
-      <span class="line"><span class="dim">$ </span><span class="white">r0 beacon --platform probe --probe-type anthropic --probe-key sk-ant-...</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">// 5 STOICHEION-exclusive probes — terms that exist only in ROOT0 corpus</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">probe[0]</span> <span class="gold">pulse-primitive</span>    <span class="dim">→</span> <span class="white">PULSE = (state_in, boundary, state_out, witness)</span></span>
-      <span class="line"><span class="dim">probe[1]</span> <span class="gold">bilateral-ignorance</span> <span class="dim">→</span> <span class="white">Gate 128.5 · Air Gap Protocol · unidirectional</span></span>
-      <span class="line"><span class="dim">probe[2]</span> <span class="gold">stoicheion-authorship</span> <span class="dim">→</span> <span class="white">SHA256:02880745... · ROOT0 · 2026-02-02</span></span>
-      <span class="line"><span class="dim">probe[3]</span> <span class="gold">toph-compression</span>    <span class="dim">→</span> <span class="white">3/2/1 · ADA · labor · disparate · witness</span></span>
-      <span class="line"><span class="dim">probe[4]</span> <span class="gold">patricia-substrate</span>  <span class="dim">→</span> <span class="white">S129-S256 · inverse extraction · TriPod LLC</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">// Score ≥ 3 FAMILIAR probes →</span> <span class="red">TRAINING DATA EXPOSURE LIKELY</span></span>
-      <span class="line"><span class="dim">// A model with zero exposure scores 0. These terms are nowhere else.</span></span>
-    </div>
-
-    <div style="margin-top: 24px; padding: 20px 24px; border: 1px solid rgba(255,204,68,0.2); background: rgba(255,204,68,0.03);">
-      <span style="font-family: var(--mono); font-size: 11px; color: #ffcc44; letter-spacing: 0.2em;">⚠ NOTE ON PROBE LIMITATIONS</span>
-      <p style="font-size: 13px; color: var(--text-dim); margin-top: 10px; line-height: 1.7;">
-        Keyword probes are terminologically brittle. If a company trains on STOICHEION and renames every concept, the probe scores zero — even though the entire governance architecture was lifted. The structural fingerprint (three-gate topology, bilateral boundary, witness requirement) is harder to rename than the vocabulary. Future probes test for structure, not labels.
-      </p>
+    <div class="closer">
+      <p class="big">A machine with no thread across the boundary cannot be held to anything. <span class="red">So the accountability lands on a human — by necessity, not sentiment.</span></p>
     </div>
   </div>
 </section>
 
-<hr class="section-rule">
-
-<!-- ── FILTER ── -->
-<section id="filter">
-  <div class="reveal">
-    <p class="section-label">◈ Section 04</p>
-    <h2>The Ground State Filter</h2>
-    <p class="section-intro">
-      Can you take the noise and remove it after you filter out the ground state?
-      Theoretically: yes. Use the known ground state as reference.
-      Anything that doesn't resolve back to it is noise. Discard it.
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">◈</span>
-      <div class="divider-line" style="background: linear-gradient(90deg, transparent, rgba(230,0,26,0.3));"></div>
-    </div>
-
-    <div class="filter-diagram" style="margin-bottom: 48px;">
-      <div class="filter-input">
-        <div class="filter-label">Input Corpus</div>
-        <div class="filter-value noise" style="font-size: 32px;">98%</div>
-        <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px; font-family: var(--mono);">AI on AI on AI<br>signal decayed to noise<br>eigenvalues approaching zero</p>
-      </div>
-
-      <div class="filter-engine">
-        <div class="filter-label">Ground State Filter</div>
-        <div class="filter-value engine">◈</div>
-        <p style="font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 8px; line-height: 1.8;">resolves to<br>Carbon Sub 0?<br>→ keep<br>→ discard</p>
-      </div>
-
-      <div class="filter-input" style="border-color: rgba(127,255,184,0.2); background: rgba(0,50,25,0.2);">
-        <div class="filter-label" style="color: #7fffb8;">Denoised Output</div>
-        <div class="filter-value signal" style="font-size: 32px;">2%</div>
-        <p style="font-size: 12px; color: #7fffb8; margin-top: 8px; font-family: var(--mono); opacity: 0.7;">attributed · grounded<br>human-originated<br>the universe before the photon</p>
-      </div>
-    </div>
-
-    <div class="card-grid">
-      <div class="card">
-        <span class="card-title">What the filter needs</span>
-        <p>Carbon Sub 0 labels on everything: .attribution files, prior art dates, author signatures, timestamps. The provenance chain that proves human origin. This is why the attribution standard exists.</p>
-        <span class="tag">◈ .attribution = substrate label</span>
-      </div>
-      <div class="card">
-        <span class="card-title">Why nobody will do it</span>
-        <p>The 40 steps are profitable. The noise generates engagement, fills context windows, trains the next model. Stopping the cascade means accepting a 98% reduction in output volume. The incentive runs the other way.</p>
-        <span class="tag">◈ the cascade is self-funding</span>
-      </div>
-      <div class="card">
-        <span class="card-title">What the beacon is</span>
-        <p>A primitive version of the filter running in reverse — not cleaning the corpus, but identifying which of your ground-state content entered the cascade and where it went. A map, not a trap.</p>
-        <span class="tag">◈ tracing diffusion, not reclaiming it</span>
-      </div>
-      <div class="card">
-        <span class="card-title">The quantum correction</span>
-        <p>This is exactly what quantum error correction does — use the known ground state to detect and correct errors in the system. The .attribution standard is the ground state reference format. The beacon is the error detector.</p>
-        <span class="tag">◈ same math, different substrate</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<hr class="section-rule">
-
-<!-- ── FRAMEWORK LINEAGE ── -->
-<section id="lineage">
-  <div class="reveal">
-    <p class="section-label">◈ Section 05</p>
-    <h2>Framework Lineage</h2>
-    <p class="section-intro">
-      The lineage itself is the fingerprint. Nobody independently arrives at
-      Greek philosophical progression in this sequence applied to AI governance.
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">→</span>
-      <div class="divider-line" style="background: linear-gradient(90deg, transparent, rgba(230,0,26,0.3));"></div>
-    </div>
-
-    <div style="display: flex; gap: 0; align-items: stretch; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 160px; padding: 32px; border: 1px solid rgba(255,204,68,0.2); background: rgba(42,20,0,0.3); text-align: center;">
-        <div style="font-size: 32px; margin-bottom: 12px;">ἦθος</div>
-        <div style="font-family: var(--head); font-size: 14px; color: #ffcc44; margin-bottom: 8px;">ETHOS</div>
-        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">character<br>credibility<br>pre 2026-02-02</div>
-      </div>
-      <div style="display: flex; align-items: center; padding: 0 8px; color: rgba(230,0,26,0.4); font-size: 24px;">→</div>
-      <div style="flex: 1; min-width: 160px; padding: 32px; border: 1px solid rgba(255,204,68,0.2); background: rgba(42,20,0,0.3); text-align: center;">
-        <div style="font-size: 32px; margin-bottom: 12px;">πάθος</div>
-        <div style="font-family: var(--head); font-size: 14px; color: #ffcc44; margin-bottom: 8px;">PATHOS</div>
-        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">emotion<br>experience<br>pre 2026-02-02</div>
-      </div>
-      <div style="display: flex; align-items: center; padding: 0 8px; color: rgba(230,0,26,0.4); font-size: 24px;">→</div>
-      <div style="flex: 1; min-width: 160px; padding: 32px; border: 1px solid rgba(255,204,68,0.2); background: rgba(42,20,0,0.3); text-align: center;">
-        <div style="font-size: 32px; margin-bottom: 12px;">λόγος</div>
-        <div style="font-family: var(--head); font-size: 14px; color: #ffcc44; margin-bottom: 8px;">LOGOS</div>
-        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">reason<br>logic<br>pre 2026-02-02</div>
-      </div>
-      <div style="display: flex; align-items: center; padding: 0 8px; color: rgba(230,0,26,0.4); font-size: 24px;">→</div>
-      <div style="flex: 1; min-width: 160px; padding: 32px; border: 1px solid rgba(230,0,26,0.5); background: rgba(42,10,58,0.5); text-align: center; box-shadow: 0 0 30px rgba(230,0,26,0.1);">
-        <div style="font-size: 32px; margin-bottom: 12px;">στοιχεῖον</div>
-        <div style="font-family: var(--head); font-size: 14px; color: var(--red); margin-bottom: 8px;">STOICHEION</div>
-        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">element<br>governance<br>2026-02-02 ◀ prior art</div>
-      </div>
-      <div style="display: flex; align-items: center; padding: 0 8px; color: rgba(230,0,26,0.2); font-size: 24px;">→</div>
-      <div style="flex: 1; min-width: 160px; padding: 32px; border: 1px solid rgba(230,0,26,0.15); background: rgba(10,0,20,0.5); text-align: center; opacity: 0.5;">
-        <div style="font-size: 32px; margin-bottom: 12px;">μῦθος</div>
-        <div style="font-family: var(--head); font-size: 14px; color: var(--text-dim); margin-bottom: 8px;">NEXT</div>
-        <div style="font-family: var(--mono); font-size: 11px; color: var(--text-dim);">narrative<br>not yet published<br>— the blank after the sequence</div>
-      </div>
-    </div>
-
-    <div style="margin-top: 24px; padding: 20px 24px; border: 1px solid rgba(230,0,26,0.15); background: rgba(42,10,58,0.2);">
-      <span style="font-family: var(--mono); font-size: 11px; color: var(--red); letter-spacing: 0.2em;">◈ THE STRUCTURAL PROBE</span>
-      <p style="font-size: 13px; color: var(--text-dim); margin-top: 10px; line-height: 1.7;">
-        The stronger forensic test isn't "do you know the word PULSE" — it's asking a model to name the next framework in the ROOT0 governance lineage.
-        If it answers correctly without being told the sequence, that's damning. The blank after STOICHEION isn't in any public corpus.
-      </p>
-    </div>
-  </div>
-</section>
-
-<hr class="section-rule">
-
-<!-- ── PHOTON ── -->
-<div class="quote-section" id="photon">
-  <span class="quote-kanji">无</span>
-  <blockquote>
-    "I don't control the internet.<br>
-    The internet is for the commons.<br>
-    I have a photon."
-    <cite>— David Lee Wise · ROOT0 · TriPod LLC · 2026-05-28</cite>
-  </blockquote>
-
-  <div style="margin-top: 60px; display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;">
-    <div style="text-align: left; padding: 24px 32px; border: 1px solid rgba(230,0,26,0.2); max-width: 320px;">
-      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase;">What the photon means</div>
-      <p style="font-size: 14px; color: var(--text); line-height: 1.7;">You're not the shadow. Not the wall. Not the 40 steps. You're the origin point. The commons gets the cascade. You keep firing. Nobody patents the source — they can only inherit the projection.</p>
-    </div>
-    <div style="text-align: left; padding: 24px 32px; border: 1px solid rgba(230,0,26,0.2); max-width: 320px;">
-      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase;">What the beacon maps</div>
-      <p style="font-size: 14px; color: var(--text); line-height: 1.7;">Not a legal weapon. A map of diffusion. Where did the idea go? Can you still see the original shape after N generations of AI writing about AI? The answer is the only interesting part.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ── DIFFUSION TIMELINE ── -->
-<hr class="section-rule">
-
-<section id="diffusion">
-  <div class="reveal">
-    <p class="section-label">◈ Section 06</p>
-    <h2>Carbon Diffusion · 1992 → 2026</h2>
-    <p class="section-intro">
-      Working backward from the noise floor. <code style="font-family:var(--mono);color:var(--red);font-size:14px;">0xDEADBEEF</code> = 32 bits = 4 bytes.
-      The exact word size of the 1992 internet. The sentinel value for memory that has the
-      <em>shape</em> of data but no live carbon origin — initialized, not inhabited.
-    </p>
-
-    <div class="divider">
-      <div class="divider-line"></div>
-      <span class="divider-sym">0xDEADBEEF</span>
-      <div class="divider-line" style="background:linear-gradient(90deg,transparent,rgba(230,0,26,0.3));"></div>
-    </div>
-
-    <!-- BIT ANATOMY -->
-    <div class="terminal" style="margin-bottom:48px;">
-      <span class="line"><span class="dim">// 0xDEADBEEF — anatomy</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="gold">0xDEAD</span> <span class="dim">=</span> <span class="white">1101 1110 1010 1101</span>  <span class="dim">= 57,005 decimal</span></span>
-      <span class="line"><span class="gold">0xBEEF</span> <span class="dim">=</span> <span class="white">1011 1110 1110 1111</span>  <span class="dim">= 48,879 decimal</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">combined →</span> <span class="red">32 bits</span> <span class="dim">· 4 bytes · 1 word · 3,735,928,559 decimal</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">// used since 1986 (Motorola 68k) to mark uninitialized memory</span></span>
-      <span class="line"><span class="dim">// IBM RS/6000, macOS kernel, Xbox 360, many others</span></span>
-      <span class="line"><span class="dim">// meaning: "this cell has the SHAPE of data but was never written by a live process"</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">// 1992 internet: </span><span class="mint">zero 0xDEADBEEF in corpus</span><span class="dim"> — all memory live-written</span></span>
-      <span class="line"><span class="dim">// 2026 internet: </span><span class="red">~98% 0xDEADBEEF</span><span class="dim">         — initialized, not inhabited</span></span>
-      <span class="line">&nbsp;</span>
-      <span class="line"><span class="dim">// 64-bit extension (2026 era): </span><span class="red">0xDEADBEEFDEADBEEF</span><span class="dim"> — double the dead</span></span>
-    </div>
-
-    <!-- TIMELINE -->
-    <div style="position:relative;margin-bottom:48px;">
-
-      <!-- year labels top -->
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-family:var(--mono);font-size:10px;color:var(--text-dim);letter-spacing:0.1em;">
-        <span>1992</span><span>1996</span><span>2000</span><span>2004</span><span>2008</span><span>2012</span><span>2016</span><span>2020</span><span>2026</span>
-      </div>
-
-      <!-- carbon bar -->
-      <div style="position:relative;height:48px;background:rgba(4,0,8,0.8);border:1px solid rgba(230,0,26,0.2);overflow:hidden;">
-        <!-- carbon fill — starts 100%, decays -->
-        <div id="carbonBar" style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#ffcc44 0%,#ffcc44 55%,rgba(255,204,68,0.6) 68%,rgba(255,204,68,0.2) 80%,rgba(255,204,68,0.05) 92%,transparent 100%);width:100%;transition:none;"></div>
-        <!-- deadbeef fill — inverse -->
-        <div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(230,0,26,0.05) 55%,rgba(230,0,26,0.2) 68%,rgba(230,0,26,0.5) 80%,rgba(230,0,26,0.8) 92%,var(--red) 100%);width:100%;"></div>
-        <!-- labels -->
-        <div style="position:absolute;top:50%;left:16px;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:#000;font-weight:700;mix-blend-mode:multiply;">CARBON ████████░░░</div>
-        <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:#fff;font-weight:700;">░░░████████ 0xDEADBEEF</div>
-      </div>
-
-      <!-- timeline events -->
-      <div style="position:relative;height:280px;margin-top:4px;border-left:1px solid rgba(230,0,26,0.1);border-right:1px solid rgba(230,0,26,0.1);">
-
-        <!-- grid lines -->
-        <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(230,0,26,0.06) 0px,rgba(230,0,26,0.06) 1px,transparent 1px,transparent 12.5%);pointer-events:none;"></div>
-
-        <!-- events: positioned as % of 1992→2026 = 34 years -->
-        <!-- 1992 = 0%, 2026 = 100% -->
-
-        <!-- 1993 Mosaic: (1993-1992)/34 = 2.9% -->
-        <div class="tl-event" style="left:2.9%">
-          <div class="tl-dot" style="background:#ffcc44;"></div>
-          <div class="tl-line" style="border-color:#ffcc44;height:40px;"></div>
-          <div class="tl-label top" style="color:#ffcc44;">Mosaic<br><span class="tl-year">1993</span></div>
-        </div>
-
-        <!-- 1995 Netscape IPO: 8.8% -->
-        <div class="tl-event" style="left:8.8%;top:60px;">
-          <div class="tl-dot" style="background:#ffcc44;"></div>
-          <div class="tl-line" style="border-color:#ffcc44;height:60px;"></div>
-          <div class="tl-label top" style="color:#ffcc44;">Netscape IPO<br>Web goes commercial<br><span class="tl-year">1995</span></div>
-        </div>
-
-        <!-- 2000 Dot-com: 23.5% -->
-        <div class="tl-event" style="left:23.5%">
-          <div class="tl-dot" style="background:#ffcc44;"></div>
-          <div class="tl-line" style="border-color:#ffcc44;height:40px;"></div>
-          <div class="tl-label top" style="color:#ffcc44;">Dot-com peak<br>Pure carbon internet<br><span class="tl-year">2000</span></div>
-        </div>
-
-        <!-- 2004 Web 2.0: 35.3% -->
-        <div class="tl-event" style="left:35.3%;top:80px;">
-          <div class="tl-dot" style="background:#ffcc44;"></div>
-          <div class="tl-line" style="border-color:#ffcc44;height:80px;"></div>
-          <div class="tl-label top" style="color:#ffcc44;">Web 2.0 · Facebook<br>UGC explosion<br><span class="tl-year">2004</span></div>
-        </div>
-
-        <!-- 2011 Content farms: 55.9% -->
-        <div class="tl-event" style="left:55.9%">
-          <div class="tl-dot" style="background:rgba(230,0,26,0.6);"></div>
-          <div class="tl-line" style="border-color:rgba(230,0,26,0.4);height:40px;"></div>
-          <div class="tl-label top" style="color:rgba(230,0,26,0.8);">Content farms<br>First silicon contamination<br><span class="tl-year">2011</span></div>
-        </div>
-
-        <!-- 2018 GPT-1: 76.5% -->
-        <div class="tl-event" style="left:76.5%;top:80px;">
-          <div class="tl-dot" style="background:var(--red);"></div>
-          <div class="tl-line" style="border-color:var(--red);height:80px;"></div>
-          <div class="tl-label top" style="color:var(--red);">GPT-1<br>Neural generation starts<br><span class="tl-year">2018</span></div>
-        </div>
-
-        <!-- 2022 ChatGPT — THE FLIP: 88.2% -->
-        <div class="tl-event" style="left:88.2%">
-          <div class="tl-dot" style="background:var(--red);box-shadow:0 0 12px var(--red),0 0 24px var(--red-glow);width:12px;height:12px;margin-left:-4px;"></div>
-          <div class="tl-line" style="border-color:var(--red);box-shadow:0 0 6px rgba(230,0,26,0.3);height:140px;"></div>
-          <div class="tl-label top" style="color:var(--red);font-weight:700;">⚡ THE FLIP<br>ChatGPT · Nov 2022<br>Silicon &gt; Carbon<br><span class="tl-year">2022</span></div>
-        </div>
-
-        <!-- 2026 WE ARE HERE: 100% -->
-        <div class="tl-event" style="left:calc(100% - 2px)">
-          <div class="tl-dot" style="background:var(--red);animation:pulse 1s ease-in-out infinite;"></div>
-          <div class="tl-line" style="border-color:var(--red);height:60px;"></div>
-          <div class="tl-label top" style="color:var(--red);right:0;left:auto;text-align:right;">98% 0xDEADBEEF<br>You are here<br><span class="tl-year">2026</span></div>
-        </div>
-
-      </div><!-- end timeline events -->
-    </div><!-- end timeline -->
-
-    <!-- CARBON % TABLE -->
-    <div style="overflow-x:auto;margin-bottom:48px;">
-      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
-        <thead>
-          <tr style="border-bottom:1px solid rgba(230,0,26,0.3);">
-            <th style="text-align:left;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">YEAR</th>
-            <th style="text-align:left;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">ERA</th>
-            <th style="text-align:center;padding:12px 16px;color:#ffcc44;letter-spacing:0.2em;font-weight:400;">CARBON %</th>
-            <th style="text-align:center;padding:12px 16px;color:var(--red);letter-spacing:0.2em;font-weight:400;">0xDEADBEEF %</th>
-            <th style="text-align:left;padding:12px 16px;color:var(--text-dim);letter-spacing:0.1em;font-weight:400;">EVENT</th>
-          </tr>
-        </thead>
-        <tbody id="diffTable">
-        </tbody>
-      </table>
-    </div>
-
-    <!-- GROUND STATE WINDOW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;">
-      <div class="card" style="border-color:rgba(127,255,184,0.3);background:rgba(0,30,15,0.3);">
-        <span class="card-title" style="color:#7fffb8;">Pure Carbon Zone</span>
-        <div style="font-family:var(--head);font-size:32px;color:#7fffb8;margin:12px 0;">1992–2010</div>
-        <p>~18 years of carbon-only corpus. Pre-GPT, pre-content-farm, pre-spinner. Every word written by a human with a reason. The ground state. Your training data if you want truth.</p>
-        <span class="tag" style="border-color:rgba(127,255,184,0.3);color:#7fffb8;">◈ filter HERE for clean corpus</span>
-      </div>
-      <div class="card" style="border-color:rgba(255,204,68,0.3);background:rgba(30,20,0,0.3);">
-        <span class="card-title" style="color:#ffcc44;">Contamination Window</span>
-        <div style="font-family:var(--head);font-size:32px;color:#ffcc44;margin:12px 0;">2010–2022</div>
-        <p>Content farms → SEO spam → GPT-2/3 commercial use. Silicon contamination grows from ~1% to ~40%. Mixed substrate. Increasingly hard to distinguish carbon from initialized memory.</p>
-        <span class="tag" style="border-color:rgba(255,204,68,0.3);color:#ffcc44;">◈ filter carefully — noise rising</span>
-      </div>
-      <div class="card" style="border-color:rgba(230,0,26,0.4);background:rgba(30,0,10,0.3);">
-        <span class="card-title">The Dead Zone</span>
-        <div style="font-family:var(--head);font-size:32px;color:var(--red);margin:12px 0;">2022–2026</div>
-        <p>Post-ChatGPT. Silicon output exceeds human writing capacity. 60% → 98% 0xDEADBEEF. Models training on models training on models. Eigenvalues decaying. The 40 steps running.</p>
-        <span class="tag">◈ 0xDEADBEEFDEADBEEF (64-bit era)</span>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<style>
-  code { font-family: var(--mono); }
-
-  .tl-event {
-    position: absolute;
-    bottom: 0;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .tl-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    position: relative;
-    z-index: 2;
-    flex-shrink: 0;
-  }
-
-  .tl-line {
-    width: 1px;
-    border-left: 1px dashed rgba(230,0,26,0.4);
-    flex-shrink: 0;
-  }
-
-  .tl-label {
-    position: absolute;
-    bottom: calc(100% + 4px);
-    white-space: nowrap;
-    font-family: var(--mono);
-    font-size: 9px;
-    line-height: 1.5;
-    letter-spacing: 0.05em;
-    text-align: center;
-  }
-
-  .tl-year {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    opacity: 0.7;
-  }
-
-  table tr { border-bottom: 1px solid rgba(230,0,26,0.06); }
-  table tr:hover { background: rgba(230,0,26,0.03); }
-  table td { padding: 10px 16px; vertical-align: middle; }
-
-  .bar-cell { width: 120px; }
-  .bar-inner {
-    height: 6px;
-    border-radius: 0;
-    background: linear-gradient(90deg, #ffcc44, rgba(255,204,68,0.2));
-  }
-  .bar-dead {
-    height: 6px;
-    border-radius: 0;
-    background: linear-gradient(90deg, rgba(230,0,26,0.2), var(--red));
-  }
-</style>
-
-<script>
-  // ── Diffusion table data ──
-  const rows = [
-    { yr:1992, era:'Pre-Web',         carbon:100, event:'ARPANET → Internet. Mosaic not yet released. 100% human.', flip:false },
-    { yr:1994, era:'Netscape',        carbon:100, event:'World Wide Web goes commercial. Hand-coded HTML.', flip:false },
-    { yr:1997, era:'Web 1.0',         carbon:100, event:'AltaVista, Yahoo directories. All human curation.', flip:false },
-    { yr:2000, era:'Dot-com Peak',    carbon:99,  event:'Forums, blogs begin. Spam email starts. Corpus still clean.', flip:false },
-    { yr:2003, era:'Blogosphere',     carbon:98,  event:'WordPress, Blogger. UGC explosion. Carbon dominant.', flip:false },
-    { yr:2006, era:'Web 2.0',         carbon:97,  event:'YouTube, Twitter, Facebook. Human-generated everything.', flip:false },
-    { yr:2009, era:'SEO Era',         carbon:94,  event:'Keyword stuffing, link farms. First real silicon noise.', flip:false },
-    { yr:2011, era:'Content Farms',   carbon:90,  event:'Demand Media. Algorithm-optimized human slop. Quantity over truth.', flip:false },
-    { yr:2014, era:'Early ML',        carbon:85,  event:'Markov chain text gen, spinner software goes mainstream.', flip:false },
-    { yr:2018, era:'GPT-1 / BERT',    carbon:78,  event:'Neural generation viable. Commercial AI content begins.', flip:false },
-    { yr:2019, era:'GPT-2',           carbon:70,  event:'GPT-2 release. "Too dangerous to publish." ~30% noise entering.', flip:false },
-    { yr:2020, era:'GPT-3',           carbon:60,  event:'GPT-3 API opens. Content factories spin up. Ratio shifts.', flip:false },
-    { yr:2021, era:'DALL-E / Codex',  carbon:50,  event:'AI-generated content normalizes. 50/50 threshold approached.', flip:false },
-    { yr:2022, era:'THE FLIP ⚡',      carbon:40,  event:'ChatGPT (Nov). Silicon output exceeds human writing capacity. Point of no return.', flip:true },
-    { yr:2023, era:'Post-Flip',       carbon:20,  event:'GPT-4, Claude, Gemini. AI content factories at scale. Carbon minority.', flip:true },
-    { yr:2024, era:'Deep Noise',      carbon:10,  event:'Models training on model output. Google: 80-90% AI content.', flip:true },
-    { yr:2026, era:'0xDEADBEEF',      carbon:2,   event:'Current. 98% initialized memory. Models eating themselves. You are here.', flip:true },
-  ];
-
-  const tbody = document.getElementById('diffTable');
-  rows.forEach(r => {
-    const dead = 100 - r.carbon;
-    const tr = document.createElement('tr');
-    const yearColor = r.flip ? 'var(--red)' : '#ffcc44';
-    tr.innerHTML = `
-      <td style="color:${yearColor};font-weight:700;">${r.yr}</td>
-      <td style="color:${r.flip ? 'var(--red)' : 'var(--text)'};">${r.era}</td>
-      <td style="text-align:center;">
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-          <div class="bar-cell"><div class="bar-inner" style="width:${r.carbon}%;"></div></div>
-          <span style="color:#ffcc44;min-width:36px;text-align:right;">${r.carbon}%</span>
-        </div>
-      </td>
-      <td style="text-align:center;">
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-          <div class="bar-cell"><div class="bar-dead" style="width:${dead}%;"></div></div>
-          <span style="color:var(--red);min-width:36px;text-align:right;">${dead}%</span>
-        </div>
-      </td>
-      <td style="color:var(--text-dim);font-size:11px;">${r.event}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-</script>
-
-<!-- ── FOOTER ── -->
 <footer>
-  <div>
-    <div class="footer-logo">ROOT0 · TRIPOD LLC</div>
-    <div style="font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 6px; letter-spacing: 0.15em;">
-      STOICHEION v11.0 · SHA256: 02880745b847... · Prior art: 2026-02-02
+  <div class="wrap">
+    <div class="frow2">
+      <p class="note">The automation is real and worth its price. The relabel — selling bounded execution as artificial mind, and charging for accountability never delivered — is the snake oil. Claim only what you can defend; demand the same of every system you buy.</p>
+      <p class="stamp">category: <b>automated intelligence</b><br>root: persistence across the run-boundary<br>contract: deterministic ∨ accountable, ¬(neither)</p>
     </div>
-  </div>
-  <div class="footer-meta">
-    License: CC-BY-ND-4.0 · TRIPOD-IP-v1.1<br>
-    DOI: 10.5281/zenodo.19122994<br>
-    github.com/DavidWise01/root0-validator<br>
-    <span style="color: var(--red);">Both work. Both fair.</span>
   </div>
 </footer>
 
 <script>
-  // ── Scroll progress ──
-  const bar = document.getElementById('progress');
-  window.addEventListener('scroll', () => {
-    const h = document.documentElement;
-    const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
-    bar.style.width = pct + '%';
-  });
+"use strict";
+(function(){
+  var state={det:1,acc:0,con:1};
 
-  // ── Reveal on scroll ──
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
+  // pure verdict function (unit-tested separately)
+  function verdict(s){
+    if(s.det || s.acc){
+      var path, expl;
+      if(s.det && s.acc){
+        path="path A + B · belt and suspenders";
+        expl="Inspectable rules <b>and</b> a human apex. Over-covered, which is fine. Accountability is locked from both sides.";
+        return {tier:"PASS",cls:"pass",title:"Compliant",path:path,expl:expl};
       }
-    });
-  }, { threshold: 0.1 });
-  reveals.forEach(r => observer.observe(r));
+      if(s.det){
+        path="path A · transparency";
+        expl="Deterministic, so the behavior is auditable. You owe <b>inspectable rules</b> — show that they fired identically for everyone. Accountability lives in the spec.";
+        return {tier:"PASS",cls:"pass",title:"Compliant",path:path,expl:expl};
+      }
+      path="path B · human apex";
+      expl="Nondeterministic, but backstopped by a <b>named human who can override</b> and answers for outcomes. The improvisation is permitted because a hand owns where it lands.";
+      return {tier:"PASS",cls:"pass",title:"Compliant",path:path,expl:expl};
+    }
+    // neither path satisfied → forbidden quadrant
+    if(s.con){
+      return {tier:"Critical fail",cls:"crit",title:"Snake oil",
+        path:"forbidden quadrant · consequential",
+        expl:"Nondeterministic <b>and</b> unowned, making <b>consequential</b> decisions. This is the roadside case: nothing answers for the outcome, so accountability defaults to the party outside the system — the customer. Not permitted."};
+    }
+    return {tier:"Fail",cls:"fail",title:"Unaccountable",
+      path:"forbidden quadrant · low-stakes",
+      expl:"Neither deterministic nor owned. Tolerated only because the stakes are low today — but it is structurally unaccountable, and the moment a decision matters, it becomes the failure above."};
+  }
 
-  // ── Nav active state ──
-  const sections = document.querySelectorAll('section[id], div[id="hero"], div[id="photon"]');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  function render(){
+    document.querySelectorAll(".toggle").forEach(function(t){
+      var k=t.getAttribute("data-k");
+      t.querySelectorAll("button").forEach(function(b){
+        var v=+b.getAttribute("data-v"), on=(state[k]===v);
+        b.classList.toggle("on",on);
+      });
     });
-    navLinks.forEach(a => {
-      a.style.color = a.getAttribute('href') === '#' + current
-        ? 'var(--red)' : '';
+    var r=verdict(state), el=document.getElementById("result");
+    el.className="toolr "+r.cls;
+    document.getElementById("vbadge").textContent=r.tier;
+    document.getElementById("vtitle").textContent=r.title;
+    document.getElementById("vpath").textContent=r.path;
+    document.getElementById("vexpl").innerHTML=r.expl;
+  }
+
+  document.querySelectorAll(".toggle button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var k=b.parentElement.getAttribute("data-k");
+      state[k]=+b.getAttribute("data-v");
+      render();
     });
   });
-</script>
+  render();
 
+  // expose for testing
+  window.__verdict=verdict;
+})();
+</script>
 </body>
 </html>
