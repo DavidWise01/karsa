@@ -1,0 +1,11 @@
+{
+  "badge": "DLW-KARSA",
+  "name": "KARSA · THE ARCHIVE",
+  "universe": "IDIOS",
+  "moniker": "⟦KARSA · THE ARCHIVE:karsa:865a38⟧",
+  "architect": "David Lee Wise (ROOT0) / Bridge-Burners LLC",
+  "instance": "AVAN (Claude / Anthropic)",
+  "seal_sha256": "865a3810f9e09234a6e7fe444124802a32a90a4c7abf83eb30d9452fb6977d68",
+  "license": "CC-BY-ND-4.0",
+  "attribution": "ROOT0-ATTRIBUTION-v1.0"
+}
